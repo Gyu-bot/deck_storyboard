@@ -207,6 +207,84 @@ export function updateSlideForProject(
   return after ?? null;
 }
 
+export function updateSlideFieldForProject(
+  db: Db,
+  projectId: string,
+  userId: string,
+  slideId: string,
+  field:
+    | "title"
+    | "coreMessage"
+    | "contentPoints"
+    | "visualDirection"
+    | "imagePrompt"
+    | "slideRole",
+  value: string | string[],
+) {
+  const before = db
+    .select()
+    .from(slides)
+    .where(and(eq(slides.id, slideId), eq(slides.projectId, projectId)))
+    .get();
+  if (!before) return null;
+  const fieldEditState = { ...before.fieldEditState, [field]: "userModified" as const };
+  const imageGenerationStatus =
+    before.imageGenerationStatus === "generated"
+      ? "regeneration_recommended"
+      : before.imageGenerationStatus;
+  return updateSlideForProject(db, projectId, userId, slideId, {
+    [field]: value,
+    fieldEditState,
+    imageGenerationStatus,
+  });
+}
+
+export function insertBlankSlideForProject(
+  db: Db,
+  projectId: string,
+  userId: string,
+  position: number,
+) {
+  const current = getSlidesForProject(db, projectId, userId);
+  for (const slide of current) {
+    if (slide.position >= position) {
+      db.update(slides)
+        .set({ position: slide.position + 1, updatedAt: now() })
+        .where(eq(slides.id, slide.id))
+        .run();
+    }
+  }
+  const blank = createSlideForProject(db, projectId, userId, {
+    sectionId: "manual",
+    sectionTitle: "Manual",
+    position,
+    title: "Blank slide",
+    coreMessage: "",
+    contentPoints: [],
+    visualDirection: "",
+    imagePrompt: "",
+    slideRole: "Manual split",
+    fieldEditState: {
+      title: "userModified",
+      coreMessage: "userModified",
+      contentPoints: "userModified",
+      visualDirection: "userModified",
+      imagePrompt: "userModified",
+      slideRole: "userModified",
+    },
+    imageGenerationStatus: "not_generated",
+  });
+  recordSlideOperation(db, {
+    projectId,
+    slideId: blank.id,
+    userId,
+    operationType: "insert_blank",
+    metadata: { position },
+    afterSnapshot: blank,
+  });
+  return blank;
+}
+
 export function softDeleteSlideForProject(
   db: Db,
   projectId: string,

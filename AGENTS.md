@@ -21,6 +21,30 @@ Each task branch must create or update only its own branch status file:
 
 At the end of the task, summarize the result in the PR body.
 
+## Task-driven execution policy
+
+Work in this project should proceed by `IMPLEMENTATION_PLAN.md` task IDs whenever practical.
+
+- Treat each task as the default unit for a Codex session, branch, commit set, and PR.
+- Use the branch name suggested in `IMPLEMENTATION_PLAN.md` unless there is a clear reason to adjust it.
+- Keep each PR traceable to its task ID.
+- In every PR body, mention:
+  - task ID and task title
+  - what was implemented
+  - acceptance criteria covered
+  - task status file path
+  - follow-up work or known gaps
+- Do not mark a task `Done` in `IMPLEMENTATION_PLAN.md` until its PR has been merged into `main`.
+- If a task is blocked or partially complete, record that in the task-specific status file instead of editing global planning documents during a feature session.
+- When one request spans multiple unrelated tasks, split work into separate task branches and PRs when practical.
+
+Planning/documentation cleanup should happen in a dedicated planning/docs session.
+
+- Ordinary feature, fix, refactor, chore, or experiment sessions should not update `IMPLEMENTATION_PLAN.md` unless the user explicitly asks.
+- Those sessions should instead update only their task-specific status/backlog file under `.ai/status/active/`.
+- Planning/docs sessions should update `IMPLEMENTATION_PLAN.md` by reviewing merged PRs, PR notes, task status files, and direct user instructions.
+- New follow-up tasks should be added only when supported by merged PR notes, status files, or explicit user instruction.
+
 Global planning documents should be updated only in dedicated documentation branches, such as:
 
 - `docs/update-project-plan`

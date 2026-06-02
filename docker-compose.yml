@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+    environment:
+      DATA_ROOT: /app/data
+      DATABASE_PATH: /app/data/deck-storyboard.db
+      API_KEY_ENCRYPTION_SECRET: ${API_KEY_ENCRYPTION_SECRET:-development-only-api-key-secret}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-development-only-nextauth-secret}
+      NEXTAUTH_URL: http://localhost:3001
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - deck-storyboard-data:/app/data
+
+volumes:
+  deck-storyboard-data:

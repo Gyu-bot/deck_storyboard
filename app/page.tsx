@@ -1,4 +1,5 @@
 import { ArrowRight, FileText, Image, Layers3 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const workflowItems = [
@@ -26,15 +27,17 @@ export default function Home() {
         <header className="flex items-center justify-between border-b border-border pb-5">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Deck Storyboard
+              Consulting storyboard workspace
             </p>
             <h1 className="text-2xl font-semibold tracking-normal">
-              Consulting storyboard workspace
+              Deck Storyboard
             </h1>
           </div>
-          <Button>
-            Start draft
-            <ArrowRight className="size-4" aria-hidden="true" />
+          <Button asChild>
+            <Link href="/signup">
+              Start draft
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </Button>
         </header>
 

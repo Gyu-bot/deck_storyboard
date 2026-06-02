@@ -19,18 +19,19 @@
 
 #### Task T001. Next.js 앱 스캐폴드와 기본 런타임 구성
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: None
 - Branch: `feature/T001-app-scaffold`
 - Expected PR Unit: `PR-T001`
 - Acceptance Criteria:
-  - [ ] Next.js App Router + React + TypeScript 프로젝트가 생성되어 있다.
-  - [ ] Tailwind CSS와 shadcn/ui 초기 설정이 완료되어 있다.
-  - [ ] 기본 라우트가 앱 shell을 렌더링한다.
-  - [ ] `npm run lint` 또는 동등한 정적 검사가 통과한다.
-  - [ ] `.ai/status/active/T001-app-scaffold.md`에 작업 결과가 기록되어 있다.
+  - [x] Next.js App Router + React + TypeScript 프로젝트가 생성되어 있다.
+  - [x] Tailwind CSS와 shadcn/ui 초기 설정이 완료되어 있다.
+  - [x] 기본 라우트가 앱 shell을 렌더링한다.
+  - [x] `npm run lint` 또는 동등한 정적 검사가 통과한다.
+  - [x] `.ai/status/active/T001-app-scaffold.md`에 작업 결과가 기록되어 있다.
 - Notes:
   - 인증, DB, Docker Compose는 후속 Task에서 처리한다.
+  - Completed by direct initialization merge to `main` at commit `96ca882`.
 
 #### Task T002. Dockerfile과 Docker Compose 개발 환경 구성
 - Priority: High

@@ -2,7 +2,7 @@
 
 - Task: T001. Next.js 앱 스캐폴드와 기본 런타임 구성
 - Branch: feature/T001-app-scaffold
-- Status: Needs Review
+- Status: Done
 - Started: 2026-06-02
 
 ## Scope
@@ -32,3 +32,4 @@
 - Browser screenshot capture timed out in the in-app browser runtime; DOM verification succeeded.
 - `npm audit --audit-level=high` exited successfully, but reported 2 moderate advisories in Next's transitive PostCSS dependency. The suggested forced fix would install a breaking older Next version, so no forced audit fix was applied.
 - Package versions were pinned after initial install to keep the scaffold reproducible.
+- Merged directly to `main` and pushed to `origin/main` at commit `96ca882`.

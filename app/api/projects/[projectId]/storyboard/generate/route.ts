@@ -8,6 +8,7 @@ import {
   analyzeStoryStructure,
   createSlideBreakdown,
 } from "@/lib/storyboard/generation";
+import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
 
@@ -74,5 +75,5 @@ export async function POST(
   });
   const structure = await analyzeStoryStructure(db, projectId, userId, provider);
   await createSlideBreakdown(db, projectId, userId, provider, structure);
-  return NextResponse.redirect(new URL(`/projects/${projectId}`, request.url), 303);
+  return NextResponse.redirect(appUrl(`/projects/${projectId}`, request), 303);
 }

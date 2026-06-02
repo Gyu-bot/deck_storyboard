@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { KeyRound, Save } from "lucide-react";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
@@ -24,7 +25,7 @@ export default async function SettingsPage() {
           <p className="text-sm font-medium text-muted-foreground">Settings</p>
           <h1 className="text-3xl font-semibold">API keys</h1>
         </div>
-        <a className="text-sm font-medium text-primary" href="/projects">Projects</a>
+        <Link className="text-sm font-medium text-primary" href="/projects">Projects</Link>
       </header>
       <div className="grid gap-4">
         {providers.map(([provider, label]) => (

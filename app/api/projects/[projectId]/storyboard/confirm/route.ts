@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db/client";
 import { requireCurrentUserId } from "@/lib/auth/session";
 import { recordSlideOperation, updateProjectForUser } from "@/lib/repositories/projects";
+import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
 
@@ -22,5 +23,5 @@ export async function POST(
     metadata: { status: "storyboard_confirmed" },
     afterSnapshot: updated,
   });
-  return NextResponse.redirect(new URL(`/projects/${projectId}`, request.url), 303);
+  return NextResponse.redirect(appUrl(`/projects/${projectId}`, request), 303);
 }

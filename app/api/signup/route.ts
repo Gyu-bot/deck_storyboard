@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createUser } from "@/lib/auth/users";
 import { getDatabase } from "@/lib/db/client";
 import { saveUserApiKey } from "@/lib/repositories/user-api-keys";
+import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     if (imageProviderKey && imageProvider === "openai_images") {
       saveUserApiKey(db, user.id, "openai_images", imageProviderKey);
     }
-    return NextResponse.redirect(new URL("/login?created=1", request.url), 303);
+    return NextResponse.redirect(appUrl("/login?created=1", request), 303);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Signup failed." },

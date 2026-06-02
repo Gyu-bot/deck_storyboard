@@ -35,31 +35,31 @@
 
 #### Task T002. Dockerfile과 Docker Compose 개발 환경 구성
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T001
 - Branch: `feature/T002-docker-foundation`
 - Expected PR Unit: `PR-T002`
 - Acceptance Criteria:
-  - [ ] 앱이 Dockerfile로 빌드된다.
-  - [ ] Docker Compose로 앱 컨테이너를 실행할 수 있다.
-  - [ ] `/app/data` 볼륨 경로가 구성되어 있다.
-  - [ ] honcho 포트 `8000`, `5432`, `6379`와 충돌하지 않는 포트를 사용한다.
-  - [ ] `.ai/status/active/T002-docker-foundation.md`에 실행 포트와 검증 결과가 기록되어 있다.
+  - [x] 앱이 Dockerfile로 빌드된다.
+  - [x] Docker Compose로 앱 컨테이너를 실행할 수 있다.
+  - [x] `/app/data` 볼륨 경로가 구성되어 있다.
+  - [x] honcho 포트 `8000`, `5432`, `6379`와 충돌하지 않는 포트를 사용한다.
+  - [x] `.ai/status/active/T002-docker-foundation.md`에 실행 포트와 검증 결과가 기록되어 있다.
 - Notes:
   - 컨테이너 실행 전 현재 Docker/포트 상태를 먼저 확인한다.
 
 #### Task T003. 테스트, 린트, 포맷 기본 명령 정리
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T001
 - Branch: `feature/T003-quality-baseline`
 - Expected PR Unit: `PR-T003`
 - Acceptance Criteria:
-  - [ ] 테스트 러너가 설정되어 있다.
-  - [ ] lint/typecheck 명령이 package script에 정의되어 있다.
-  - [ ] 최소 smoke test가 추가되어 있다.
-  - [ ] CI 없이도 로컬에서 검증할 명령 목록이 명확하다.
-  - [ ] `.ai/status/active/T003-quality-baseline.md`에 검증 명령과 결과가 기록되어 있다.
+  - [x] 테스트 러너가 설정되어 있다.
+  - [x] lint/typecheck 명령이 package script에 정의되어 있다.
+  - [x] 최소 smoke test가 추가되어 있다.
+  - [x] CI 없이도 로컬에서 검증할 명령 목록이 명확하다.
+  - [x] `.ai/status/active/T003-quality-baseline.md`에 검증 명령과 결과가 기록되어 있다.
 - Notes:
   - CI 워크플로는 필요해질 때 별도 Task로 추가한다.
 
@@ -71,32 +71,32 @@
 
 #### Task T004. SQLite + Drizzle 초기 스키마 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T001
 - Branch: `feature/T004-drizzle-schema`
 - Expected PR Unit: `PR-T004`
 - Acceptance Criteria:
-  - [ ] `User`, `UserApiKey`, `Project`, `Slide`, `SlideImageGeneration`, `ImageGenerationBatch`, `SlideEditOperation` 스키마가 정의되어 있다.
-  - [ ] `ProjectStatus`에 `storyboard_generation_failed`가 포함되어 있다.
-  - [ ] `Slide`가 `sectionId`, `sectionTitle`, `fieldEditState`, `imageGenerationStatus`를 저장한다.
-  - [ ] soft delete를 위한 `deletedAt` 필드가 필요한 테이블에 있다.
-  - [ ] migration 또는 schema push 절차가 검증되어 있다.
-  - [ ] `.ai/status/active/T004-drizzle-schema.md`에 스키마 결정과 검증 결과가 기록되어 있다.
+  - [x] `User`, `UserApiKey`, `Project`, `Slide`, `SlideImageGeneration`, `ImageGenerationBatch`, `SlideEditOperation` 스키마가 정의되어 있다.
+  - [x] `ProjectStatus`에 `storyboard_generation_failed`가 포함되어 있다.
+  - [x] `Slide`가 `sectionId`, `sectionTitle`, `fieldEditState`, `imageGenerationStatus`를 저장한다.
+  - [x] soft delete를 위한 `deletedAt` 필드가 필요한 테이블에 있다.
+  - [x] migration 또는 schema push 절차가 검증되어 있다.
+  - [x] `.ai/status/active/T004-drizzle-schema.md`에 스키마 결정과 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 AI/provider 연동은 포함하지 않는다.
 
 #### Task T005. 데이터 접근 계층과 사용자 소유권 필터 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T004
 - Branch: `feature/T005-data-access-ownership`
 - Expected PR Unit: `PR-T005`
 - Acceptance Criteria:
-  - [ ] 프로젝트 조회가 `project.userId = currentUser.id` 기준으로 제한된다.
-  - [ ] soft-deleted project/slide가 기본 조회에서 제외된다.
-  - [ ] project, slide, image history 접근 함수가 소유권 검사를 포함한다.
-  - [ ] 소유권 위반 케이스 테스트가 있다.
-  - [ ] `.ai/status/active/T005-data-access-ownership.md`에 테스트 결과가 기록되어 있다.
+  - [x] 프로젝트 조회가 `project.userId = currentUser.id` 기준으로 제한된다.
+  - [x] soft-deleted project/slide가 기본 조회에서 제외된다.
+  - [x] project, slide, image history 접근 함수가 소유권 검사를 포함한다.
+  - [x] 소유권 위반 케이스 테스트가 있다.
+  - [x] `.ai/status/active/T005-data-access-ownership.md`에 테스트 결과가 기록되어 있다.
 - Notes:
   - UI 구현 전 서버 측 guard를 먼저 세운다.
 
@@ -108,34 +108,34 @@
 
 #### Task T006. Auth.js Credentials 기반 세션 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T004
 - Branch: `feature/T006-auth-session`
 - Expected PR Unit: `PR-T006`
 - Acceptance Criteria:
-  - [ ] 이메일/비밀번호 기반 회원가입 API가 있다.
-  - [ ] 비밀번호가 argon2 또는 bcrypt로 해시되어 저장된다.
-  - [ ] 로그인/로그아웃이 secure cookie 세션으로 동작한다.
-  - [ ] 이메일 인증, OAuth, SSO, 2FA, 비밀번호 재설정은 구현되지 않는다.
-  - [ ] 인증 성공/실패 테스트가 있다.
-  - [ ] `.ai/status/active/T006-auth-session.md`에 검증 결과가 기록되어 있다.
+  - [x] 이메일/비밀번호 기반 회원가입 API가 있다.
+  - [x] 비밀번호가 argon2 또는 bcrypt로 해시되어 저장된다.
+  - [x] 로그인/로그아웃이 secure cookie 세션으로 동작한다.
+  - [x] 이메일 인증, OAuth, SSO, 2FA, 비밀번호 재설정은 구현되지 않는다.
+  - [x] 인증 성공/실패 테스트가 있다.
+  - [x] `.ai/status/active/T006-auth-session.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 회원가입 UI는 T007에서 처리한다.
 
 #### Task T007. 회원가입, 로그인, 로그아웃 UI 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T006
 - Branch: `feature/T007-auth-ui`
 - Expected PR Unit: `PR-T007`
 - Acceptance Criteria:
-  - [ ] `/signup` 화면에 이메일, 비밀번호, 비밀번호 확인, OpenRouter API key, optional image provider key 입력이 있다.
-  - [ ] `/login` 화면에 이메일/비밀번호 입력과 로그인 버튼이 있다.
-  - [ ] 로그아웃 action 또는 `/logout` route가 동작한다.
-  - [ ] 로그인 후 `/projects`로 이동한다.
-  - [ ] 실패 시 사용자에게 에러 메시지를 표시한다.
-  - [ ] 브라우저 또는 equivalent visual check로 주요 화면을 확인했다.
-  - [ ] `.ai/status/active/T007-auth-ui.md`에 확인 결과가 기록되어 있다.
+  - [x] `/signup` 화면에 이메일, 비밀번호, 비밀번호 확인, OpenRouter API key, optional image provider key 입력이 있다.
+  - [x] `/login` 화면에 이메일/비밀번호 입력과 로그인 버튼이 있다.
+  - [x] 로그아웃 action 또는 `/logout` route가 동작한다.
+  - [x] 로그인 후 `/projects`로 이동한다.
+  - [x] 실패 시 사용자에게 에러 메시지를 표시한다.
+  - [x] 브라우저 또는 equivalent visual check로 주요 화면을 확인했다.
+  - [x] `.ai/status/active/T007-auth-ui.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - Settings의 key 교체/삭제는 T009에서 처리한다.
 
@@ -143,33 +143,33 @@
 
 #### Task T008. API key AES-GCM 암호화 저장 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T004
 - Branch: `feature/T008-api-key-encryption`
 - Expected PR Unit: `PR-T008`
 - Acceptance Criteria:
-  - [ ] `API_KEY_ENCRYPTION_SECRET` 기반 AES-GCM 암호화/복호화 유틸이 있다.
-  - [ ] DB에는 full plaintext API key가 저장되지 않는다.
-  - [ ] production에서 secret이 없으면 key 저장이 비활성화되거나 startup이 실패한다.
-  - [ ] OpenRouter, Nano Banana, OpenAI Images provider key 저장을 지원한다.
-  - [ ] 암호화 round-trip과 secret 누락 테스트가 있다.
-  - [ ] `.ai/status/active/T008-api-key-encryption.md`에 검증 결과가 기록되어 있다.
+  - [x] `API_KEY_ENCRYPTION_SECRET` 기반 AES-GCM 암호화/복호화 유틸이 있다.
+  - [x] DB에는 full plaintext API key가 저장되지 않는다.
+  - [x] production에서 secret이 없으면 key 저장이 비활성화되거나 startup이 실패한다.
+  - [x] OpenRouter, Nano Banana, OpenAI Images provider key 저장을 지원한다.
+  - [x] 암호화 round-trip과 secret 누락 테스트가 있다.
+  - [x] `.ai/status/active/T008-api-key-encryption.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - provider connection test는 초기 MVP 필수가 아니다.
 
 #### Task T009. Settings API key 관리 화면 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T007, T008
 - Branch: `feature/T009-api-key-settings`
 - Expected PR Unit: `PR-T009`
 - Acceptance Criteria:
-  - [ ] `/settings`에서 OpenRouter, Nano Banana, OpenAI Images key를 추가/교체/삭제할 수 있다.
-  - [ ] 저장된 key는 masked form으로만 표시된다.
-  - [ ] key 삭제 후 해당 provider의 신규 호출이 차단된다.
-  - [ ] Settings 화면은 key presence를 보여주되 자동 provider validation call을 하지 않는다.
-  - [ ] 브라우저 또는 equivalent visual check로 add/replace/remove flow를 확인했다.
-  - [ ] `.ai/status/active/T009-api-key-settings.md`에 확인 결과가 기록되어 있다.
+  - [x] `/settings`에서 OpenRouter, Nano Banana, OpenAI Images key를 추가/교체/삭제할 수 있다.
+  - [x] 저장된 key는 masked form으로만 표시된다.
+  - [x] key 삭제 후 해당 provider의 신규 호출이 차단된다.
+  - [x] Settings 화면은 key presence를 보여주되 자동 provider validation call을 하지 않는다.
+  - [x] 브라우저 또는 equivalent visual check로 add/replace/remove flow를 확인했다.
+  - [x] `.ai/status/active/T009-api-key-settings.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - 서버 fallback provider key는 사용하지 않는다.
 
@@ -181,17 +181,17 @@
 
 #### Task T010. 프로젝트 목록과 soft delete 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T005, T007
 - Branch: `feature/T010-project-list`
 - Expected PR Unit: `PR-T010`
 - Acceptance Criteria:
-  - [ ] 로그인 후 `/projects`에서 사용자 소유 프로젝트 목록을 볼 수 있다.
-  - [ ] 프로젝트는 `updatedAt` 내림차순으로 정렬된다.
-  - [ ] 프로젝트 생성, 열기, 이름 변경, 삭제 action이 있다.
-  - [ ] 삭제는 `deletedAt` 설정으로 처리되고 기본 목록에서 사라진다.
-  - [ ] 다른 사용자의 프로젝트가 노출되지 않는다.
-  - [ ] `.ai/status/active/T010-project-list.md`에 검증 결과가 기록되어 있다.
+  - [x] 로그인 후 `/projects`에서 사용자 소유 프로젝트 목록을 볼 수 있다.
+  - [x] 프로젝트는 `updatedAt` 내림차순으로 정렬된다.
+  - [x] 프로젝트 생성, 열기, 이름 변경, 삭제 action이 있다.
+  - [x] 삭제는 `deletedAt` 설정으로 처리되고 기본 목록에서 사라진다.
+  - [x] 다른 사용자의 프로젝트가 노출되지 않는다.
+  - [x] `.ai/status/active/T010-project-list.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 새 프로젝트 상세 생성 form은 T011에서 처리한다.
 
@@ -199,34 +199,34 @@
 
 #### Task T011. 새 프로젝트 one-page 생성 form 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T010
 - Branch: `feature/T011-new-project-form`
 - Expected PR Unit: `PR-T011`
 - Acceptance Criteria:
-  - [ ] `/projects/new`가 one-page form으로 구현되어 있다.
-  - [ ] Project name과 Storyline input이 기본 visible field로 제공된다.
-  - [ ] Slide count, AI options, Style settings, Image settings가 collapsible section으로 제공된다.
-  - [ ] `MAX_STORYLINE_CHARACTERS=60000` 기본 제한을 초과하면 LLM 호출 전 validation message를 표시한다.
-  - [ ] 생성 후 project가 `draft_input` 또는 generation-ready 상태로 저장된다.
-  - [ ] 브라우저 또는 equivalent visual check로 form layout과 validation을 확인했다.
-  - [ ] `.ai/status/active/T011-new-project-form.md`에 확인 결과가 기록되어 있다.
+  - [x] `/projects/new`가 one-page form으로 구현되어 있다.
+  - [x] Project name과 Storyline input이 기본 visible field로 제공된다.
+  - [x] Slide count, AI options, Style settings, Image settings가 collapsible section으로 제공된다.
+  - [x] `MAX_STORYLINE_CHARACTERS=60000` 기본 제한을 초과하면 LLM 호출 전 validation message를 표시한다.
+  - [x] 생성 후 project가 `draft_input` 또는 generation-ready 상태로 저장된다.
+  - [x] 브라우저 또는 equivalent visual check로 form layout과 validation을 확인했다.
+  - [x] `.ai/status/active/T011-new-project-form.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - 실제 storyboard generation 호출은 T014 이후에 연결한다.
 
 #### Task T012. 스타일 템플릿과 이미지 설정 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T011
 - Branch: `feature/T012-style-image-settings`
 - Expected PR Unit: `PR-T012`
 - Acceptance Criteria:
-  - [ ] Executive Consulting, Strategy Proposal, Minimal White, Dark Executive, Technical Architecture 템플릿이 있다.
-  - [ ] custom common style prompt를 저장한다.
-  - [ ] aspect ratio `16:9`, `4:3`를 지원하고 기본값은 `16:9`다.
-  - [ ] default image model은 `gpt-image-2`와 `nano-banana` 중 선택할 수 있다.
-  - [ ] resolved common prompt가 project style에 저장된다.
-  - [ ] `.ai/status/active/T012-style-image-settings.md`에 검증 결과가 기록되어 있다.
+  - [x] Executive Consulting, Strategy Proposal, Minimal White, Dark Executive, Technical Architecture 템플릿이 있다.
+  - [x] custom common style prompt를 저장한다.
+  - [x] aspect ratio `16:9`, `4:3`를 지원하고 기본값은 `16:9`다.
+  - [x] default image model은 `gpt-image-2`와 `nano-banana` 중 선택할 수 있다.
+  - [x] resolved common prompt가 project style에 저장된다.
+  - [x] `.ai/status/active/T012-style-image-settings.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - provider key 존재 여부 validation은 이미지 생성 시점에서 처리한다.
 
@@ -238,50 +238,50 @@
 
 #### Task T013. OpenRouter LLM provider와 Zod schema 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T008, T012
 - Branch: `feature/T013-openrouter-structured-output`
 - Expected PR Unit: `PR-T013`
 - Acceptance Criteria:
-  - [ ] `story_structure`와 `slide_breakdown` task를 지원하는 OpenRouter provider가 있다.
-  - [ ] StoryStructure, StoryImprovementSuggestion, SlideBreakdown output Zod schema가 있다.
-  - [ ] invalid output은 accepted storyboard data로 저장되지 않는다.
-  - [ ] validation failure는 한 번 retry 후 stage-specific error로 surfaced 된다.
-  - [ ] OpenRouter key가 없으면 server fallback 없이 provider-key error를 반환한다.
-  - [ ] provider unit test와 schema validation test가 있다.
-  - [ ] `.ai/status/active/T013-openrouter-structured-output.md`에 검증 결과가 기록되어 있다.
+  - [x] `story_structure`와 `slide_breakdown` task를 지원하는 OpenRouter provider가 있다.
+  - [x] StoryStructure, StoryImprovementSuggestion, SlideBreakdown output Zod schema가 있다.
+  - [x] invalid output은 accepted storyboard data로 저장되지 않는다.
+  - [x] validation failure는 한 번 retry 후 stage-specific error로 surfaced 된다.
+  - [x] OpenRouter key가 없으면 server fallback 없이 provider-key error를 반환한다.
+  - [x] provider unit test와 schema validation test가 있다.
+  - [x] `.ai/status/active/T013-openrouter-structured-output.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Phase 5용 `merge_slides`, `split_slide`, `insert_slide`는 예약만 하고 구현하지 않는다.
 
 #### Task T014. Story structure analysis와 improvement suggestion 생성
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T013
 - Branch: `feature/T014-story-structure-analysis`
 - Expected PR Unit: `PR-T014`
 - Acceptance Criteria:
-  - [ ] storyline에서 document purpose, overall thesis, sections, section role/core message/source summary/suggested count를 생성한다.
-  - [ ] improvement suggestions가 enabled일 때 같은 call에서 생성된다.
-  - [ ] suggestions disabled일 때 suggestions panel data가 생성되지 않는다.
-  - [ ] target slide count와 다른 결과가 나오면 rationale을 저장하거나 표시할 수 있다.
-  - [ ] 실패 시 project status가 `storyboard_generation_failed`가 된다.
-  - [ ] `.ai/status/active/T014-story-structure-analysis.md`에 검증 결과가 기록되어 있다.
+  - [x] storyline에서 document purpose, overall thesis, sections, section role/core message/source summary/suggested count를 생성한다.
+  - [x] improvement suggestions가 enabled일 때 같은 call에서 생성된다.
+  - [x] suggestions disabled일 때 suggestions panel data가 생성되지 않는다.
+  - [x] target slide count와 다른 결과가 나오면 rationale을 저장하거나 표시할 수 있다.
+  - [x] 실패 시 project status가 `storyboard_generation_failed`가 된다.
+  - [x] `.ai/status/active/T014-story-structure-analysis.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - slide breakdown 저장은 T015에서 처리한다.
 
 #### Task T015. Slide breakdown 생성과 slide persistence 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T014
 - Branch: `feature/T015-slide-breakdown`
 - Expected PR Unit: `PR-T015`
 - Acceptance Criteria:
-  - [ ] story structure 결과를 기반으로 slide breakdown을 생성한다.
-  - [ ] 각 slide에 `sectionId`, `sectionTitle`, `title`, `coreMessage`, `contentPoints`, `visualDirection`, `imagePrompt`, `slideRole`이 저장된다.
-  - [ ] `imagePrompt`는 storyboard confirmation 전에 생성된다.
-  - [ ] 생성된 slide의 field edit state 기본값은 `aiGenerated`다.
-  - [ ] 생성 완료 후 project status가 `storyboard_review`가 된다.
-  - [ ] `.ai/status/active/T015-slide-breakdown.md`에 검증 결과가 기록되어 있다.
+  - [x] story structure 결과를 기반으로 slide breakdown을 생성한다.
+  - [x] 각 slide에 `sectionId`, `sectionTitle`, `title`, `coreMessage`, `contentPoints`, `visualDirection`, `imagePrompt`, `slideRole`이 저장된다.
+  - [x] `imagePrompt`는 storyboard confirmation 전에 생성된다.
+  - [x] 생성된 slide의 field edit state 기본값은 `aiGenerated`다.
+  - [x] 생성 완료 후 project status가 `storyboard_review`가 된다.
+  - [x] `.ai/status/active/T015-slide-breakdown.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - UI 표시와 confirmation은 T016에서 처리한다.
 
@@ -289,20 +289,20 @@
 
 #### Task T016. Vertical storyboard review UI와 confirmation 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T015
 - Branch: `feature/T016-storyboard-review-ui`
 - Expected PR Unit: `PR-T016`
 - Acceptance Criteria:
-  - [ ] `/projects/{projectId}`에서 vertical slide card list를 표시한다.
-  - [ ] section header/grouping label이 표시된다.
-  - [ ] compact/expanded toggle이 동작한다.
-  - [ ] improvement suggestions가 있을 때 collapsible panel로 표시된다.
-  - [ ] empty/generating/failed/review/confirmed/no-selected-slide 상태를 처리한다.
-  - [ ] Confirm storyboard action이 project status를 `storyboard_confirmed`로 변경한다.
-  - [ ] confirmation 전 image generation button은 disabled 상태다.
-  - [ ] 브라우저 또는 equivalent visual check로 핵심 상태를 확인했다.
-  - [ ] `.ai/status/active/T016-storyboard-review-ui.md`에 확인 결과가 기록되어 있다.
+  - [x] `/projects/{projectId}`에서 vertical slide card list를 표시한다.
+  - [x] section header/grouping label이 표시된다.
+  - [x] compact/expanded toggle이 동작한다.
+  - [x] improvement suggestions가 있을 때 collapsible panel로 표시된다.
+  - [x] empty/generating/failed/review/confirmed/no-selected-slide 상태를 처리한다.
+  - [x] Confirm storyboard action이 project status를 `storyboard_confirmed`로 변경한다.
+  - [x] confirmation 전 image generation button은 disabled 상태다.
+  - [x] 브라우저 또는 equivalent visual check로 핵심 상태를 확인했다.
+  - [x] `.ai/status/active/T016-storyboard-review-ui.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - slide side panel editing은 T017에서 처리한다.
 
@@ -314,18 +314,18 @@
 
 #### Task T017. Side panel field editing 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T016
 - Branch: `feature/T017-slide-field-editing`
 - Expected PR Unit: `PR-T017`
 - Acceptance Criteria:
-  - [ ] slide 선택 시 right-side detail panel이 열린다.
-  - [ ] Content, Prompt, Images tab 구조가 있다.
-  - [ ] title, core message, content points, visual direction, image prompt, slide role을 수정할 수 있다.
-  - [ ] 수정된 field는 `userModified`로 표시/저장된다.
-  - [ ] confirmed project에서 편집해도 project가 unconfirm되지 않는다.
-  - [ ] 기존 generated image가 있는 slide를 편집하면 `regeneration_recommended`가 된다.
-  - [ ] `.ai/status/active/T017-slide-field-editing.md`에 검증 결과가 기록되어 있다.
+  - [x] slide 선택 시 right-side detail panel이 열린다.
+  - [x] Content, Prompt, Images tab 구조가 있다.
+  - [x] title, core message, content points, visual direction, image prompt, slide role을 수정할 수 있다.
+  - [x] 수정된 field는 `userModified`로 표시/저장된다.
+  - [x] confirmed project에서 편집해도 project가 unconfirm되지 않는다.
+  - [x] 기존 generated image가 있는 slide를 편집하면 `regeneration_recommended`가 된다.
+  - [x] `.ai/status/active/T017-slide-field-editing.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Images tab의 history 기능은 T023에서 채운다.
 
@@ -333,33 +333,33 @@
 
 #### Task T018. Reorder, add blank, delete slide 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T017
 - Branch: `feature/T018-manual-slide-operations`
 - Expected PR Unit: `PR-T018`
 - Acceptance Criteria:
-  - [ ] dnd-kit 기반 drag and drop reorder가 동작한다.
-  - [ ] reorder 후 slide order가 안정적으로 재계산되어 저장된다.
-  - [ ] blank slide를 삽입할 수 있다.
-  - [ ] slide 삭제는 soft delete로 처리된다.
-  - [ ] confirmed project에서 새 slide는 `not_generated` image status로 시작한다.
-  - [ ] reorder 후 AI reflow suggestion은 제공하지 않는다.
-  - [ ] `.ai/status/active/T018-manual-slide-operations.md`에 검증 결과가 기록되어 있다.
+  - [x] dnd-kit 기반 drag and drop reorder가 동작한다.
+  - [x] reorder 후 slide order가 안정적으로 재계산되어 저장된다.
+  - [x] blank slide를 삽입할 수 있다.
+  - [x] slide 삭제는 soft delete로 처리된다.
+  - [x] confirmed project에서 새 slide는 `not_generated` image status로 시작한다.
+  - [x] reorder 후 AI reflow suggestion은 제공하지 않는다.
+  - [x] `.ai/status/active/T018-manual-slide-operations.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - operation history 기록은 T019에서 통합한다.
 
 #### Task T019. Manual split과 operation history 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T018
 - Branch: `feature/T019-operation-history`
 - Expected PR Unit: `PR-T019`
 - Acceptance Criteria:
-  - [ ] 사용자가 slide를 수동으로 split하기 위해 새 slide를 만들고 field를 편집할 수 있다.
-  - [ ] reorder, insert blank, delete slide, edit field, confirm storyboard operation이 기록된다.
-  - [ ] operation history에 before/after snapshot 또는 진단 가능한 metadata가 포함된다.
-  - [ ] soft-deleted slide는 ordering, generation, export 대상에서 제외된다.
-  - [ ] `.ai/status/active/T019-operation-history.md`에 검증 결과가 기록되어 있다.
+  - [x] 사용자가 slide를 수동으로 split하기 위해 새 slide를 만들고 field를 편집할 수 있다.
+  - [x] reorder, insert blank, delete slide, edit field, confirm storyboard operation이 기록된다.
+  - [x] operation history에 before/after snapshot 또는 진단 가능한 metadata가 포함된다.
+  - [x] soft-deleted slide는 ordering, generation, export 대상에서 제외된다.
+  - [x] `.ai/status/active/T019-operation-history.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - undo/redo UI는 MVP 범위가 아니다.
 
@@ -371,17 +371,17 @@
 
 #### Task T020. Image provider interface와 local storage provider 구현
 - Priority: High
-- Status: Backlog
+- Status: Done
 - Depends on: T016
 - Branch: `feature/T020-image-provider-storage`
 - Expected PR Unit: `PR-T020`
 - Acceptance Criteria:
-  - [ ] `ImageGenerationProvider` interface가 `prompt`, `aspectRatio`, `model`, `apiKey` input을 받는다.
-  - [ ] `ImageStorageProvider` interface와 local filesystem 구현이 있다.
-  - [ ] 저장 경로가 `/app/data/storage/projects/{projectId}/images/` 구조를 따른다.
-  - [ ] 저장된 image URL 조회가 project ownership guard를 통과해야 한다.
-  - [ ] storage unit test가 있다.
-  - [ ] `.ai/status/active/T020-image-provider-storage.md`에 검증 결과가 기록되어 있다.
+  - [x] `ImageGenerationProvider` interface가 `prompt`, `aspectRatio`, `model`, `apiKey` input을 받는다.
+  - [x] `ImageStorageProvider` interface와 local filesystem 구현이 있다.
+  - [x] 저장 경로가 `/app/data/storage/projects/{projectId}/images/` 구조를 따른다.
+  - [x] 저장된 image URL 조회가 project ownership guard를 통과해야 한다.
+  - [x] storage unit test가 있다.
+  - [x] `.ai/status/active/T020-image-provider-storage.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 provider API 호출은 T021, T022에서 구현한다.
 

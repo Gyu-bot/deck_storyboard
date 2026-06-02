@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
 import { listProjectsForUser } from "@/lib/repositories/projects";
-import { ProjectDeleteButton } from "@/app/projects/project-actions";
+import { ProjectDeleteButton, ProjectRenameForm } from "@/app/projects/project-actions";
 
 export default async function ProjectsPage() {
   const userId = await getCurrentUserId();
@@ -50,6 +50,9 @@ export default async function ProjectsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {project.status} · Updated {new Date(project.updatedAt).toLocaleString()}
                 </p>
+                <div className="mt-3">
+                  <ProjectRenameForm projectId={project.id} name={project.name} />
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Button asChild variant="outline" size="sm">

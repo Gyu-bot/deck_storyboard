@@ -12,6 +12,7 @@ import {
   resolveCommonStylePrompt,
   validateStorylineLength,
 } from "@/lib/projects/style-settings";
+import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
 
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
       customCommonStylePrompt,
     ),
   });
-  return NextResponse.redirect(new URL(`/projects/${project.id}`, request.url), 303);
+  return NextResponse.redirect(appUrl(`/projects/${project.id}`, request), 303);
 }
 
 export async function PATCH(request: Request) {

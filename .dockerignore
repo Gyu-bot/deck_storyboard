@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+.worktrees
+coverage
+data
+npm-debug.log*
+tsconfig.tsbuildinfo

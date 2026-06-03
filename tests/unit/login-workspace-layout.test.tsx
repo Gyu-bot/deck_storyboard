@@ -88,7 +88,7 @@ describe("T017A slide selection sync", () => {
     );
 
     const showPromptTab = () => screen.getByRole("button", { name: /프롬프트/ });
-    const imagePrompt = () => screen.getByRole("textbox", { name: /이미지 프롬프트AI 생성/ });
+    const imagePrompt = () => screen.getByRole("textbox", { name: /슬라이드 목업 프롬프트AI 생성/ });
 
     fireEvent.click(showPromptTab());
     expect(imagePrompt()).toHaveValue("Prompt A");
@@ -96,6 +96,107 @@ describe("T017A slide selection sync", () => {
     fireEvent.click(screen.getByRole("button", { name: /Slide B/ }));
 
     expect(imagePrompt()).toHaveValue("Prompt B");
+  });
+});
+
+describe("T017B storyboard detail floating panel", () => {
+  it("keeps the detail editor sticky on desktop with an internal scroll area", () => {
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_review" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = Array.from({ length: 16 }, (_, index) => ({
+      id: `slide-${index + 1}`,
+      sectionTitle: "Section",
+      position: index + 1,
+      title: `Slide ${index + 1}`,
+      coreMessage: `Core message ${index + 1}`,
+      contentPoints: ["Point A", "Point B", "Point C"],
+      visualDirection: "A dense chart with annotations",
+      imagePrompt: "Executive slide image prompt",
+      slideRole: "Evidence",
+      fieldEditState: {
+        title: "aiGenerated",
+        coreMessage: "aiGenerated",
+        contentPoints: "aiGenerated",
+        visualDirection: "aiGenerated",
+        imagePrompt: "aiGenerated",
+        slideRole: "aiGenerated",
+      },
+      imageGenerationStatus: "not_generated",
+    }));
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+
+    const workspace = screen.getByTestId("storyboard-workspace-layout");
+    expect(workspace).toHaveClass("items-start");
+    expect(workspace).toHaveClass("lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)]");
+
+    const panel = screen.getByLabelText("선택 슬라이드 상세 편집 패널");
+    expect(panel).toHaveClass("lg:sticky");
+    expect(panel).toHaveClass("lg:top-6");
+    expect(panel).toHaveClass("lg:max-h-[calc(100vh-3rem)]");
+    expect(panel).toHaveClass("overflow-hidden");
+
+    expect(screen.getByTestId("storyboard-detail-scroll-area")).toHaveClass("overflow-y-auto");
+    expect(screen.getByRole("button", { name: /삭제/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "목업" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "목업 생성" })).toBeInTheDocument();
+    expect(screen.getAllByText("목업 없음").length).toBeGreaterThan(0);
+  });
+});
+
+describe("T017B storyboard improvement suggestions", () => {
+  it("renders suggestions as a readable list instead of raw JSON", () => {
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_review" as const,
+      improvementSuggestions: [
+        {
+          id: "i1",
+          title: "Pilot 후보를 더 구체화",
+          rationale: "고객 의사결정을 빠르게 만들려면 대표 품질 이슈 1~2개를 예시로 제시하면 좋다.",
+        },
+      ],
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = [
+      {
+        id: "slide-a",
+        sectionTitle: "Section",
+        position: 1,
+        title: "Slide A",
+        coreMessage: "Core message A",
+        contentPoints: ["Point A"],
+        visualDirection: "Visual A",
+        imagePrompt: "Prompt A",
+        slideRole: "Role A",
+        fieldEditState: {
+          title: "aiGenerated",
+          coreMessage: "aiGenerated",
+          contentPoints: "aiGenerated",
+          visualDirection: "aiGenerated",
+          imagePrompt: "aiGenerated",
+          slideRole: "aiGenerated",
+        },
+        imageGenerationStatus: "not_generated",
+      },
+    ];
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+
+    expect(screen.getByRole("heading", { name: "Pilot 후보를 더 구체화" })).toBeInTheDocument();
+    expect(
+      screen.getByText("고객 의사결정을 빠르게 만들려면 대표 품질 이슈 1~2개를 예시로 제시하면 좋다."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/"title"/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/"rationale"/)).not.toBeInTheDocument();
   });
 });
 

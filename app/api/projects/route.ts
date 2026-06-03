@@ -12,6 +12,7 @@ import {
   resolveCommonStylePrompt,
   validateStorylineLength,
 } from "@/lib/projects/style-settings";
+import { parseSlideCountPreference } from "@/lib/projects/slide-count";
 import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
@@ -35,10 +36,33 @@ export async function POST(request: Request) {
   }
   const styleTemplate = parseStyleTemplate(form.get("styleTemplate"));
   const customCommonStylePrompt = String(form.get("customCommonStylePrompt") ?? "");
+  let slideCountPreference;
+  try {
+    slideCountPreference = parseSlideCountPreference({
+      mode: form.get("slideCountMode"),
+      customMin: form.get("minSlideCount"),
+      customMax: form.get("maxSlideCount"),
+      storyline,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : String(error) },
+      { status: 400 },
+    );
+  }
   const project = createProjectForUser(getDatabase(), userId, {
     name,
     storyline,
-    targetSlideCount: Number(form.get("targetSlideCount") ?? 8),
+    slideCountMode: slideCountPreference.mode,
+    minSlideCount: slideCountPreference.minSlideCount,
+    maxSlideCount: slideCountPreference.maxSlideCount,
+    preferredSlideCount: slideCountPreference.preferredSlideCount,
+    storylineSlideMarkerCount:
+      slideCountPreference.storylineSlideMarkerCount,
+    storylineSlideMarkerConfidence:
+      slideCountPreference.storylineSlideMarkerConfidence,
+    targetSlideCountRationale:
+      slideCountPreference.targetSlideCountRationale,
     improvementSuggestionsEnabled:
       String(form.get("improvementSuggestionsEnabled") ?? "on") === "on",
     aspectRatio: String(form.get("aspectRatio")) === "4:3" ? "4:3" : "16:9",

@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
+import { SlideCountPreferenceFields } from "@/app/projects/new/slide-count-preference-fields";
 import {
   MAX_STORYLINE_CHARACTERS,
   type StyleTemplateName,
@@ -58,11 +59,8 @@ export default async function NewProjectPage() {
         </section>
         <details open className="rounded-md border border-border bg-card p-5">
           <summary className="cursor-pointer text-lg font-semibold">슬라이드 수와 AI 옵션</summary>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-medium">
-              목표 슬라이드 수
-              <input name="targetSlideCount" type="number" min={1} max={80} defaultValue={8} className="h-10 rounded-md border border-border bg-background px-3" />
-            </label>
+          <div className="mt-4 grid gap-4">
+            <SlideCountPreferenceFields />
             <label className="flex items-center gap-2 text-sm font-medium">
               <input name="improvementSuggestionsEnabled" type="checkbox" defaultChecked />
               스토리라인 개선 제안 생성
@@ -87,7 +85,7 @@ export default async function NewProjectPage() {
           </div>
         </details>
         <details className="rounded-md border border-border bg-card p-5">
-          <summary className="cursor-pointer text-lg font-semibold">이미지 설정</summary>
+          <summary className="cursor-pointer text-lg font-semibold">슬라이드 목업 설정</summary>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium">
               화면 비율
@@ -97,7 +95,7 @@ export default async function NewProjectPage() {
               </select>
             </label>
             <label className="grid gap-2 text-sm font-medium">
-              기본 이미지 모델
+              기본 목업 생성 모델
               <select name="defaultImageModel" defaultValue="gpt-image-2" className="h-10 rounded-md border border-border bg-background px-3">
                 <option value="gpt-image-2">gpt-image-2</option>
                 <option value="nano-banana">nano-banana</option>

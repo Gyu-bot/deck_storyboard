@@ -4,6 +4,7 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import type { SlideCountMode, SlideMarkerConfidence } from "@/lib/projects/slide-count";
 
 export const projectStatusValues = [
   "draft_input",
@@ -108,6 +109,18 @@ export const projects = sqliteTable("projects", {
   storyline: text("storyline").notNull(),
   status: text("status").$type<ProjectStatus>().notNull().default("draft_input"),
   targetSlideCount: integer("target_slide_count").notNull().default(8),
+  slideCountMode: text("slide_count_mode")
+    .$type<SlideCountMode>()
+    .notNull()
+    .default("standard"),
+  minSlideCount: integer("min_slide_count").default(9),
+  maxSlideCount: integer("max_slide_count").default(14),
+  preferredSlideCount: integer("preferred_slide_count").default(12),
+  storylineSlideMarkerCount: integer("storyline_slide_marker_count"),
+  storylineSlideMarkerConfidence: text("storyline_slide_marker_confidence")
+    .$type<SlideMarkerConfidence>()
+    .notNull()
+    .default("none"),
   improvementSuggestionsEnabled: integer("improvement_suggestions_enabled", {
     mode: "boolean",
   })

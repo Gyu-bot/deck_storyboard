@@ -11,6 +11,12 @@ import {
   type ProjectStatus,
   type SlideFieldEditState,
 } from "@/lib/db/schema";
+import {
+  defaultSlideCountPreference,
+  exactSlideCountPreference,
+  type SlideCountMode,
+  type SlideMarkerConfidence,
+} from "@/lib/projects/slide-count";
 
 type Db = ReturnType<typeof createTestDatabase>;
 
@@ -42,6 +48,13 @@ export function createProjectForUser(
     storyline: string;
     status?: ProjectStatus;
     targetSlideCount?: number;
+    slideCountMode?: SlideCountMode;
+    minSlideCount?: number | null;
+    maxSlideCount?: number | null;
+    preferredSlideCount?: number | null;
+    storylineSlideMarkerCount?: number | null;
+    storylineSlideMarkerConfidence?: SlideMarkerConfidence;
+    targetSlideCountRationale?: string | null;
     improvementSuggestionsEnabled?: boolean;
     styleTemplate?: string;
     customCommonStylePrompt?: string;
@@ -52,13 +65,39 @@ export function createProjectForUser(
 ) {
   ensureUser(db, userId);
   const timestamp = now();
+  const slidePreference =
+    input.slideCountMode !== undefined
+      ? {
+          mode: input.slideCountMode,
+          minSlideCount: input.minSlideCount ?? null,
+          maxSlideCount: input.maxSlideCount ?? null,
+          preferredSlideCount: input.preferredSlideCount ?? null,
+          storylineSlideMarkerCount: input.storylineSlideMarkerCount ?? null,
+          storylineSlideMarkerConfidence:
+            input.storylineSlideMarkerConfidence ?? "none",
+          targetSlideCountRationale: input.targetSlideCountRationale ?? null,
+        }
+      : input.targetSlideCount !== undefined
+        ? exactSlideCountPreference(input.targetSlideCount)
+        : defaultSlideCountPreference();
   const row = {
     id: randomUUID(),
     userId,
     name: input.name,
     storyline: input.storyline,
     status: input.status ?? "draft_input",
-    targetSlideCount: input.targetSlideCount ?? 8,
+    targetSlideCount:
+      input.targetSlideCount ??
+      slidePreference.preferredSlideCount ??
+      slidePreference.maxSlideCount ??
+      12,
+    slideCountMode: slidePreference.mode,
+    minSlideCount: slidePreference.minSlideCount,
+    maxSlideCount: slidePreference.maxSlideCount,
+    preferredSlideCount: slidePreference.preferredSlideCount,
+    storylineSlideMarkerCount: slidePreference.storylineSlideMarkerCount,
+    storylineSlideMarkerConfidence:
+      slidePreference.storylineSlideMarkerConfidence,
     improvementSuggestionsEnabled:
       input.improvementSuggestionsEnabled ?? true,
     aspectRatio: input.aspectRatio ?? "16:9",
@@ -68,7 +107,7 @@ export function createProjectForUser(
     resolvedCommonPrompt: input.resolvedCommonPrompt ?? "",
     storyStructure: null,
     improvementSuggestions: null,
-    targetSlideCountRationale: null,
+    targetSlideCountRationale: slidePreference.targetSlideCountRationale,
     generationError: null,
     createdAt: timestamp,
     updatedAt: timestamp,

@@ -55,7 +55,7 @@ export default function DevStoryboardSamplePage() {
           <h1 className="mt-1 text-3xl font-semibold">{project.name}</h1>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
             `tmp/rca-ax-readiness-storyboard-sample.json`을 더미 LLM 응답으로
-            렌더링한 화면입니다. 실제 OpenRouter 호출과 이미지 생성 호출은 실행하지 않습니다.
+            렌더링한 화면입니다. 실제 OpenRouter 호출과 슬라이드 목업 생성 호출은 실행하지 않습니다.
           </p>
         </div>
         <Button asChild variant="outline">

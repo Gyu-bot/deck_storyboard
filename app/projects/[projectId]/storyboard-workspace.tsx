@@ -17,7 +17,7 @@ const fieldStateLabels: Record<string, string> = {
 };
 
 const imageStatusLabels: Record<string, string> = {
-  not_generated: "이미지 없음",
+  not_generated: "목업 없음",
   queued: "대기 중",
   generating: "생성 중",
   generated: "생성 완료",
@@ -62,6 +62,49 @@ function localizeGeneratedText(value: string) {
     .replace(/^Set up the situation$/i, "상황과 문제를 정리")
     .replace(/^Frame the recommendation$/i, "권고 방향을 제시")
     .replace(/^Show the path$/i, "실행 경로를 구체화");
+}
+
+type ImprovementSuggestionView = {
+  id: string;
+  title: string;
+  rationale: string;
+};
+
+function textField(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
+}
+
+function normalizeImprovementSuggestion(
+  suggestion: unknown,
+  index: number,
+): ImprovementSuggestionView {
+  const fallbackId = `suggestion-${index + 1}`;
+  const fallbackTitle = `개선 제안 ${index + 1}`;
+  const fallbackRationale = "제안 근거가 제공되지 않았습니다.";
+
+  if (typeof suggestion === "string") {
+    return {
+      id: fallbackId,
+      title: textField(suggestion, fallbackTitle),
+      rationale: fallbackRationale,
+    };
+  }
+
+  if (suggestion && typeof suggestion === "object") {
+    const record = suggestion as Record<string, unknown>;
+
+    return {
+      id: textField(record.id, fallbackId),
+      title: textField(record.title, fallbackTitle),
+      rationale: textField(record.rationale, fallbackRationale),
+    };
+  }
+
+  return {
+    id: fallbackId,
+    title: fallbackTitle,
+    rationale: fallbackRationale,
+  };
 }
 
 type ProjectView = {
@@ -173,7 +216,10 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   const [tab, setTab] = useState<"content" | "prompt" | "images">("content");
   if (!slide) {
     return (
-      <aside className="self-start rounded-md border border-border bg-card p-5">
+      <aside
+        aria-label="선택 슬라이드 상세 편집 패널"
+        className="self-start rounded-md border border-border bg-card p-5 lg:sticky lg:top-6"
+      >
         <h2 className="text-lg font-semibold">선택된 슬라이드 없음</h2>
         <p className="mt-2 text-sm text-muted-foreground">왼쪽 목록에서 편집할 슬라이드를 선택하세요.</p>
       </aside>
@@ -201,22 +247,25 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   }
 
   return (
-    <aside className="grid self-start gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div>
+    <aside
+      aria-label="선택 슬라이드 상세 편집 패널"
+      className="grid self-start overflow-hidden rounded-md border border-border bg-card shadow-sm lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]"
+    >
+      <div className="flex items-center justify-between gap-3 p-5">
+        <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">슬라이드 상세</p>
-          <h2 className="text-lg font-semibold">{localizeGeneratedText(slide.title)}</h2>
+          <h2 className="truncate text-lg font-semibold">{localizeGeneratedText(slide.title)}</h2>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={deleteSlide}>
           <Trash2 className="size-4" aria-hidden="true" />
           삭제
         </Button>
       </div>
-      <div className="flex h-10 overflow-hidden rounded-md border border-border">
+      <div className="mx-5 flex h-10 overflow-hidden rounded-md border border-border">
         {[
           ["content", "내용"],
           ["prompt", "프롬프트"],
-          ["images", "이미지"],
+          ["images", "목업"],
         ].map(([item, label]) => (
           <button
             key={item}
@@ -228,55 +277,57 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
           </button>
         ))}
       </div>
-      {tab === "content" ? (
-        <div className="grid gap-3">
-          {[
-            ["title", "제목", localizeGeneratedText(slide.title)],
-            ["coreMessage", "핵심 메시지", localizeGeneratedText(slide.coreMessage)],
-            ["contentPoints", "본문 포인트", slide.contentPoints.map(localizeGeneratedText).join("\n")],
-            ["visualDirection", "시각화 방향", localizeGeneratedText(slide.visualDirection)],
-            ["slideRole", "슬라이드 역할", localizeGeneratedText(slide.slideRole)],
-          ].map(([field, label, value]) => (
-            <label key={`${field}-${slide.id}`} className="grid gap-2 text-sm font-medium">
-              <span className="flex items-center justify-between gap-2">
-                {label}
-                <span className="text-xs text-muted-foreground">
-                  {fieldStateLabels[slide.fieldEditState[field] ?? "aiGenerated"]}
+      <div data-testid="storyboard-detail-scroll-area" className="min-h-0 overflow-y-auto px-5 pb-5">
+        {tab === "content" ? (
+          <div className="grid gap-3">
+            {[
+              ["title", "제목", localizeGeneratedText(slide.title)],
+              ["coreMessage", "핵심 메시지", localizeGeneratedText(slide.coreMessage)],
+              ["contentPoints", "본문 포인트", slide.contentPoints.map(localizeGeneratedText).join("\n")],
+              ["visualDirection", "시각화 방향", localizeGeneratedText(slide.visualDirection)],
+              ["slideRole", "슬라이드 역할", localizeGeneratedText(slide.slideRole)],
+            ].map(([field, label, value]) => (
+              <label key={`${field}-${slide.id}`} className="grid gap-2 text-sm font-medium">
+                <span className="flex items-center justify-between gap-2">
+                  {label}
+                  <span className="text-xs text-muted-foreground">
+                    {fieldStateLabels[slide.fieldEditState[field] ?? "aiGenerated"]}
+                  </span>
                 </span>
+                <textarea
+                  key={`${field}-content-${slide.id}`}
+                  defaultValue={value}
+                  rows={fieldRows(field)}
+                  className="w-full rounded-md border border-border bg-background p-3 leading-6"
+                  onBlur={(event) => saveField(field, event.currentTarget.value)}
+                />
+              </label>
+            ))}
+          </div>
+        ) : null}
+        {tab === "prompt" ? (
+          <label className="grid gap-2 text-sm font-medium">
+            <span className="flex items-center justify-between gap-2">
+              슬라이드 목업 프롬프트
+              <span className="text-xs text-muted-foreground">
+                {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
               </span>
-              <textarea
-                key={`${field}-content-${slide.id}`}
-                defaultValue={value}
-                rows={fieldRows(field)}
-                className="w-full rounded-md border border-border bg-background p-3 leading-6"
-                onBlur={(event) => saveField(field, event.currentTarget.value)}
-              />
-            </label>
-          ))}
-        </div>
-      ) : null}
-      {tab === "prompt" ? (
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="flex items-center justify-between gap-2">
-            이미지 프롬프트
-            <span className="text-xs text-muted-foreground">
-              {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
             </span>
-          </span>
-          <textarea
-            key={`imagePrompt-${slide.id}`}
-            defaultValue={localizeGeneratedText(slide.imagePrompt)}
-            rows={8}
-            className="w-full rounded-md border border-border bg-background p-3 leading-6"
-            onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)}
-          />
-        </label>
-      ) : null}
-      {tab === "images" ? (
-        <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-          이미지 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
-        </div>
-      ) : null}
+            <textarea
+              key={`imagePrompt-${slide.id}`}
+              defaultValue={localizeGeneratedText(slide.imagePrompt)}
+              rows={8}
+              className="w-full rounded-md border border-border bg-background p-3 leading-6"
+              onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)}
+            />
+          </label>
+        ) : null}
+        {tab === "images" ? (
+          <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+            목업 생성 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+          </div>
+        ) : null}
+      </div>
     </aside>
   );
 }
@@ -339,7 +390,10 @@ export function StoryboardWorkspace({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,560px)]">
+    <div
+      data-testid="storyboard-workspace-layout"
+      className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,560px)]"
+    >
       <section className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -354,13 +408,25 @@ export function StoryboardWorkspace({
           </div>
           <Button type="button" disabled={project.status !== "storyboard_confirmed"}>
             <ImageIcon className="size-4" aria-hidden="true" />
-            이미지 생성
+            목업 생성
           </Button>
         </div>
         {project.improvementSuggestions?.length ? (
           <details className="rounded-md border border-border bg-card p-4">
             <summary className="cursor-pointer font-semibold">스토리라인 개선 제안</summary>
-            <pre className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{JSON.stringify(project.improvementSuggestions, null, 2)}</pre>
+            <ol className="mt-3 grid gap-3 text-sm">
+              {project.improvementSuggestions.map((suggestion, index) => {
+                const item = normalizeImprovementSuggestion(suggestion, index);
+
+                return (
+                  <li key={`${item.id}-${index}`} className="border-t border-border pt-3 first:border-t-0 first:pt-0">
+                    <h3 className="font-semibold text-foreground">{localizeGeneratedText(item.title)}</h3>
+                    <p className="mt-1 text-xs font-medium text-muted-foreground">제안 이유</p>
+                    <p className="mt-1 leading-6 text-muted-foreground">{localizeGeneratedText(item.rationale)}</p>
+                  </li>
+                );
+              })}
+            </ol>
           </details>
         ) : null}
         {project.targetSlideCountRationale ? (

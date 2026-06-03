@@ -34,11 +34,23 @@ Work in this project should proceed by `IMPLEMENTATION_PLAN.md` task IDs wheneve
   - acceptance criteria covered
   - task status file path
   - follow-up work or known gaps
+- Write PR bodies in Korean unless the user explicitly asks for another language.
 - Do not mark a task `Done` in `IMPLEMENTATION_PLAN.md` until its PR has been merged into `main`.
 - Before marking a task `Done` in `IMPLEMENTATION_PLAN.md`, verify every Acceptance Criteria item for that task and change the completed criteria from `[ ]` to `[x]`.
 - If any Acceptance Criteria item is not satisfied, do not mark the task `Done`; mark it `Needs Review` or keep it in progress and explain the gap in the task status file.
 - If a task is blocked or partially complete, record that in the task-specific status file instead of editing global planning documents during a feature session.
 - When one request spans multiple unrelated tasks, split work into separate task branches and PRs when practical.
+
+## Implementation and review agent separation
+
+For non-trivial task implementation work, separate the implementing agent role from the reviewing agent role.
+
+- The implementing agent should focus on the task scope, code/docs changes, local verification, and the task-specific status file.
+- The reviewing agent should independently review the completed work against the task's Acceptance Criteria, user instructions, project policies, regression risk, and missing verification.
+- The reviewing agent should use a review stance: findings first, with file/line references when possible, followed by open questions and a brief summary.
+- Do not let the same agent perspective act as both implementer and reviewer for substantial feature, fix, or refactor tasks when subagent delegation is practical.
+- Minor or simple work may proceed without a separate reviewing agent, including small wording changes, narrow documentation edits, trivial configuration updates, or clearly low-risk one-file changes.
+- When skipping a separate reviewing agent for minor work, still verify the changed files directly and mention the verification performed in the final response or PR body.
 
 Planning/documentation cleanup should happen in a dedicated planning/docs session.
 
@@ -57,6 +69,7 @@ When updating planning documents:
 
 - Use the latest `origin/main` as the source of truth.
 - Mark tasks as Done only if their PR has been merged into `main`.
+- In planning/documentation cleanup sessions, review PR merge state and remove local git worktrees for branches whose PRs have already been merged into `main`; inspect each target worktree first, skip the current worktree, and do not remove any worktree with uncommitted changes or an unmerged PR.
 - When marking tasks as Done, check off the verified Acceptance Criteria items in `IMPLEMENTATION_PLAN.md`.
 - Add new follow-up tasks only when they are supported by PR notes, status files, or user instruction.
 - Mark uncertain items as `Needs Review`.

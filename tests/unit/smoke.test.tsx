@@ -13,5 +13,8 @@ describe("T003 smoke test", () => {
     expect(
       screen.getByText(/완성 deck을 만들 수 없습니다.*참고용 skeleton deck/),
     ).toBeInTheDocument();
+    expect(screen.getByText("슬라이드 목업")).toBeInTheDocument();
+    expect(screen.getByText(/최종 PPT 제작에 참고할 목업 방향/)).toBeInTheDocument();
+    expect(screen.queryByText("레퍼런스 이미지")).not.toBeInTheDocument();
   });
 });

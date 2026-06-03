@@ -17,7 +17,7 @@ const fieldStateLabels: Record<string, string> = {
 };
 
 const imageStatusLabels: Record<string, string> = {
-  not_generated: "이미지 없음",
+  not_generated: "목업 없음",
   queued: "대기 중",
   generating: "생성 중",
   generated: "생성 완료",
@@ -222,7 +222,7 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
         {[
           ["content", "내용"],
           ["prompt", "프롬프트"],
-          ["images", "이미지"],
+          ["images", "목업"],
         ].map(([item, label]) => (
           <button
             key={item}
@@ -265,7 +265,7 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
         {tab === "prompt" ? (
           <label className="grid gap-2 text-sm font-medium">
             <span className="flex items-center justify-between gap-2">
-              이미지 프롬프트
+              슬라이드 목업 프롬프트
               <span className="text-xs text-muted-foreground">
                 {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
               </span>
@@ -281,7 +281,7 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
         ) : null}
         {tab === "images" ? (
           <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-            이미지 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+            목업 생성 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
           </div>
         ) : null}
       </div>
@@ -365,7 +365,7 @@ export function StoryboardWorkspace({
           </div>
           <Button type="button" disabled={project.status !== "storyboard_confirmed"}>
             <ImageIcon className="size-4" aria-hidden="true" />
-            이미지 생성
+            목업 생성
           </Button>
         </div>
         {project.improvementSuggestions?.length ? (

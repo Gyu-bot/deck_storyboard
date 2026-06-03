@@ -85,7 +85,7 @@ export default async function NewProjectPage() {
           </div>
         </details>
         <details className="rounded-md border border-border bg-card p-5">
-          <summary className="cursor-pointer text-lg font-semibold">이미지 설정</summary>
+          <summary className="cursor-pointer text-lg font-semibold">슬라이드 목업 설정</summary>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium">
               화면 비율
@@ -95,7 +95,7 @@ export default async function NewProjectPage() {
               </select>
             </label>
             <label className="grid gap-2 text-sm font-medium">
-              기본 이미지 모델
+              기본 목업 생성 모델
               <select name="defaultImageModel" defaultValue="gpt-image-2" className="h-10 rounded-md border border-border bg-background px-3">
                 <option value="gpt-image-2">gpt-image-2</option>
                 <option value="nano-banana">nano-banana</option>

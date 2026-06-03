@@ -88,7 +88,7 @@ describe("T017A slide selection sync", () => {
     );
 
     const showPromptTab = () => screen.getByRole("button", { name: /프롬프트/ });
-    const imagePrompt = () => screen.getByRole("textbox", { name: /이미지 프롬프트AI 생성/ });
+    const imagePrompt = () => screen.getByRole("textbox", { name: /슬라이드 목업 프롬프트AI 생성/ });
 
     fireEvent.click(showPromptTab());
     expect(imagePrompt()).toHaveValue("Prompt A");
@@ -144,6 +144,9 @@ describe("T017B storyboard detail floating panel", () => {
 
     expect(screen.getByTestId("storyboard-detail-scroll-area")).toHaveClass("overflow-y-auto");
     expect(screen.getByRole("button", { name: /삭제/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "목업" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "목업 생성" })).toBeInTheDocument();
+    expect(screen.getAllByText("목업 없음").length).toBeGreaterThan(0);
   });
 });
 

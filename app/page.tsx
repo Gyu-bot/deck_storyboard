@@ -11,12 +11,12 @@ const workflowItems = [
   {
     icon: Layers3,
     label: "논리 검토",
-    text: "이미지 생성 비용을 쓰기 전에 세로형 스토리보드에서 흐름을 확인합니다.",
+    text: "목업 생성 비용을 쓰기 전에 세로형 스토리보드에서 흐름을 확인합니다.",
   },
   {
     icon: Image,
-    label: "레퍼런스 이미지",
-    text: "최종 PPT 제작에 참고할 슬라이드 콘셉트 이미지를 생성합니다.",
+    label: "슬라이드 목업",
+    text: "최종 PPT 제작에 참고할 목업 방향을 생성합니다.",
   },
 ];
 
@@ -47,7 +47,7 @@ export default function Home() {
               AI storyboard builder
             </p>
             <h2 className="text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
-              슬라이드 논리를 먼저 확정하고, 이미지는 그 다음에 만듭니다.
+              슬라이드 논리를 먼저 확정하고, 목업은 그 다음에 만듭니다.
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
               전체 프리젠테이션/제안서/리포트 스토리라인을 이미 가지고 있는

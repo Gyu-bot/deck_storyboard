@@ -10,7 +10,7 @@ export default function SignupPage() {
         <h1 className="mt-2 text-4xl font-semibold">작업 공간 만들기</h1>
         <p className="mt-4 max-w-xl text-muted-foreground">
           계정 생성 후 관리자가 필요한 provider key를 할당하면 스토리보드
-          생성과 이미지 생성 기능을 사용할 수 있습니다.
+          생성과 슬라이드 목업 생성 기능을 사용할 수 있습니다.
         </p>
       </section>
       <form

@@ -41,5 +41,8 @@ describe("T011A new project slide count range form", () => {
     expect(screen.getByRole("spinbutton", { name: "직접 최소 slide" })).toHaveValue(9);
     expect(screen.getByRole("spinbutton", { name: "직접 최대 slide" })).toHaveValue(14);
     expect(screen.getByText(/직접 범위를 선택한 경우에만 적용됩니다/)).toBeInTheDocument();
+    expect(screen.getByText("슬라이드 목업 설정")).toBeInTheDocument();
+    expect(screen.getByLabelText("기본 목업 생성 모델")).toBeInTheDocument();
+    expect(screen.queryByText("이미지 설정")).not.toBeInTheDocument();
   });
 });

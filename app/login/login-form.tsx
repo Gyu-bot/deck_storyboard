@@ -25,7 +25,7 @@ export function LoginForm() {
   }
 
   return (
-    <form action={onSubmit} className="grid gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
+    <form action={onSubmit} className="grid self-center gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
       <label className="grid gap-2 text-sm font-medium">
         이메일 또는 테스트 ID
         <input name="email" type="text" required className="h-10 rounded-md border border-border bg-background px-3" />

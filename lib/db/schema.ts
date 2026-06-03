@@ -16,9 +16,12 @@ export const projectStatusValues = [
 
 export const providerKeyValues = [
   "openrouter",
-  "nano_banana",
-  "openai_images",
+  "openai",
+  "anthropic",
+  "gemini",
 ] as const;
+
+export const userRoleValues = ["member", "admin"] as const;
 
 export const imageGenerationStatusValues = [
   "not_generated",
@@ -33,6 +36,7 @@ export const editStateValues = ["aiGenerated", "userModified"] as const;
 
 export type ProjectStatus = (typeof projectStatusValues)[number];
 export type ProviderKey = (typeof providerKeyValues)[number];
+export type UserRole = (typeof userRoleValues)[number];
 export type ImageGenerationStatus =
   (typeof imageGenerationStatusValues)[number];
 export type FieldEditState = (typeof editStateValues)[number];
@@ -61,6 +65,7 @@ export const users = sqliteTable(
     id: text("id").primaryKey(),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
+    role: text("role").$type<UserRole>().notNull().default("member"),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
     deletedAt: text("deleted_at"),

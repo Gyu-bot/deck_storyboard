@@ -1,16 +1,17 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { KeyRound, Save } from "lucide-react";
+import { KeyRound } from "lucide-react";
+import { LogoutButton } from "@/components/logout-button";
+import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
 import { getUserApiKeyPresence } from "@/lib/repositories/user-api-keys";
-import { Button } from "@/components/ui/button";
-import { SettingsKeyDelete } from "@/app/settings/settings-key-delete";
 
 const providers = [
   ["openrouter", "OpenRouter"],
-  ["nano_banana", "Nano Banana"],
-  ["openai_images", "OpenAI Images"],
+  ["openai", "OpenAI"],
+  ["anthropic", "Anthropic / Claude"],
+  ["gemini", "Gemini"],
 ] as const;
 
 export default async function SettingsPage() {
@@ -20,36 +21,44 @@ export default async function SettingsPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-4xl px-6 py-8">
-      <header className="mb-8 flex items-center justify-between border-b border-border pb-5">
+      <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <p className="text-sm font-medium text-muted-foreground">설정</p>
-          <h1 className="text-3xl font-semibold">API key 관리</h1>
+          <h1 className="text-3xl font-semibold">Provider key 할당 상태</h1>
         </div>
-        <Link className="text-sm font-medium text-primary" href="/projects">프로젝트</Link>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href="/projects">프로젝트</Link>
+          </Button>
+          <LogoutButton />
+        </div>
       </header>
+      <section className="mb-5 rounded-md border border-border bg-card p-5">
+        <div className="flex items-start gap-3">
+          <KeyRound className="mt-0.5 size-5 text-muted-foreground" aria-hidden="true" />
+          <div>
+            <h2 className="font-semibold">관리자 할당 방식</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              일반 사용자는 provider API key를 직접 입력하거나 교체할 수 없습니다.
+              필요한 key는 관리자 화면에서 회원별로 할당됩니다.
+            </p>
+          </div>
+        </div>
+      </section>
       <div className="grid gap-4">
         {providers.map(([provider, label]) => (
-          <section key={provider} className="grid gap-4 rounded-md border border-border bg-card p-5">
+          <section key={provider} className="rounded-md border border-border bg-card p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold">{label}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {presence[provider] ? `저장됨: ${presence[provider]}` : "저장된 key 없음"}
+                  {presence[provider] ? `할당됨: ${presence[provider]}` : "할당된 key 없음"}
                 </p>
               </div>
-              {presence[provider] ? <SettingsKeyDelete provider={provider} /> : null}
+              <span className="rounded-md border border-border px-3 py-1 text-sm">
+                {presence[provider] ? "Assigned" : "Unassigned"}
+              </span>
             </div>
-            <form action="/api/settings/api-keys" method="post" className="flex flex-col gap-3 sm:flex-row">
-              <input type="hidden" name="provider" value={provider} />
-              <label className="flex-1 text-sm font-medium">
-                <span className="sr-only">{label} key</span>
-                <input name="apiKey" type="password" placeholder="key 추가 또는 교체" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3" />
-              </label>
-              <Button type="submit">
-                {presence[provider] ? <Save className="size-4" aria-hidden="true" /> : <KeyRound className="size-4" aria-hidden="true" />}
-                {presence[provider] ? "교체" : "추가"}
-              </Button>
-            </form>
           </section>
         ))}
       </div>

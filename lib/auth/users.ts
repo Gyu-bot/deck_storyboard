@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { eq, isNull, and } from "drizzle-orm";
 import type { createTestDatabase } from "@/lib/db/test-utils";
-import { users } from "@/lib/db/schema";
+import { users, type UserRole } from "@/lib/db/schema";
 
 type Db = ReturnType<typeof createTestDatabase>;
 
 const developmentUsers = [
-  { email: "test@example.local", password: "test" },
-  { email: "admin@example.local", password: "admin" },
+  { email: "test@example.local", password: "test", role: "member" },
+  { email: "admin@example.local", password: "admin", role: "admin" },
 ] as const;
 
 function now() {
@@ -24,7 +24,7 @@ export function normalizeLoginIdentifier(identifier: string) {
 
 export async function createUser(
   db: Db,
-  input: { email: string; password: string },
+  input: { email: string; password: string; role?: UserRole },
 ) {
   const email = input.email.trim().toLowerCase();
   const existing = db
@@ -38,12 +38,35 @@ export async function createUser(
     id: randomUUID(),
     email,
     passwordHash: await bcrypt.hash(input.password, 12),
+    role: input.role ?? "member",
     createdAt: timestamp,
     updatedAt: timestamp,
     deletedAt: null,
   };
   db.insert(users).values(row).run();
   return row;
+}
+
+export function getUserById(db: Db, userId: string) {
+  return (
+    db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .get() ?? null
+  );
+}
+
+export function listUsers(db: Db, options: { query?: string } = {}) {
+  const query = options.query?.trim().toLowerCase() ?? "";
+  const rows = db
+    .select()
+    .from(users)
+    .where(isNull(users.deletedAt))
+    .all()
+    .sort((a, b) => a.email.localeCompare(b.email));
+  if (!query) return rows;
+  return rows.filter((user) => user.email.toLowerCase().includes(query));
 }
 
 export async function verifyUserPassword(
@@ -79,6 +102,7 @@ export function seedDevelopmentUsers(db: Db) {
       id: randomUUID(),
       email: input.email,
       passwordHash: bcrypt.hashSync(input.password, 12),
+      role: input.role,
       createdAt: timestamp,
       updatedAt: timestamp,
       deletedAt: null,

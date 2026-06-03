@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CheckCircle2, WandSparkles } from "lucide-react";
+import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
@@ -31,7 +32,7 @@ export default async function ProjectDetailPage({
   const slides = getSlidesForProject(db, projectId, userId);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-7xl px-6 py-6">
+    <main className="mx-auto min-h-screen w-full max-w-[1500px] px-6 py-6">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <Link className="text-sm font-medium text-primary" href="/projects">프로젝트 목록</Link>
@@ -41,6 +42,7 @@ export default async function ProjectDetailPage({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <LogoutButton />
           <form action={`/api/projects/${project.id}/storyboard/generate`} method="post">
             <Button type="submit" variant="outline">
               <WandSparkles className="size-4" aria-hidden="true" />

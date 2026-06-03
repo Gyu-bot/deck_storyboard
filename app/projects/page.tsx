@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FolderOpen, Plus } from "lucide-react";
+import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
@@ -24,15 +25,16 @@ export default async function ProjectsPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-6 py-8">
-      <header className="mb-8 flex items-center justify-between border-b border-border pb-5">
+      <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <p className="text-sm font-medium text-muted-foreground">워크스페이스</p>
           <h1 className="text-3xl font-semibold">스토리보드 프로젝트</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
             <Link href="/settings">설정</Link>
           </Button>
+          <LogoutButton />
           <Button asChild>
             <Link href="/projects/new">
               <Plus className="size-4" aria-hidden="true" />

@@ -7,6 +7,7 @@
 - **Status values:** `Backlog`, `Ready`, `In Progress`, `Needs Review`, `Done`, `Blocked`
 - **Done 기준:** A task is `Done` only after its PR has been merged into `main`.
 - **Issue field:** Each task should include an `Issue` field. Use `None` when no GitHub Issue is linked yet.
+- **PR field:** Each task should include a `PR` field. Use `None` until the task is completed by a merged PR, then record the closing PR number such as `#123`.
 - **GitHub Issue sync:** Create GitHub Issues only for tasks whose `Status` is `Ready` and whose `Issue` field is `None`; after creation, update the task's `Issue` field with the issue number.
 - **Default PR 단위:** One task per PR unless this plan explicitly groups tasks or the user approves a different split.
 - **Task status file:** Each implementation branch should create or update `.ai/status/active/<task-id>-<short-name>.md`.
@@ -23,6 +24,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: None
 - Branch: `feature/T001-app-scaffold`
 - Expected PR Unit: `PR-T001`
@@ -40,6 +42,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T001
 - Branch: `feature/T002-docker-foundation`
 - Expected PR Unit: `PR-T002`
@@ -56,6 +59,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T001
 - Branch: `feature/T003-quality-baseline`
 - Expected PR Unit: `PR-T003`
@@ -70,8 +74,9 @@
 
 #### Task T003A. First screen product-purpose copy 보강
 - Priority: Low
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #6
+- PR: None
 - Depends on: T001
 - Branch: `fix/T003A-home-purpose-copy`
 - Expected PR Unit: `PR-T003A`
@@ -99,6 +104,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T001
 - Branch: `feature/T004-drizzle-schema`
 - Expected PR Unit: `PR-T004`
@@ -116,6 +122,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T004
 - Branch: `feature/T005-data-access-ownership`
 - Expected PR Unit: `PR-T005`
@@ -138,6 +145,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T004
 - Branch: `feature/T006-auth-session`
 - Expected PR Unit: `PR-T006`
@@ -155,6 +163,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T006
 - Branch: `feature/T007-auth-ui`
 - Expected PR Unit: `PR-T007`
@@ -175,6 +184,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T007
 - Branch: `fix/T007A-login-layout-spacing`
 - Expected PR Unit: `PR-T007A`
@@ -195,6 +205,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T004
 - Branch: `feature/T008-api-key-encryption`
 - Expected PR Unit: `PR-T008`
@@ -214,6 +225,7 @@
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T007, T008
 - Branch: `feature/T009-api-key-settings`
 - Expected PR Unit: `PR-T009`
@@ -250,6 +262,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T006, T007, T008
 - Branch: `feature/T009A-admin-role-auth-simplification`
 - Expected PR Unit: `PR-T009A`
@@ -274,6 +287,7 @@ MVP scope:
 - Priority: High
 - Status: Needs Review
 - Issue: None
+- PR: None
 - Depends on: T009A
 - Branch: `feature/T009B-admin-member-key-management-page`
 - Expected PR Unit: `PR-T009B`
@@ -303,6 +317,7 @@ MVP scope:
 - Priority: High
 - Status: Needs Review
 - Issue: None
+- PR: None
 - Depends on: T009B, T008
 - Branch: `feature/T009C-admin-api-key-assignment`
 - Expected PR Unit: `PR-T009C`
@@ -337,6 +352,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T005, T007
 - Branch: `feature/T010-project-list`
 - Expected PR Unit: `PR-T010`
@@ -357,6 +373,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T010
 - Branch: `feature/T011-new-project-form`
 - Expected PR Unit: `PR-T011`
@@ -374,8 +391,9 @@ MVP scope:
 
 #### Task T011A. Slide count range preference UI와 project contract 정리
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #7
+- PR: None
 - Depends on: T011, T015B
 - Branch: `feature/T011A-slide-count-range-preference`
 - Expected PR Unit: `PR-T011A`
@@ -401,6 +419,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T011
 - Branch: `feature/T012-style-image-settings`
 - Expected PR Unit: `PR-T012`
@@ -426,6 +445,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T008, T012
 - Branch: `feature/T013-openrouter-structured-output`
 - Expected PR Unit: `PR-T013`
@@ -446,6 +466,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T013
 - Branch: `feature/T014-story-structure-analysis`
 - Expected PR Unit: `PR-T014`
@@ -463,6 +484,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T014
 - Branch: `feature/T015-slide-breakdown`
 - Expected PR Unit: `PR-T015`
@@ -481,6 +503,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T013, T014, T015
 - Branch: `feature/T015A-storyboard-sample-contract`
 - Expected PR Unit: `PR-T015A`
@@ -506,6 +529,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T015A, T009C
 - Branch: `feature/T015B-openrouter-storyboard-call`
 - Expected PR Unit: `PR-T015B`
@@ -532,6 +556,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T011A, T015B
 - Branch: `feature/T015C-slide-count-range-policy`
 - Expected PR Unit: `PR-T015C`
@@ -553,6 +578,7 @@ MVP scope:
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T028
 - Branch: `feature/T015D-storyboard-prompt-hardening`
 - Expected PR Unit: `PR-T015D`
@@ -595,6 +621,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T015
 - Branch: `feature/T016-storyboard-review-ui`
 - Expected PR Unit: `PR-T016`
@@ -622,6 +649,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T016
 - Branch: `feature/T017-slide-field-editing`
 - Expected PR Unit: `PR-T017`
@@ -641,6 +669,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T017
 - Branch: `fix/T017A-slide-selection-detail-sync`
 - Expected PR Unit: `PR-T017A`
@@ -659,8 +688,9 @@ MVP scope:
 
 #### Task T017B. Storyboard detail input floating panel UX 수정
 - Priority: Medium
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #8
+- PR: None
 - Depends on: T017A
 - Branch: `fix/T017B-floating-detail-panel`
 - Expected PR Unit: `PR-T017B`
@@ -683,6 +713,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T017
 - Branch: `feature/T018-manual-slide-operations`
 - Expected PR Unit: `PR-T018`
@@ -702,6 +733,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T018
 - Branch: `feature/T019-operation-history`
 - Expected PR Unit: `PR-T019`
@@ -731,6 +763,7 @@ MVP scope:
 - Priority: High
 - Status: Done
 - Issue: None
+- PR: None
 - Depends on: T016
 - Branch: `feature/T020-image-provider-storage`
 - Expected PR Unit: `PR-T020`
@@ -746,8 +779,9 @@ MVP scope:
 
 #### Task T021. GPT Image / OpenAI Images provider 구현
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #9
+- PR: None
 - Depends on: T020, T009C
 - Branch: `feature/T021-openai-images-provider`
 - Expected PR Unit: `PR-T021`
@@ -764,8 +798,9 @@ MVP scope:
 
 #### Task T022. Gemini/Nano Banana image provider 구현
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #10
+- PR: None
 - Depends on: T020, T009C
 - Branch: `feature/T022-gemini-image-provider`
 - Expected PR Unit: `PR-T022`
@@ -787,6 +822,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T017, T021, T022
 - Branch: `feature/T023-single-image-generation`
 - Expected PR Unit: `PR-T023`
@@ -805,6 +841,7 @@ MVP scope:
 - Priority: Low
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T023, T015D
 - Branch: `feature/T023A-image-prompt-cache-readiness`
 - Expected PR Unit: `PR-T023A`
@@ -828,6 +865,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T023
 - Branch: `feature/T024-batch-image-generation`
 - Expected PR Unit: `PR-T024`
@@ -853,6 +891,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T016, T019, T023
 - Branch: `feature/T025-markdown-export`
 - Expected PR Unit: `PR-T025`
@@ -871,6 +910,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T025
 - Branch: `feature/T026-selected-image-zip-export`
 - Expected PR Unit: `PR-T026`
@@ -890,6 +930,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T020, T026
 - Branch: `feature/T027-security-hardening`
 - Expected PR Unit: `PR-T027`
@@ -907,6 +948,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T015B, T023, T024
 - Branch: `feature/T027A-provider-call-progress-ui`
 - Expected PR Unit: `PR-T027A`
@@ -928,6 +970,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T009B, T015B, T021, T022, T024
 - Branch: `feature/T027B-provider-usage-ledger`
 - Expected PR Unit: `PR-T027B`
@@ -957,6 +1000,7 @@ MVP scope:
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T002, T009C, T024, T026, T027, T027A, T027B
 - Branch: `feature/T028-mvp-e2e-smoke`
 - Expected PR Unit: `PR-T028`
@@ -980,6 +1024,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T015B, T009C
 - Branch: `feature/T035-multi-llm-providers`
 - Expected PR Unit: `PR-T035`
@@ -1001,6 +1046,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T035
 - Branch: `feature/T036-llm-model-selection`
 - Expected PR Unit: `PR-T036`
@@ -1031,6 +1077,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T009C, T035, T036
 - Branch: `chore/T037-unified-provider-key-cleanup`
 - Expected PR Unit: `PR-T037`
@@ -1057,6 +1104,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T027A, T035, T036, T037
 - Branch: `feature/T038-provider-error-recovery-ux`
 - Expected PR Unit: `PR-T038`
@@ -1085,6 +1133,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T019, T015D
 - Branch: `feature/T029-ai-merge-selected-slides`
 - Expected PR Unit: `PR-T029`
@@ -1106,6 +1155,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T019, T015D
 - Branch: `feature/T030-ai-split-slide`
 - Expected PR Unit: `PR-T030`
@@ -1124,6 +1174,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T019, T015D
 - Branch: `feature/T031-ai-insert-slide`
 - Expected PR Unit: `PR-T031`
@@ -1142,6 +1193,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: T019, T029, T030, T031, T015D
 - Branch: `feature/T032-ai-deck-flow-reflow`
 - Expected PR Unit: `PR-T032`
@@ -1169,6 +1221,7 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 - Priority: High
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: Merged PR evidence
 - Branch: `docs/update-implementation-plan`
 - Expected PR Unit: `PR-D001`
@@ -1184,6 +1237,7 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 - Priority: Medium
 - Status: Backlog
 - Issue: None
+- PR: None
 - Depends on: Merged PR evidence or user instruction
 - Branch: `docs/update-project-status`
 - Expected PR Unit: `PR-D002`

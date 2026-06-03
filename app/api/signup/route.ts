@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createUser } from "@/lib/auth/users";
 import { getDatabase } from "@/lib/db/client";
-import { saveUserApiKey } from "@/lib/repositories/user-api-keys";
 import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
@@ -11,9 +10,6 @@ export async function POST(request: Request) {
   const email = String(form.get("email") ?? "");
   const password = String(form.get("password") ?? "");
   const passwordConfirm = String(form.get("passwordConfirm") ?? "");
-  const openrouterKey = String(form.get("openrouterKey") ?? "");
-  const imageProvider = String(form.get("imageProvider") ?? "openai_images");
-  const imageProviderKey = String(form.get("imageProviderKey") ?? "");
 
   if (!email || !password || password.length < 8) {
     return NextResponse.json(
@@ -27,14 +23,7 @@ export async function POST(request: Request) {
 
   try {
     const db = getDatabase();
-    const user = await createUser(db, { email, password });
-    if (openrouterKey) saveUserApiKey(db, user.id, "openrouter", openrouterKey);
-    if (imageProviderKey && imageProvider === "nano_banana") {
-      saveUserApiKey(db, user.id, "nano_banana", imageProviderKey);
-    }
-    if (imageProviderKey && imageProvider === "openai_images") {
-      saveUserApiKey(db, user.id, "openai_images", imageProviderKey);
-    }
+    await createUser(db, { email, password });
     return NextResponse.redirect(appUrl("/login?created=1", request), 303);
   } catch (error) {
     return NextResponse.json(

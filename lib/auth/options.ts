@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         if (!email || !password) return null;
         const user = await verifyUserPassword(getDatabase(), email, password);
         if (!user) return null;
-        return { id: user.id, email: user.email };
+        return { id: user.id, email: user.email, role: user.role };
       },
     }),
   ],
@@ -30,11 +30,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) token.sub = user.id;
+      if (user && "role" in user) {
+        (token as { role?: string }).role = String(user.role);
+      }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
         (session.user as { id?: string }).id = token.sub;
+      }
+      if (session.user && "role" in token) {
+        (session.user as { role?: string }).role = String(
+          (token as { role?: string }).role,
+        );
       }
       return session;
     },

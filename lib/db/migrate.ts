@@ -7,6 +7,7 @@ export function migrateDatabase(sqlite: Database.Database) {
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'member',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -108,4 +109,11 @@ export function migrateDatabase(sqlite: Database.Database) {
       created_at TEXT NOT NULL
     );
   `);
+
+  const userColumns = sqlite
+    .prepare("PRAGMA table_info(users)")
+    .all() as Array<{ name: string }>;
+  if (!userColumns.some((column) => column.name === "role")) {
+    sqlite.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'member'");
+  }
 }

@@ -193,7 +193,8 @@
 - Notes:
   - 서버 fallback provider key는 사용하지 않는다.
   - 2026-06-03 user-directed Korean UI pass localized Settings key-management copy.
-  - T009A 이후 일반 사용자의 self-service provider key 관리는 제거하거나 관리자 할당 상태 확인 전용으로 축소한다.
+  - T009A 이후 일반 사용자의 self-service provider key 관리는 제거한다.
+  - 일반 사용자 로그인 시 API 설정 메뉴는 노출하지 않는다. 필요한 경우 key 상태 확인은 관리자 화면에서만 처리한다.
   - T009C 이후 이미지 provider 전용 key 관리는 account-level provider key 관리로 대체한다.
 
 ---
@@ -203,7 +204,9 @@
 MVP scope:
 
 - Users sign up and log in without entering provider API keys.
+- Normal users do not see or use an API settings menu after login.
 - Admins assign account-level provider keys to users before live LLM/image generation is connected.
+- Admins can add and delete user accounts from the admin workflow.
 - Account-level provider keys are shared across LLM and image generation paths where the provider supports both.
 - Admin/member management is an MVP prerequisite, not a post-MVP feature.
 
@@ -218,6 +221,8 @@ MVP scope:
 - Acceptance Criteria:
   - [ ] `/signup`은 이메일, 비밀번호, 비밀번호 확인만 받는다.
   - [ ] 일반 회원 가입 시 OpenRouter, OpenAI, Claude/Anthropic, Gemini 등 provider API key 입력은 요구하지 않는다.
+  - [ ] 일반 사용자 로그인 후 primary navigation/header에 API 설정 또는 provider key 설정 메뉴가 노출되지 않는다.
+  - [ ] 일반 사용자가 `/settings` 또는 legacy API key settings route에 직접 접근해도 key 추가/교체/삭제 self-service UI를 사용할 수 없다.
   - [ ] 일반 사용자는 자신의 API key full value를 입력, 교체, 조회할 수 없다.
   - [ ] 관리자 권한을 식별할 수 있는 user role 또는 equivalent admin flag가 DB와 session에 반영된다.
   - [ ] 관리자 권한이 없는 사용자는 admin routes/pages/API에 접근할 수 없다.
@@ -227,6 +232,7 @@ MVP scope:
 - Notes:
   - 2026-06-03 user direction: 회원은 가입 시 API key 입력 없이 회원 가입과 로그인만 수행한다.
   - API key 할당 책임은 일반 사용자 self-service에서 관리자 관리 방식으로 이동한다.
+  - 2026-06-03 user direction: 일반 계정에는 API 설정 메뉴가 필요하지 않다.
 
 #### Task T009B. Admin member and API key management page 구현
 - Priority: High
@@ -237,6 +243,9 @@ MVP scope:
 - Acceptance Criteria:
   - [ ] 관리자 전용 `/admin` 또는 `/admin/users` 회원관리 화면이 있다.
   - [ ] 관리자 화면에서 회원 목록, 이메일, 가입일, 최근 수정일, 계정 상태, provider key 할당 상태를 한 화면에서 볼 수 있다.
+  - [ ] 관리자는 admin workflow에서 신규 회원 계정을 추가할 수 있다.
+  - [ ] 관리자는 admin workflow에서 회원 계정을 삭제 또는 비활성화할 수 있으며, 삭제/비활성화된 계정은 일반 로그인과 프로젝트 접근이 차단된다.
+  - [ ] 회원 삭제/비활성화는 기존 프로젝트/슬라이드 데이터 보존 정책을 명확히 따른다.
   - [ ] 회원 검색 또는 최소한 이메일 기준 filtering이 가능하다.
   - [ ] 회원 상세 또는 expandable row에서 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini API key 할당 상태를 확인할 수 있다.
   - [ ] 회원별 API key 추가/교체/삭제 action으로 이동하거나 같은 화면에서 inline으로 실행할 수 있다.
@@ -244,10 +253,11 @@ MVP scope:
   - [ ] 회원별 generation 가능 여부를 provider key assignment 상태 기준으로 판단할 수 있다.
   - [ ] 관리자 화면은 일반 프로젝트 작업 화면과 명확히 분리된다.
   - [ ] 관리자 권한이 없는 접근은 login 또는 forbidden 상태로 차단된다.
-  - [ ] 브라우저 또는 equivalent visual check로 admin access control, 회원 목록, 회원별 API key 관리 UI를 확인했다.
+  - [ ] 브라우저 또는 equivalent visual check로 admin access control, 회원 추가/삭제, 회원 목록, 회원별 API key 관리 UI를 확인했다.
   - [ ] `.ai/status/active/T009B-admin-member-key-management-page.md`에 검증 결과가 기록되어 있다.
 - Notes:
-  - 초기 범위는 회원 삭제보다 회원 조회, 계정 상태 확인, 회원별 key 할당/교체/삭제에 초점을 둔다.
+  - 2026-06-03 user direction: 관리자는 회원 계정 추가/삭제와 회원별 API key setting을 모두 수행할 수 있어야 한다.
+  - 회원 삭제는 hard delete와 soft delete/disabled status 중 구현 전 결정하고, 프로젝트/슬라이드 소유 데이터 처리 정책을 status에 기록한다.
   - 회원관리와 회원별 API key 관리는 별도 흩어진 화면보다 같은 admin workflow 안에서 처리한다.
 
 #### Task T009C. Admin-managed user API key assignment 구현
@@ -258,6 +268,7 @@ MVP scope:
 - Expected PR Unit: `PR-T009C`
 - Acceptance Criteria:
   - [ ] 관리자는 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini account-level provider key를 추가/교체/삭제할 수 있다.
+  - [ ] 회원별 API key 설정은 admin user/account management workflow 안에서 수행되며, 일반 사용자 Settings 메뉴로 분리하지 않는다.
   - [ ] 저장된 key는 모든 UI/API response에서 masked form 또는 presence status로만 노출된다.
   - [ ] 일반 사용자 generation flow는 관리자에게 할당된 user-scoped account-level provider key만 사용한다.
   - [ ] OpenAI key는 OpenAI LLM과 OpenAI image generation에 함께 사용할 수 있다.
@@ -271,7 +282,7 @@ MVP scope:
   - [ ] `.ai/status/active/T009C-admin-api-key-assignment.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 서버 fallback provider key는 계속 사용하지 않는다.
-  - 일반 사용자 `/settings`는 T009C 이후 제거하거나 key 할당 상태 확인 전용으로 축소한다.
+  - 일반 사용자 `/settings` API key menu는 T009C 이후 제거한다.
   - MVP key policy: 이미지 전용 API key를 별도로 받지 않고 provider account key를 LLM과 이미지 생성에 공통 사용한다.
 
 ---

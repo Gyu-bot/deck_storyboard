@@ -48,7 +48,7 @@ export default function DevStoryboardSamplePage() {
   }));
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-7xl px-6 py-6">
+    <main className="mx-auto min-h-screen w-full max-w-[1500px] px-6 py-6">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <p className="text-sm font-medium text-primary">개발용 샘플 fixture</p>

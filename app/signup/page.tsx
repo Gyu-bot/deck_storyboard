@@ -9,8 +9,8 @@ export default function SignupPage() {
         <p className="text-sm font-medium text-muted-foreground">Deck Storyboard</p>
         <h1 className="mt-2 text-4xl font-semibold">작업 공간 만들기</h1>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          개인 API key를 등록해 스토리보드 생성과 이미지 생성을 사용자
-          소유 key 기준으로 실행합니다.
+          계정 생성 후 관리자가 필요한 provider key를 할당하면 스토리보드
+          생성과 이미지 생성 기능을 사용할 수 있습니다.
         </p>
       </section>
       <form
@@ -29,21 +29,6 @@ export default function SignupPage() {
         <label className="grid gap-2 text-sm font-medium">
           비밀번호 확인
           <input name="passwordConfirm" type="password" minLength={8} required className="h-10 rounded-md border border-border bg-background px-3" />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          OpenRouter API key
-          <input name="openrouterKey" type="password" required className="h-10 rounded-md border border-border bg-background px-3" />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          이미지 provider 선택
-          <select name="imageProvider" className="h-10 rounded-md border border-border bg-background px-3">
-            <option value="openai_images">OpenAI Images</option>
-            <option value="nano_banana">Nano Banana</option>
-          </select>
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          이미지 provider key
-          <input name="imageProviderKey" type="password" className="h-10 rounded-md border border-border bg-background px-3" />
         </label>
         <Button type="submit">
           <UserPlus className="size-4" aria-hidden="true" />

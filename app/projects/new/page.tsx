@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
 import {
@@ -22,9 +24,17 @@ export default async function NewProjectPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-6 py-8">
-      <header className="mb-8 border-b border-border pb-5">
-        <p className="text-sm font-medium text-muted-foreground">새 프로젝트</p>
-        <h1 className="text-3xl font-semibold">스토리라인 입력</h1>
+      <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">새 프로젝트</p>
+          <h1 className="text-3xl font-semibold">스토리라인 입력</h1>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/projects">프로젝트</Link>
+          </Button>
+          <LogoutButton />
+        </div>
       </header>
       <form action="/api/projects" method="post" className="grid gap-5">
         <section className="grid gap-4 rounded-md border border-border bg-card p-5">

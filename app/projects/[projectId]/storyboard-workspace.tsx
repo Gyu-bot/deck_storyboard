@@ -194,6 +194,12 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
     window.location.reload();
   }
 
+  function fieldRows(field: string) {
+    if (field === "contentPoints") return 7;
+    if (field === "coreMessage" || field === "visualDirection") return 5;
+    return 2;
+  }
+
   return (
     <aside className="grid self-start gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
@@ -231,14 +237,20 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
             ["visualDirection", "시각화 방향", localizeGeneratedText(slide.visualDirection)],
             ["slideRole", "슬라이드 역할", localizeGeneratedText(slide.slideRole)],
           ].map(([field, label, value]) => (
-            <label key={field} className="grid gap-2 text-sm font-medium">
+            <label key={`${field}-${slide.id}`} className="grid gap-2 text-sm font-medium">
               <span className="flex items-center justify-between gap-2">
                 {label}
                 <span className="text-xs text-muted-foreground">
                   {fieldStateLabels[slide.fieldEditState[field] ?? "aiGenerated"]}
                 </span>
               </span>
-              <textarea defaultValue={value} rows={field === "contentPoints" ? 4 : 2} className="rounded-md border border-border bg-background p-3" onBlur={(event) => saveField(field, event.currentTarget.value)} />
+              <textarea
+                key={`${field}-content-${slide.id}`}
+                defaultValue={value}
+                rows={fieldRows(field)}
+                className="w-full rounded-md border border-border bg-background p-3 leading-6"
+                onBlur={(event) => saveField(field, event.currentTarget.value)}
+              />
             </label>
           ))}
         </div>
@@ -251,7 +263,13 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
               {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
             </span>
           </span>
-          <textarea defaultValue={localizeGeneratedText(slide.imagePrompt)} rows={8} className="rounded-md border border-border bg-background p-3" onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)} />
+          <textarea
+            key={`imagePrompt-${slide.id}`}
+            defaultValue={localizeGeneratedText(slide.imagePrompt)}
+            rows={8}
+            className="w-full rounded-md border border-border bg-background p-3 leading-6"
+            onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)}
+          />
         </label>
       ) : null}
       {tab === "images" ? (
@@ -321,7 +339,7 @@ export function StoryboardWorkspace({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,560px)]">
       <section className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">

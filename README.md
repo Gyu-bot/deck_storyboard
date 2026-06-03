@@ -4,6 +4,17 @@
 
 Deck Storyboard turns a free-form proposal or report storyline into a reviewable slide storyboard, then uses confirmed slide content to generate reference slide images.
 
+## Product Purpose
+
+Deck Storyboard is for people who already have the rough storyline of a presentation, proposal, report, or consulting deck and need help turning that storyline into a clearer slide-by-slide structure.
+
+It is not meant to produce a final, client-ready PowerPoint deck. The intended output is an early skeleton deck reference: a structured storyboard, slide titles, core messages, content points, visual directions, and optional reference images that can guide a human deck-building process.
+
+> [!CAUTION]
+> Deck Storyboard cannot create a finished deck. Its output is reference material only, intended to help humans draft and refine the final presentation.
+
+Use it when you want to move from "I know the story I need to tell" to "I have a reviewable slide plan and visual references." The final layout, copy polish, client branding, and presentation craft remain human-owned.
+
 The core product flow is:
 
 1. A user enters a free-form storyline and project settings.
@@ -125,39 +136,6 @@ Real user input is often less structured than a prepared slide canvas. It may be
 - `slide_breakdown` focuses on producing complete slide objects with titles, messages, content points, visual direction, and image prompts.
 
 The second call is not mandatory. If `story_structure` already returns valid, high-quality `slides[]`, the app can skip `slide_breakdown` and persist those slide objects directly.
-
-## Sample Fixture Strategy
-
-Before connecting real LLM calls, sample storyline and expected JSON fixtures are used to lock down the output contract. The local `tmp/` directory is intentionally ignored by git and can hold temporary sample files, such as:
-
-- `tmp/rca-ax-readiness-storyline-sample.md`
-- `tmp/rca-ax-readiness-storyboard-sample.json`
-
-These fixtures represent the intended path from free-form storyline to validated slide objects before external provider calls are introduced.
-
-In non-production mode, if `tmp/rca-ax-readiness-storyboard-sample.json` exists, the storyboard generation route uses that file as a dummy LLM `story_structure` response. This lets the frontend exercise the flow up to storyboard review without a live OpenRouter call or image generation call.
-
-Run the local sample check with:
-
-```sh
-npm run test:storyboard-sample
-```
-
-To try the same dummy flow in the frontend during local development:
-
-```sh
-DATA_ROOT="$PWD/tmp/dev-data" npm run dev -- -p 3000
-```
-
-Then open `http://localhost:3000`, sign up or log in with local test credentials, create a project with any storyline text, and click `스토리보드 생성`. When the sample JSON exists, the generation route uses it as the dummy LLM response and the project should move to storyboard review with the sample slides. Image generation is not started by this sample flow.
-
-For a direct visual preview without login, open:
-
-```text
-http://localhost:3000/dev/storyboard-sample
-```
-
-This page is development-only and renders the ignored sample JSON in the same storyboard review component.
 
 Development mode seeds two local accounts when the app opens the database:
 

@@ -4,6 +4,17 @@
 
 Deck Storyboard는 자유 양식의 제안서 또는 리포트 스토리라인을 검토 가능한 슬라이드 스토리보드로 변환하고, 사용자가 확정한 슬라이드 내용을 바탕으로 참고용 슬라이드 이미지를 생성하는 앱입니다.
 
+## 제품 목적
+
+Deck Storyboard는 프리젠테이션, 제안서, 리포트, 컨설팅 덱의 전체 스토리라인을 이미 어느 정도 가지고 있는 사람을 위한 도구입니다. 목표는 그 스토리라인을 더 명확한 슬라이드 단위 구조로 나누고, 검토 가능한 초기 스토리보드로 만드는 것입니다.
+
+이 앱은 최종 납품용 PowerPoint 덱을 자동 생성하기 위한 도구가 아닙니다. 의도한 산출물은 초기 skeleton deck 참고자료입니다. 즉, 구조화된 스토리보드, 슬라이드 제목, 핵심 메시지, 내용 포인트, 시각화 방향, 선택적인 참고 이미지를 제공해 사람이 최종 덱을 만드는 과정을 돕습니다.
+
+> [!CAUTION]
+> Deck Storyboard는 완성 deck을 만들 수 없습니다. 산출물은 어디까지나 사람이 최종 프리젠테이션을 만들 때 참고하는 초기 skeleton deck 자료입니다.
+
+"어떤 이야기를 해야 하는지는 알고 있지만, 이를 어떤 슬라이드 흐름으로 정리할지 잡고 싶다"는 상황에 적합합니다. 최종 레이아웃, 문장 다듬기, 클라이언트 브랜드 반영, 발표용 완성도는 여전히 사람이 책임지는 영역입니다.
+
 핵심 제품 흐름은 다음과 같습니다.
 
 1. 사용자가 자유 양식 스토리라인과 프로젝트 설정을 입력합니다.
@@ -125,39 +136,6 @@ sequenceDiagram
 - `slide_breakdown`은 제목, 메시지, 내용 bullet, 시각화 방향, 이미지 프롬프트를 포함한 완성된 슬라이드 객체를 만드는 데 집중합니다.
 
 두 번째 호출은 필수가 아닙니다. `story_structure`가 이미 유효하고 품질 기준을 통과하는 `slides[]`를 반환하면, 앱은 `slide_breakdown`을 생략하고 해당 슬라이드 객체를 바로 저장할 수 있습니다.
-
-## 샘플 fixture 전략
-
-실제 LLM 호출을 연결하기 전에, 샘플 스토리라인과 기대 JSON fixture로 출력 계약을 먼저 고정합니다. 로컬 `tmp/` 디렉토리는 의도적으로 git에서 제외되며 다음 같은 임시 샘플 파일을 둘 수 있습니다.
-
-- `tmp/rca-ax-readiness-storyline-sample.md`
-- `tmp/rca-ax-readiness-storyboard-sample.json`
-
-이 fixture들은 외부 provider 호출을 붙이기 전에 자유 양식 스토리라인이 검증 가능한 슬라이드 객체로 변환되는 목표 경로를 표현합니다.
-
-non-production 모드에서 `tmp/rca-ax-readiness-storyboard-sample.json`이 존재하면, 스토리보드 생성 route는 이 파일을 dummy LLM `story_structure` 응답으로 사용합니다. 이렇게 하면 live OpenRouter 호출이나 이미지 생성 호출 없이도 프론트엔드에서 스토리보드 검토 직전까지의 흐름을 테스트할 수 있습니다.
-
-로컬 샘플 검증은 다음 명령으로 실행합니다.
-
-```sh
-npm run test:storyboard-sample
-```
-
-프론트엔드에서 같은 dummy flow를 테스트하려면 로컬 개발 서버를 실행합니다.
-
-```sh
-DATA_ROOT="$PWD/tmp/dev-data" npm run dev -- -p 3000
-```
-
-그 다음 `http://localhost:3000`을 열고, 로컬 테스트 계정으로 가입 또는 로그인한 뒤, 아무 스토리라인 텍스트로 프로젝트를 만들고 `스토리보드 생성`을 클릭합니다. 샘플 JSON이 있으면 생성 route가 해당 파일을 dummy LLM 응답으로 사용하고, 프로젝트는 샘플 슬라이드가 들어간 스토리보드 검토 상태로 이동해야 합니다. 이 샘플 flow에서는 이미지 생성이 시작되지 않습니다.
-
-로그인 없이 바로 시각적으로 확인하려면 다음 주소를 엽니다.
-
-```text
-http://localhost:3000/dev/storyboard-sample
-```
-
-이 페이지는 development-only이며, ignored sample JSON을 실제 스토리보드 검토 컴포넌트로 렌더링합니다.
 
 development 모드에서는 앱이 DB를 열 때 로컬 계정 두 개를 seed합니다.
 

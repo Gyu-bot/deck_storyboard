@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import NewProjectPage from "@/app/projects/new/page";
 
@@ -33,8 +33,13 @@ describe("T011A new project slide count range form", () => {
       "value",
       "custom",
     );
+    expect(screen.queryByRole("spinbutton", { name: "직접 최소 slide" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("spinbutton", { name: "직접 최대 slide" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: /직접 범위/ }));
+
     expect(screen.getByRole("spinbutton", { name: "직접 최소 slide" })).toHaveValue(9);
     expect(screen.getByRole("spinbutton", { name: "직접 최대 slide" })).toHaveValue(14);
-    expect(screen.getByText(/별도 LLM 호출 없이 참고용 count만 감지/)).toBeInTheDocument();
+    expect(screen.getByText(/직접 범위를 선택한 경우에만 적용됩니다/)).toBeInTheDocument();
   });
 });

@@ -13,6 +13,7 @@
 ## After
 
 - 새 프로젝트 생성 form을 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 선택으로 전환했다.
+- `직접 범위` min/max 입력 panel은 `직접 범위` 선택 시에만 노출되도록 숨김 처리했다.
 - 기본 선택은 `표준`이고 저장 기본 범위는 9-14 slides다.
 - preset 저장 범위:
   - `간단히`: 5-8
@@ -37,6 +38,7 @@
 - marker heuristic without LLM: covered.
 - marker/range conflict notice: covered.
 - browser 또는 equivalent visual check: covered by component render test.
+- 직접 범위 panel conditional visibility: covered.
 
 ## Verification
 
@@ -45,4 +47,5 @@
 - `npm test`: passed, 9 files / 30 tests.
 - `npm run test:storyboard-sample`: passed after copying ignored sample fixtures into this worktree; output `storyboard sample ok | slides=12 | llm_dummy_calls=story_structure | status=storyboard_review | image_generation=not_started`.
 - Equivalent visual check: `tests/unit/new-project-form.test.tsx` renders the actual `NewProjectPage` with a mocked session and confirms `자동`, preset options, `직접 범위`, min/max inputs, and default `표준` checked state.
+- Browser check at `http://localhost:3002/projects/new`: default `표준` state hides the custom min/max panel; clicking `직접 범위` reveals the min/max inputs and custom-only guidance.
 - Browser auth note: in-app browser input automation was unstable in this environment, so authenticated `/projects/new` was covered by equivalent component rendering instead of live form typing.

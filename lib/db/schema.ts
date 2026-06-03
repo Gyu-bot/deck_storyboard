@@ -179,7 +179,7 @@ export const slideImageGenerations = sqliteTable("slide_image_generations", {
     .notNull()
     .references(() => projects.id),
   slideId: text("slide_id").references(() => slides.id),
-  provider: text("provider").$type<"openai_images" | "nano_banana" | "local">().notNull(),
+  provider: text("provider").$type<"openai" | "gemini" | "local">().notNull(),
   model: text("model").notNull(),
   promptSnapshot: text("prompt_snapshot").notNull(),
   commonPromptSnapshot: text("common_prompt_snapshot").notNull().default(""),

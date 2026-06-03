@@ -1,0 +1,21 @@
+# T022 Gemini/Nano Banana Provider
+
+- Status: Needs Review
+- Branch: feature/T021-T022-image-providers
+- Implemented: Gemini image provider adapter, `nano-banana` to Gemini account-level key resolution, Nano Banana model aliasing, aspect-ratio request config, local storage orchestration, and slide image generation record creation.
+- Acceptance coverage:
+  - `nano-banana` resolves to the `gemini` account-level user/provider API key.
+  - Missing user key returns `provider_key_missing` and does not use a server fallback.
+  - `16:9` and `4:3` aspect ratios are sent through `generationConfig.imageConfig.aspectRatio`.
+  - Provider inline image bytes are decoded and passed to local storage.
+  - Failed provider responses are normalized through `ImageProviderError`.
+- Verification:
+  - `npm run test:unit -- tests/unit/image-providers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:unit`
+  - `npm run test:storyboard-sample`
+  - OpenRouter real API smoke on copied DB: generated and persisted exactly one slide for the `test` account.
+- Notes:
+  - The project-facing model remains `nano-banana`; the provider adapter maps it to the Gemini API model endpoint `gemini-2.5-flash-image`.
+  - Full end-to-end image API calls were left for user-supplied OpenAI/Gemini keys as requested.

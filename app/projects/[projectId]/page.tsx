@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { CheckCircle2, WandSparkles } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
@@ -7,7 +8,12 @@ import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
 import { getProjectForUser, getSlidesForProject } from "@/lib/repositories/projects";
 import { StoryboardWorkspace } from "@/app/projects/[projectId]/storyboard-workspace";
+import { StoryboardTestModeToggle } from "@/app/projects/[projectId]/storyboard-test-mode-toggle";
 import type { ProjectStatus } from "@/lib/db/schema";
+import {
+  STORYBOARD_TEST_MODE_COOKIE,
+  isStoryboardTestModeEnabled,
+} from "@/lib/storyboard/sample-fixture";
 
 const projectStatusLabels: Record<ProjectStatus, string> = {
   draft_input: "입력 초안",
@@ -30,6 +36,10 @@ export default async function ProjectDetailPage({
   const project = getProjectForUser(db, projectId, userId);
   if (!project) redirect("/projects");
   const slides = getSlidesForProject(db, projectId, userId);
+  const cookieStore = await cookies();
+  const testModeEnabled = isStoryboardTestModeEnabled({
+    cookieValue: cookieStore.get(STORYBOARD_TEST_MODE_COOKIE)?.value,
+  });
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1500px] px-6 py-6">
@@ -43,6 +53,7 @@ export default async function ProjectDetailPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <LogoutButton />
+          <StoryboardTestModeToggle enabled={testModeEnabled} />
           <form action={`/api/projects/${project.id}/storyboard/generate`} method="post">
             <Button type="submit" variant="outline">
               <WandSparkles className="size-4" aria-hidden="true" />

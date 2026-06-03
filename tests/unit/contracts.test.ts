@@ -28,6 +28,7 @@ import {
   softDeleteProjectForUser,
 } from "@/lib/repositories/projects";
 import {
+  createOpenRouterChatCompletionFetcher,
   createOpenRouterProvider,
   storyboardResponseSchema,
 } from "@/lib/ai/openrouter";
@@ -110,6 +111,106 @@ describe("T008 API key encryption", () => {
 });
 
 describe("T013-T015 storyboard generation contracts", () => {
+  it("builds structured OpenRouter chat requests and parses JSON message content", async () => {
+    const storyboard = {
+      documentPurpose: "Proposal",
+      overallThesis: "Prioritize enterprise teams",
+      sections: [
+        {
+          id: "s1",
+          title: "Strategy",
+          role: "Recommendation",
+          coreMessage: "Focus the launch",
+          sourceSummary: "User storyline",
+          suggestedSlideCount: 1,
+        },
+      ],
+      slides: [
+        {
+          sectionId: "s1",
+          sectionTitle: "Strategy",
+          title: "Enterprise launch focus",
+          coreMessage: "Start with teams that have immediate deck needs",
+          contentPoints: ["Workflow fit", "Adoption path"],
+          visualDirection: "Executive matrix",
+          imagePrompt: "Clean executive matrix",
+          slideRole: "Recommendation",
+        },
+      ],
+    };
+    const requests: Array<{ url: string; init: RequestInit }> = [];
+    const fetcher = createOpenRouterChatCompletionFetcher({
+      model: "openai/gpt-4o",
+      fetchImpl: async (url, init) => {
+        requests.push({ url: String(url), init: init ?? {} });
+        return new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify(storyboard),
+                },
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      },
+    });
+
+    await expect(
+      fetcher({
+        provider: "openrouter",
+        apiKey: "sk-or-user-secret",
+        task: "story_structure",
+        storyline: "We need a launch strategy deck for enterprise teams.",
+        targetSlideCount: 1,
+        includeSuggestions: false,
+      }),
+    ).resolves.toEqual(storyboard);
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.url).toBe("https://openrouter.ai/api/v1/chat/completions");
+    expect(requests[0]?.init.method).toBe("POST");
+    expect(requests[0]?.init.headers).toMatchObject({
+      Authorization: "Bearer sk-or-user-secret",
+      "Content-Type": "application/json",
+    });
+    const body = JSON.parse(String(requests[0]?.init.body)) as {
+      model: string;
+      messages: Array<{ role: string; content: string }>;
+      response_format: {
+        type: string;
+        json_schema: { name: string; strict: boolean; schema: unknown };
+      };
+      provider: { require_parameters: boolean };
+    };
+    expect(body.model).toBe("openai/gpt-4o");
+    expect(body.provider.require_parameters).toBe(true);
+    expect(body.response_format).toMatchObject({
+      type: "json_schema",
+      json_schema: {
+        name: "deck_storyboard_response",
+        strict: true,
+      },
+    });
+    expect(body.response_format.json_schema.schema).toMatchObject({
+      required: [
+        "documentPurpose",
+        "overallThesis",
+        "sections",
+        "improvementSuggestions",
+        "targetSlideCountRationale",
+        "slides",
+      ],
+    });
+    expect(body.messages.map((message) => message.role)).toEqual([
+      "system",
+      "user",
+    ]);
+    expect(body.messages[1]?.content).toContain("targetSlideCount: 1");
+  });
+
   it("validates storyboard output, retries invalid provider output, and persists slides", async () => {
     const db = createTestDatabase();
     const project = createProjectForUser(db, "user-a", {
@@ -188,6 +289,73 @@ describe("T013-T015 storyboard generation contracts", () => {
     expect(getProjectForUser(db, project.id, "user-a")?.status).toBe(
       "storyboard_review",
     );
+  });
+
+  it("calls slide_breakdown when story_structure has no usable slide breakdown", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "A market entry proposal",
+      targetSlideCount: 1,
+      improvementSuggestionsEnabled: false,
+    });
+    const fetcher = vi.fn().mockResolvedValue({
+      documentPurpose: "Proposal",
+      overallThesis: "Enter selectively",
+      sections: [
+        {
+          id: "s1",
+          title: "Market",
+          role: "Context",
+          coreMessage: "The market is attractive",
+          sourceSummary: "User storyline",
+          suggestedSlideCount: 1,
+        },
+      ],
+      slides: [
+        {
+          sectionId: "s1",
+          sectionTitle: "Market",
+          title: "Market momentum",
+          coreMessage: "Demand is rising",
+          contentPoints: ["Demand", "Competition"],
+          visualDirection: "2x2 chart",
+          imagePrompt: "Executive chart",
+          slideRole: "Evidence",
+        },
+      ],
+    });
+    const provider = createOpenRouterProvider({
+      apiKey: "openrouter-key",
+      fetcher,
+    });
+
+    await createSlideBreakdown(
+      db,
+      project.id,
+      "user-a",
+      provider,
+      {
+        documentPurpose: "Proposal",
+        overallThesis: "Enter selectively",
+        sections: [
+          {
+            id: "s1",
+            title: "Market",
+            role: "Context",
+            coreMessage: "The market is attractive",
+            sourceSummary: "User storyline",
+            suggestedSlideCount: 1,
+          },
+        ],
+      },
+    );
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher).toHaveBeenCalledWith(
+      expect.objectContaining({ task: "slide_breakdown" }),
+    );
+    expect(getSlidesForProject(db, project.id, "user-a")).toHaveLength(1);
   });
 });
 

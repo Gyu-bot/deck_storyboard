@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FolderOpen, Plus } from "lucide-react";
-import { LogoutButton } from "@/components/logout-button";
+import { FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
+import { getUserById } from "@/lib/auth/users";
 import { getDatabase } from "@/lib/db/client";
 import { listProjectsForUser } from "@/lib/repositories/projects";
 import { ProjectDeleteButton, ProjectRenameForm } from "@/app/projects/project-actions";
+import { ProjectsHeaderActions } from "@/app/projects/projects-header-actions";
 import type { ProjectStatus } from "@/lib/db/schema";
 
 const projectStatusLabels: Record<ProjectStatus, string> = {
@@ -21,7 +22,9 @@ const projectStatusLabels: Record<ProjectStatus, string> = {
 export default async function ProjectsPage() {
   const userId = await getCurrentUserId();
   if (!userId) redirect("/login");
-  const projects = listProjectsForUser(getDatabase(), userId);
+  const db = getDatabase();
+  const projects = listProjectsForUser(db, userId);
+  const isAdmin = getUserById(db, userId)?.role === "admin";
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-6 py-8">
@@ -30,18 +33,7 @@ export default async function ProjectsPage() {
           <p className="text-sm font-medium text-muted-foreground">워크스페이스</p>
           <h1 className="text-3xl font-semibold">스토리보드 프로젝트</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <Link href="/settings">설정</Link>
-          </Button>
-          <LogoutButton />
-          <Button asChild>
-            <Link href="/projects/new">
-              <Plus className="size-4" aria-hidden="true" />
-              새 프로젝트
-            </Link>
-          </Button>
-        </div>
+        <ProjectsHeaderActions isAdmin={isAdmin} />
       </header>
       {projects.length === 0 ? (
         <section className="grid min-h-80 place-items-center rounded-md border border-dashed border-border">

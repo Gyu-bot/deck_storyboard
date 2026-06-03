@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   STORYBOARD_SAMPLE_FIXTURE_PATH,
+  isStoryboardTestModeEnabled,
   loadStoryboardSampleFixture,
 } from "@/lib/storyboard/sample-fixture";
 
@@ -54,12 +55,47 @@ function createFixtureRoot() {
 }
 
 describe("local storyboard sample fixture", () => {
-  it("loads a schema-valid ignored sample in development but not production", () => {
+  it("enables sample fixture test mode only from the dev cookie", () => {
+    expect(
+      isStoryboardTestModeEnabled({
+        cookieValue: "sample-fixture",
+        nodeEnv: "development",
+      }),
+    ).toBe(true);
+    expect(
+      isStoryboardTestModeEnabled({
+        cookieValue: null,
+        nodeEnv: "development",
+      }),
+    ).toBe(false);
+    expect(
+      isStoryboardTestModeEnabled({
+        cookieValue: "sample-fixture",
+        nodeEnv: "production",
+      }),
+    ).toBe(false);
+  });
+
+  it("loads a schema-valid ignored sample only when development test mode is enabled", () => {
     const root = createFixtureRoot();
 
-    const sample = loadStoryboardSampleFixture({ root, nodeEnv: "development" });
-    const productionSample = loadStoryboardSampleFixture({ root, nodeEnv: "production" });
+    const disabledSample = loadStoryboardSampleFixture({
+      root,
+      nodeEnv: "development",
+      testModeEnabled: false,
+    });
+    const sample = loadStoryboardSampleFixture({
+      root,
+      nodeEnv: "development",
+      testModeEnabled: true,
+    });
+    const productionSample = loadStoryboardSampleFixture({
+      root,
+      nodeEnv: "production",
+      testModeEnabled: true,
+    });
 
+    expect(disabledSample).toBeNull();
     expect(sample?.slides).toHaveLength(1);
     expect(sample?.slides?.[0]?.title).toBe("Sample slide");
     expect(productionSample).toBeNull();

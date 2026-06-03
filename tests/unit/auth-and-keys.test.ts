@@ -50,6 +50,25 @@ describe("T006 credentials auth", () => {
       role: "admin",
     });
   });
+
+  it("repairs the local development admin role when the seeded user already exists", async () => {
+    const db = createTestDatabase();
+
+    await createUser(db, {
+      email: "admin@example.local",
+      password: "admin",
+    });
+    expect(await verifyUserPassword(db, "admin", "admin")).toMatchObject({
+      role: "member",
+    });
+
+    seedDevelopmentUsers(db);
+
+    await expect(verifyUserPassword(db, "admin", "admin")).resolves.toMatchObject({
+      email: "admin@example.local",
+      role: "admin",
+    });
+  });
 });
 
 describe("T008-T009C user API key management", () => {

@@ -9,6 +9,7 @@ import {
   type StyleTemplateName,
   styleTemplates,
 } from "@/lib/projects/style-settings";
+import { MAX_SLIDE_COUNT } from "@/lib/projects/slide-count";
 
 const styleTemplateLabels: Record<StyleTemplateName, string> = {
   "Executive Consulting": "임원 보고형",
@@ -58,11 +59,64 @@ export default async function NewProjectPage() {
         </section>
         <details open className="rounded-md border border-border bg-card p-5">
           <summary className="cursor-pointer text-lg font-semibold">슬라이드 수와 AI 옵션</summary>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-medium">
-              목표 슬라이드 수
-              <input name="targetSlideCount" type="number" min={1} max={80} defaultValue={8} className="h-10 rounded-md border border-border bg-background px-3" />
-            </label>
+          <div className="mt-4 grid gap-4">
+            <fieldset className="grid gap-3">
+              <legend className="text-sm font-medium">슬라이드 수 범위</legend>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                {[
+                  ["auto", "자동", "스토리 밀도 기준"],
+                  ["brief", "간단히", "5-8 slides"],
+                  ["standard", "표준", "9-14 slides"],
+                  ["detailed", "상세", "15-25 slides"],
+                  ["custom", "직접 범위", "min/max 입력"],
+                ].map(([value, label, help]) => (
+                  <label
+                    key={value}
+                    className="grid min-h-24 cursor-pointer gap-2 rounded-md border border-border bg-background p-3 text-sm"
+                  >
+                    <span className="flex items-center gap-2 font-medium">
+                      <input
+                        name="slideCountMode"
+                        type="radio"
+                        value={value}
+                        defaultChecked={value === "standard"}
+                      />
+                      {label}
+                    </span>
+                    <span className="text-xs leading-5 text-muted-foreground">{help}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="grid gap-3 rounded-md border border-dashed border-border p-4 sm:grid-cols-2">
+                <label className="grid gap-2 text-sm font-medium">
+                  직접 최소 slide
+                  <input
+                    name="minSlideCount"
+                    type="number"
+                    min={1}
+                    max={MAX_SLIDE_COUNT}
+                    defaultValue={9}
+                    className="h-10 rounded-md border border-border bg-background px-3"
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-medium">
+                  직접 최대 slide
+                  <input
+                    name="maxSlideCount"
+                    type="number"
+                    min={1}
+                    max={MAX_SLIDE_COUNT}
+                    defaultValue={14}
+                    className="h-10 rounded-md border border-border bg-background px-3"
+                  />
+                </label>
+                <p className="text-sm leading-6 text-muted-foreground sm:col-span-2">
+                  자동은 범위를 강제하지 않습니다. 스토리라인에 `12페이지`,
+                  `Slide 01` 같은 marker가 있으면 별도 LLM 호출 없이 참고용
+                  count만 감지합니다.
+                </p>
+              </div>
+            </fieldset>
             <label className="flex items-center gap-2 text-sm font-medium">
               <input name="improvementSuggestionsEnabled" type="checkbox" defaultChecked />
               스토리라인 개선 제안 생성

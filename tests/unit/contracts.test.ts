@@ -63,6 +63,16 @@ describe("T004 database schema contracts", () => {
         "deletedAt",
       ]),
     );
+    expect(Object.keys(projects)).toEqual(
+      expect.arrayContaining([
+        "slideCountMode",
+        "minSlideCount",
+        "maxSlideCount",
+        "preferredSlideCount",
+        "storylineSlideMarkerCount",
+        "storylineSlideMarkerConfidence",
+      ]),
+    );
   });
 });
 
@@ -165,6 +175,12 @@ describe("T013-T015 storyboard generation contracts", () => {
         task: "story_structure",
         storyline: "We need a launch strategy deck for enterprise teams.",
         targetSlideCount: 1,
+        slideCountPreference: {
+          mode: "standard",
+          minSlideCount: 9,
+          maxSlideCount: 14,
+          preferredSlideCount: 12,
+        },
         includeSuggestions: false,
       }),
     ).resolves.toEqual(storyboard);
@@ -208,7 +224,9 @@ describe("T013-T015 storyboard generation contracts", () => {
       "system",
       "user",
     ]);
-    expect(body.messages[1]?.content).toContain("targetSlideCount: 1");
+    expect(body.messages[1]?.content).toContain(
+      "slideCountPreference: standard range 9-14 slides, preferred 12",
+    );
   });
 
   it("validates storyboard output, retries invalid provider output, and persists slides", async () => {

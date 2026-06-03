@@ -173,7 +173,10 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   const [tab, setTab] = useState<"content" | "prompt" | "images">("content");
   if (!slide) {
     return (
-      <aside className="self-start rounded-md border border-border bg-card p-5">
+      <aside
+        aria-label="선택 슬라이드 상세 편집 패널"
+        className="self-start rounded-md border border-border bg-card p-5 lg:sticky lg:top-6"
+      >
         <h2 className="text-lg font-semibold">선택된 슬라이드 없음</h2>
         <p className="mt-2 text-sm text-muted-foreground">왼쪽 목록에서 편집할 슬라이드를 선택하세요.</p>
       </aside>
@@ -201,18 +204,21 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   }
 
   return (
-    <aside className="grid self-start gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div>
+    <aside
+      aria-label="선택 슬라이드 상세 편집 패널"
+      className="grid self-start overflow-hidden rounded-md border border-border bg-card shadow-sm lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]"
+    >
+      <div className="flex items-center justify-between gap-3 p-5">
+        <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">슬라이드 상세</p>
-          <h2 className="text-lg font-semibold">{localizeGeneratedText(slide.title)}</h2>
+          <h2 className="truncate text-lg font-semibold">{localizeGeneratedText(slide.title)}</h2>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={deleteSlide}>
           <Trash2 className="size-4" aria-hidden="true" />
           삭제
         </Button>
       </div>
-      <div className="flex h-10 overflow-hidden rounded-md border border-border">
+      <div className="mx-5 flex h-10 overflow-hidden rounded-md border border-border">
         {[
           ["content", "내용"],
           ["prompt", "프롬프트"],
@@ -228,55 +234,57 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
           </button>
         ))}
       </div>
-      {tab === "content" ? (
-        <div className="grid gap-3">
-          {[
-            ["title", "제목", localizeGeneratedText(slide.title)],
-            ["coreMessage", "핵심 메시지", localizeGeneratedText(slide.coreMessage)],
-            ["contentPoints", "본문 포인트", slide.contentPoints.map(localizeGeneratedText).join("\n")],
-            ["visualDirection", "시각화 방향", localizeGeneratedText(slide.visualDirection)],
-            ["slideRole", "슬라이드 역할", localizeGeneratedText(slide.slideRole)],
-          ].map(([field, label, value]) => (
-            <label key={`${field}-${slide.id}`} className="grid gap-2 text-sm font-medium">
-              <span className="flex items-center justify-between gap-2">
-                {label}
-                <span className="text-xs text-muted-foreground">
-                  {fieldStateLabels[slide.fieldEditState[field] ?? "aiGenerated"]}
+      <div data-testid="storyboard-detail-scroll-area" className="min-h-0 overflow-y-auto px-5 pb-5">
+        {tab === "content" ? (
+          <div className="grid gap-3">
+            {[
+              ["title", "제목", localizeGeneratedText(slide.title)],
+              ["coreMessage", "핵심 메시지", localizeGeneratedText(slide.coreMessage)],
+              ["contentPoints", "본문 포인트", slide.contentPoints.map(localizeGeneratedText).join("\n")],
+              ["visualDirection", "시각화 방향", localizeGeneratedText(slide.visualDirection)],
+              ["slideRole", "슬라이드 역할", localizeGeneratedText(slide.slideRole)],
+            ].map(([field, label, value]) => (
+              <label key={`${field}-${slide.id}`} className="grid gap-2 text-sm font-medium">
+                <span className="flex items-center justify-between gap-2">
+                  {label}
+                  <span className="text-xs text-muted-foreground">
+                    {fieldStateLabels[slide.fieldEditState[field] ?? "aiGenerated"]}
+                  </span>
                 </span>
+                <textarea
+                  key={`${field}-content-${slide.id}`}
+                  defaultValue={value}
+                  rows={fieldRows(field)}
+                  className="w-full rounded-md border border-border bg-background p-3 leading-6"
+                  onBlur={(event) => saveField(field, event.currentTarget.value)}
+                />
+              </label>
+            ))}
+          </div>
+        ) : null}
+        {tab === "prompt" ? (
+          <label className="grid gap-2 text-sm font-medium">
+            <span className="flex items-center justify-between gap-2">
+              이미지 프롬프트
+              <span className="text-xs text-muted-foreground">
+                {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
               </span>
-              <textarea
-                key={`${field}-content-${slide.id}`}
-                defaultValue={value}
-                rows={fieldRows(field)}
-                className="w-full rounded-md border border-border bg-background p-3 leading-6"
-                onBlur={(event) => saveField(field, event.currentTarget.value)}
-              />
-            </label>
-          ))}
-        </div>
-      ) : null}
-      {tab === "prompt" ? (
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="flex items-center justify-between gap-2">
-            이미지 프롬프트
-            <span className="text-xs text-muted-foreground">
-              {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
             </span>
-          </span>
-          <textarea
-            key={`imagePrompt-${slide.id}`}
-            defaultValue={localizeGeneratedText(slide.imagePrompt)}
-            rows={8}
-            className="w-full rounded-md border border-border bg-background p-3 leading-6"
-            onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)}
-          />
-        </label>
-      ) : null}
-      {tab === "images" ? (
-        <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-          이미지 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
-        </div>
-      ) : null}
+            <textarea
+              key={`imagePrompt-${slide.id}`}
+              defaultValue={localizeGeneratedText(slide.imagePrompt)}
+              rows={8}
+              className="w-full rounded-md border border-border bg-background p-3 leading-6"
+              onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)}
+            />
+          </label>
+        ) : null}
+        {tab === "images" ? (
+          <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+            이미지 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+          </div>
+        ) : null}
+      </div>
     </aside>
   );
 }
@@ -339,7 +347,10 @@ export function StoryboardWorkspace({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,560px)]">
+    <div
+      data-testid="storyboard-workspace-layout"
+      className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,560px)]"
+    >
       <section className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">

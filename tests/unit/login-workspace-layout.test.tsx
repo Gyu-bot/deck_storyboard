@@ -99,6 +99,54 @@ describe("T017A slide selection sync", () => {
   });
 });
 
+describe("T017B storyboard detail floating panel", () => {
+  it("keeps the detail editor sticky on desktop with an internal scroll area", () => {
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_review" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = Array.from({ length: 16 }, (_, index) => ({
+      id: `slide-${index + 1}`,
+      sectionTitle: "Section",
+      position: index + 1,
+      title: `Slide ${index + 1}`,
+      coreMessage: `Core message ${index + 1}`,
+      contentPoints: ["Point A", "Point B", "Point C"],
+      visualDirection: "A dense chart with annotations",
+      imagePrompt: "Executive slide image prompt",
+      slideRole: "Evidence",
+      fieldEditState: {
+        title: "aiGenerated",
+        coreMessage: "aiGenerated",
+        contentPoints: "aiGenerated",
+        visualDirection: "aiGenerated",
+        imagePrompt: "aiGenerated",
+        slideRole: "aiGenerated",
+      },
+      imageGenerationStatus: "not_generated",
+    }));
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+
+    const workspace = screen.getByTestId("storyboard-workspace-layout");
+    expect(workspace).toHaveClass("items-start");
+    expect(workspace).toHaveClass("lg:grid-cols-[minmax(0,1fr)_minmax(480px,520px)]");
+
+    const panel = screen.getByLabelText("선택 슬라이드 상세 편집 패널");
+    expect(panel).toHaveClass("lg:sticky");
+    expect(panel).toHaveClass("lg:top-6");
+    expect(panel).toHaveClass("lg:max-h-[calc(100vh-3rem)]");
+    expect(panel).toHaveClass("overflow-hidden");
+
+    expect(screen.getByTestId("storyboard-detail-scroll-area")).toHaveClass("overflow-y-auto");
+    expect(screen.getByRole("button", { name: /삭제/ })).toBeInTheDocument();
+  });
+});
+
 describe("T015B storyboard test mode toggle", () => {
   it("switches between sample fixture mode and live OpenRouter mode", () => {
     const { rerender } = render(<StoryboardTestModeToggle enabled={false} />);

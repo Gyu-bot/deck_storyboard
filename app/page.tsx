@@ -1,4 +1,4 @@
-import { ArrowRight, FileText, Image, Layers3 } from "lucide-react";
+import { AlertTriangle, ArrowRight, FileText, Image, Layers3 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -50,9 +50,16 @@ export default function Home() {
               슬라이드 논리를 먼저 확정하고, 이미지는 그 다음에 만듭니다.
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              제안서나 보고서의 긴 스토리라인을 검토 가능한 슬라이드 단위로
-              정리하고, 최종 PPT 제작을 위한 시각 방향까지 이어갑니다.
+              전체 프리젠테이션/제안서/리포트 스토리라인을 이미 가지고 있는
+              사람이 그 흐름을 검토 가능한 슬라이드 단위로 정리하는 도구입니다.
             </p>
+            <div className="mt-5 flex max-w-2xl items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-950">
+              <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+              <p className="text-sm leading-6">
+                완성 deck을 만들 수 없습니다. 산출물은 사람이 최종 덱을 만들
+                때 사용하는 참고용 skeleton deck 자료입니다.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-3">

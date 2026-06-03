@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  describeSlideCountPreferenceForPrompt,
+  type SlideCountMode,
+} from "@/lib/projects/slide-count";
 
 export const storySectionSchema = z.object({
   id: z.string().min(1),
@@ -75,6 +79,12 @@ export type OpenRouterProvider = {
     task: OpenRouterTask;
     storyline: string;
     targetSlideCount: number;
+    slideCountPreference?: {
+      mode: SlideCountMode;
+      minSlideCount: number | null;
+      maxSlideCount: number | null;
+      preferredSlideCount: number | null;
+    };
     includeSuggestions: boolean;
     previousStructure?: StoryboardResponse;
   }): Promise<StoryboardResponse>;
@@ -86,6 +96,12 @@ export type OpenRouterFetcherInput = {
   task: OpenRouterTask;
   storyline: string;
   targetSlideCount: number;
+  slideCountPreference?: {
+    mode: SlideCountMode;
+    minSlideCount: number | null;
+    maxSlideCount: number | null;
+    preferredSlideCount: number | null;
+  };
   includeSuggestions: boolean;
   previousStructure?: StoryboardResponse;
 };
@@ -233,7 +249,11 @@ function buildStoryboardPrompt(input: OpenRouterFetcherInput) {
 
   return [
     `task: ${input.task}`,
-    `targetSlideCount: ${input.targetSlideCount}`,
+    `slideCountPreference: ${
+      input.slideCountPreference
+        ? describeSlideCountPreferenceForPrompt(input.slideCountPreference)
+        : `custom range ${input.targetSlideCount}-${input.targetSlideCount} slides, preferred ${input.targetSlideCount}`
+    }`,
     `includeSuggestions: ${input.includeSuggestions}`,
     "",
     ...taskGuidance,
@@ -342,6 +362,7 @@ export function createOpenRouterProvider({
       task: input.task,
       storyline: input.storyline,
       targetSlideCount: input.targetSlideCount,
+      slideCountPreference: input.slideCountPreference,
       includeSuggestions: input.includeSuggestions,
       previousStructure: input.previousStructure,
     });

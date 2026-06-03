@@ -34,6 +34,12 @@ export function migrateDatabase(sqlite: Database.Database) {
       storyline TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'draft_input',
       target_slide_count INTEGER NOT NULL DEFAULT 8,
+      slide_count_mode TEXT NOT NULL DEFAULT 'standard',
+      min_slide_count INTEGER DEFAULT 9,
+      max_slide_count INTEGER DEFAULT 14,
+      preferred_slide_count INTEGER DEFAULT 12,
+      storyline_slide_marker_count INTEGER,
+      storyline_slide_marker_confidence TEXT NOT NULL DEFAULT 'none',
       improvement_suggestions_enabled INTEGER NOT NULL DEFAULT 1,
       aspect_ratio TEXT NOT NULL DEFAULT '16:9',
       default_image_model TEXT NOT NULL DEFAULT 'gpt-image-2',
@@ -115,5 +121,44 @@ export function migrateDatabase(sqlite: Database.Database) {
     .all() as Array<{ name: string }>;
   if (!userColumns.some((column) => column.name === "role")) {
     sqlite.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'member'");
+  }
+
+  const projectColumns = sqlite
+    .prepare("PRAGMA table_info(projects)")
+    .all() as Array<{ name: string }>;
+  const hasProjectColumn = (name: string) =>
+    projectColumns.some((column) => column.name === name);
+
+  const backfillLegacySlideCounts = !hasProjectColumn("slide_count_mode");
+
+  if (backfillLegacySlideCounts) {
+    sqlite.exec("ALTER TABLE projects ADD COLUMN slide_count_mode TEXT NOT NULL DEFAULT 'standard'");
+  }
+  if (!hasProjectColumn("min_slide_count")) {
+    sqlite.exec("ALTER TABLE projects ADD COLUMN min_slide_count INTEGER DEFAULT 9");
+  }
+  if (!hasProjectColumn("max_slide_count")) {
+    sqlite.exec("ALTER TABLE projects ADD COLUMN max_slide_count INTEGER DEFAULT 14");
+  }
+  if (!hasProjectColumn("preferred_slide_count")) {
+    sqlite.exec("ALTER TABLE projects ADD COLUMN preferred_slide_count INTEGER DEFAULT 12");
+  }
+  if (!hasProjectColumn("storyline_slide_marker_count")) {
+    sqlite.exec("ALTER TABLE projects ADD COLUMN storyline_slide_marker_count INTEGER");
+  }
+  if (!hasProjectColumn("storyline_slide_marker_confidence")) {
+    sqlite.exec(
+      "ALTER TABLE projects ADD COLUMN storyline_slide_marker_confidence TEXT NOT NULL DEFAULT 'none'",
+    );
+  }
+  if (backfillLegacySlideCounts) {
+    sqlite.exec(`
+      UPDATE projects
+      SET
+        slide_count_mode = 'custom',
+        min_slide_count = target_slide_count,
+        max_slide_count = target_slide_count,
+        preferred_slide_count = target_slide_count
+    `);
   }
 }

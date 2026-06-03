@@ -25,7 +25,7 @@ export function ProjectRenameForm({
       />
       <Button type="submit" variant="outline" size="sm">
         <Save className="size-4" aria-hidden="true" />
-        Rename
+        이름 변경
       </Button>
     </form>
   );
@@ -42,7 +42,7 @@ export function ProjectDeleteButton({ projectId }: { projectId: string }) {
   return (
     <Button type="button" variant="outline" size="sm" onClick={onDelete}>
       <Trash2 className="size-4" aria-hidden="true" />
-      Delete
+      삭제
     </Button>
   );
 }

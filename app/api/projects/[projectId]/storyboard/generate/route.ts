@@ -17,39 +17,39 @@ function deterministicStoryboard(project: NonNullable<ReturnType<typeof getProje
   const sectionCount = Math.min(3, slideCount);
   const sections = Array.from({ length: sectionCount }, (_, index) => ({
     id: `section-${index + 1}`,
-    title: ["Context", "Strategy", "Execution"][index] ?? `Section ${index + 1}`,
-    role: ["Set up the situation", "Frame the recommendation", "Show the path"][index] ?? "Support the story",
-    coreMessage: `${project.name} ${index + 1}`,
+    title: ["맥락", "전략", "실행"][index] ?? `섹션 ${index + 1}`,
+    role: ["상황과 문제를 정리", "권고 방향을 제시", "실행 경로를 구체화"][index] ?? "스토리 보강",
+    coreMessage: `${project.name} 핵심 메시지 ${index + 1}`,
     sourceSummary: project.storyline.slice(0, 240),
     suggestedSlideCount: Math.ceil(slideCount / sectionCount),
   }));
   return {
-    documentPurpose: "Storyboard a consulting deck",
+    documentPurpose: "컨설팅 덱 스토리보드 작성",
     overallThesis: project.storyline.slice(0, 160) || project.name,
     sections,
     improvementSuggestions: project.improvementSuggestionsEnabled
       ? [
           {
             id: "suggestion-1",
-            title: "Sharpen executive thesis",
-            rationale: "Make the recommendation explicit before detailed evidence.",
+            title: "핵심 권고를 더 앞에 배치",
+            rationale: "상세 근거 전에 의사결정자가 기억해야 할 결론을 먼저 보여주면 검토 속도가 빨라집니다.",
           },
         ]
       : undefined,
-    targetSlideCountRationale: `Generated ${slideCount} slides to match the requested target.`,
+    targetSlideCountRationale: `요청한 목표에 맞춰 ${slideCount}장의 슬라이드로 구성했습니다.`,
     slides: Array.from({ length: slideCount }, (_, index) => {
       const section = sections[index % sections.length] ?? sections[0]!;
       return {
         sectionId: section.id,
         sectionTitle: section.title,
-        title: `${section.title} slide ${index + 1}`,
+        title: `${section.title} 슬라이드 ${index + 1}`,
         coreMessage: section.coreMessage,
         contentPoints: [
-          "Key implication from the storyline",
-          "Evidence or decision point to validate",
+          "스토리라인에서 도출한 핵심 시사점",
+          "검토가 필요한 근거 또는 의사결정 포인트",
         ],
-        visualDirection: "Consulting-style layout with a strong headline and one primary visual.",
-        imagePrompt: `${project.resolvedCommonPrompt}\nCreate a ${project.aspectRatio} executive reference image for ${section.title}.`,
+        visualDirection: "강한 헤드라인과 하나의 핵심 시각 요소를 중심으로 구성한 컨설팅형 레이아웃",
+        imagePrompt: `${project.resolvedCommonPrompt}\n${section.title} 내용을 표현하는 ${project.aspectRatio} 비율의 임원 보고용 레퍼런스 이미지를 생성하세요.`,
         slideRole: section.role,
       };
     }),

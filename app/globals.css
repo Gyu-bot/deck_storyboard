@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(0.98 0.005 85);
-  --foreground: oklch(0.18 0.018 250);
-  --card: oklch(0.995 0.003 85);
-  --card-foreground: oklch(0.18 0.018 250);
-  --primary: oklch(0.34 0.08 230);
-  --primary-foreground: oklch(0.98 0.005 85);
-  --secondary: oklch(0.92 0.025 165);
-  --secondary-foreground: oklch(0.22 0.04 190);
-  --muted: oklch(0.94 0.01 85);
-  --muted-foreground: oklch(0.43 0.025 250);
-  --border: oklch(0.85 0.012 85);
-  --ring: oklch(0.5 0.1 225);
+  --background: oklch(0.975 0.006 118);
+  --foreground: oklch(0.19 0.025 235);
+  --card: oklch(0.997 0.003 105);
+  --card-foreground: oklch(0.19 0.025 235);
+  --primary: oklch(0.39 0.095 205);
+  --primary-foreground: oklch(0.99 0.004 100);
+  --secondary: oklch(0.91 0.04 155);
+  --secondary-foreground: oklch(0.23 0.045 180);
+  --muted: oklch(0.94 0.012 112);
+  --muted-foreground: oklch(0.45 0.026 235);
+  --border: oklch(0.84 0.015 118);
+  --ring: oklch(0.54 0.11 205);
 }
 
 @theme inline {
@@ -28,7 +28,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
 * {
@@ -38,5 +38,12 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
 }

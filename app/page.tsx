@@ -5,18 +5,18 @@ import { Button } from "@/components/ui/button";
 const workflowItems = [
   {
     icon: FileText,
-    label: "Structure",
-    text: "Turn a long storyline into sections and slide-level messages.",
+    label: "스토리 구조화",
+    text: "긴 제안서/보고서 스토리라인을 섹션과 슬라이드 메시지로 나눕니다.",
   },
   {
     icon: Layers3,
-    label: "Review",
-    text: "Inspect the vertical storyboard before spending image-generation cost.",
+    label: "논리 검토",
+    text: "이미지 생성 비용을 쓰기 전에 세로형 스토리보드에서 흐름을 확인합니다.",
   },
   {
     icon: Image,
-    label: "Reference",
-    text: "Generate visual directions for manual PowerPoint production.",
+    label: "레퍼런스 이미지",
+    text: "최종 PPT 제작에 참고할 슬라이드 콘셉트 이미지를 생성합니다.",
   },
 ];
 
@@ -27,7 +27,7 @@ export default function Home() {
         <header className="flex items-center justify-between border-b border-border pb-5">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Consulting storyboard workspace
+              컨설팅 덱 스토리보드 워크스페이스
             </p>
             <h1 className="text-2xl font-semibold tracking-normal">
               Deck Storyboard
@@ -35,7 +35,7 @@ export default function Home() {
           </div>
           <Button asChild>
             <Link href="/signup">
-              Start draft
+              새 스토리보드 시작
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </Button>
@@ -44,14 +44,14 @@ export default function Home() {
         <div className="grid flex-1 items-center gap-8 py-10 lg:grid-cols-[1fr_420px]">
           <div className="max-w-3xl">
             <p className="mb-4 text-sm font-medium uppercase tracking-normal text-muted-foreground">
-              MVP scaffold
+              AI storyboard builder
             </p>
             <h2 className="text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
-              Build slide logic first, then generate reference images.
+              슬라이드 논리를 먼저 확정하고, 이미지는 그 다음에 만듭니다.
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              This app helps consultants convert a proposal or report storyline
-              into a reviewable slide storyboard before creating the final PPT.
+              제안서나 보고서의 긴 스토리라인을 검토 가능한 슬라이드 단위로
+              정리하고, 최종 PPT 제작을 위한 시각 방향까지 이어갑니다.
             </p>
           </div>
 

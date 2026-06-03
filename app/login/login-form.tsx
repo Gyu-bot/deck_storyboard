@@ -18,7 +18,7 @@ export function LoginForm() {
       password: String(formData.get("password") ?? ""),
     });
     if (result?.error) {
-      setError("Login failed. Check your email and password.");
+      setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
       return;
     }
     router.push("/projects");
@@ -27,17 +27,17 @@ export function LoginForm() {
   return (
     <form action={onSubmit} className="grid gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
       <label className="grid gap-2 text-sm font-medium">
-        Email
+        이메일
         <input name="email" type="email" required className="h-10 rounded-md border border-border bg-background px-3" />
       </label>
       <label className="grid gap-2 text-sm font-medium">
-        Password
+        비밀번호
         <input name="password" type="password" required className="h-10 rounded-md border border-border bg-background px-3" />
       </label>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <Button type="submit">
         <LogIn className="size-4" aria-hidden="true" />
-        Log in
+        로그인
       </Button>
     </form>
   );

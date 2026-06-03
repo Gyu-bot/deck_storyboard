@@ -22,10 +22,10 @@ export default async function SettingsPage() {
     <main className="mx-auto min-h-screen w-full max-w-4xl px-6 py-8">
       <header className="mb-8 flex items-center justify-between border-b border-border pb-5">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Settings</p>
-          <h1 className="text-3xl font-semibold">API keys</h1>
+          <p className="text-sm font-medium text-muted-foreground">설정</p>
+          <h1 className="text-3xl font-semibold">API key 관리</h1>
         </div>
-        <Link className="text-sm font-medium text-primary" href="/projects">Projects</Link>
+        <Link className="text-sm font-medium text-primary" href="/projects">프로젝트</Link>
       </header>
       <div className="grid gap-4">
         {providers.map(([provider, label]) => (
@@ -34,7 +34,7 @@ export default async function SettingsPage() {
               <div>
                 <h2 className="text-lg font-semibold">{label}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {presence[provider] ? `Stored as ${presence[provider]}` : "No key stored"}
+                  {presence[provider] ? `저장됨: ${presence[provider]}` : "저장된 key 없음"}
                 </p>
               </div>
               {presence[provider] ? <SettingsKeyDelete provider={provider} /> : null}
@@ -43,11 +43,11 @@ export default async function SettingsPage() {
               <input type="hidden" name="provider" value={provider} />
               <label className="flex-1 text-sm font-medium">
                 <span className="sr-only">{label} key</span>
-                <input name="apiKey" type="password" placeholder="Add or replace key" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3" />
+                <input name="apiKey" type="password" placeholder="key 추가 또는 교체" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3" />
               </label>
               <Button type="submit">
                 {presence[provider] ? <Save className="size-4" aria-hidden="true" /> : <KeyRound className="size-4" aria-hidden="true" />}
-                {presence[provider] ? "Replace" : "Add"}
+                {presence[provider] ? "교체" : "추가"}
               </Button>
             </form>
           </section>

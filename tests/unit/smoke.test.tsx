@@ -6,9 +6,6 @@ describe("T003 smoke test", () => {
   it("renders the app shell", () => {
     render(<Home />);
     expect(screen.getByRole("heading", { name: /Deck Storyboard/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Start draft/i })).toHaveAttribute(
-      "href",
-      "/signup",
-    );
+    expect(screen.getByRole("link", { name: "새 스토리보드 시작" })).toHaveAttribute("href", "/signup");
   });
 });

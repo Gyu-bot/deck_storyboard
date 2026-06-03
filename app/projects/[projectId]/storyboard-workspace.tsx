@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -10,6 +10,59 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Image as ImageIcon, Layers3, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProjectStatus } from "@/lib/db/schema";
+
+const fieldStateLabels: Record<string, string> = {
+  aiGenerated: "AI 생성",
+  userModified: "사용자 수정",
+};
+
+const imageStatusLabels: Record<string, string> = {
+  not_generated: "이미지 없음",
+  queued: "대기 중",
+  generating: "생성 중",
+  generated: "생성 완료",
+  failed: "실패",
+  regeneration_recommended: "재생성 권장",
+};
+
+function subscribeClientSnapshot() {
+  return () => undefined;
+}
+
+function getClientSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
+function useClientReady() {
+  return useSyncExternalStore(subscribeClientSnapshot, getClientSnapshot, getServerSnapshot);
+}
+
+function localizeGeneratedText(value: string) {
+  return value
+    .replace(/^Context$/i, "맥락")
+    .replace(/^Strategy$/i, "전략")
+    .replace(/^Execution$/i, "실행")
+    .replace(/^Context slide (\d+)$/i, "맥락 슬라이드 $1")
+    .replace(/^Strategy slide (\d+)$/i, "전략 슬라이드 $1")
+    .replace(/^Execution slide (\d+)$/i, "실행 슬라이드 $1")
+    .replace(/^Key implication from the storyline$/i, "스토리라인에서 도출한 핵심 시사점")
+    .replace(/^Evidence or decision point to validate$/i, "검토가 필요한 근거 또는 의사결정 포인트")
+    .replace(
+      /^Generated (\d+) slides to match the requested target\.$/i,
+      "요청한 목표에 맞춰 $1장의 슬라이드로 구성했습니다.",
+    )
+    .replace(
+      /^Consulting-style layout with a strong headline and one primary visual\.$/i,
+      "강한 헤드라인과 하나의 핵심 시각 요소를 중심으로 구성한 컨설팅형 레이아웃",
+    )
+    .replace(/^Set up the situation$/i, "상황과 문제를 정리")
+    .replace(/^Frame the recommendation$/i, "권고 방향을 제시")
+    .replace(/^Show the path$/i, "실행 경로를 구체화");
+}
 
 type ProjectView = {
   id: string;
@@ -51,21 +104,65 @@ function SortableSlideCard({
     <article
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`grid gap-3 rounded-md border p-4 ${selected ? "border-primary bg-secondary" : "border-border bg-card"}`}
+      className={`grid gap-3 rounded-md border p-4 shadow-sm ${selected ? "border-primary bg-secondary" : "border-border bg-card"}`}
     >
       <div className="flex items-start gap-3">
-        <button className="mt-1 text-muted-foreground" {...attributes} {...listeners} type="button" aria-label="Drag slide">
+        <button className="mt-1 text-muted-foreground" {...attributes} {...listeners} type="button" aria-label="슬라이드 순서 변경">
           <GripVertical className="size-4" aria-hidden="true" />
         </button>
         <button className="flex-1 text-left" type="button" onClick={onSelect}>
-          <p className="text-xs font-medium text-muted-foreground">Slide {slide.position}</p>
-          <h3 className="text-lg font-semibold">{slide.title}</h3>
-          {!compact ? <p className="mt-2 text-sm text-muted-foreground">{slide.coreMessage}</p> : null}
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="text-xs font-medium text-muted-foreground">슬라이드 {slide.position}</p>
+            <span className="rounded-sm border border-border px-2 py-0.5 text-xs text-muted-foreground">
+              {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold leading-7">{localizeGeneratedText(slide.title)}</h3>
+          {!compact ? <p className="mt-2 text-sm text-muted-foreground">{localizeGeneratedText(slide.coreMessage)}</p> : null}
         </button>
       </div>
       {!compact ? (
         <ul className="ml-7 list-disc text-sm text-muted-foreground">
-          {slide.contentPoints.map((point) => <li key={point}>{point}</li>)}
+          {slide.contentPoints.map((point) => <li key={point}>{localizeGeneratedText(point)}</li>)}
+        </ul>
+      ) : null}
+    </article>
+  );
+}
+
+function StaticSlideCard({
+  slide,
+  compact,
+  selected,
+  onSelect,
+}: {
+  slide: SlideView;
+  compact: boolean;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <article
+      className={`grid gap-3 rounded-md border p-4 shadow-sm ${selected ? "border-primary bg-secondary" : "border-border bg-card"}`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="mt-1 text-muted-foreground" aria-hidden="true">
+          <GripVertical className="size-4" />
+        </div>
+        <button className="flex-1 text-left" type="button" onClick={onSelect}>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="text-xs font-medium text-muted-foreground">슬라이드 {slide.position}</p>
+            <span className="rounded-sm border border-border px-2 py-0.5 text-xs text-muted-foreground">
+              {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold leading-7">{localizeGeneratedText(slide.title)}</h3>
+          {!compact ? <p className="mt-2 text-sm text-muted-foreground">{localizeGeneratedText(slide.coreMessage)}</p> : null}
+        </button>
+      </div>
+      {!compact ? (
+        <ul className="ml-7 list-disc text-sm text-muted-foreground">
+          {slide.contentPoints.map((point) => <li key={point}>{localizeGeneratedText(point)}</li>)}
         </ul>
       ) : null}
     </article>
@@ -76,9 +173,9 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   const [tab, setTab] = useState<"content" | "prompt" | "images">("content");
   if (!slide) {
     return (
-      <aside className="rounded-md border border-border bg-card p-5">
-        <h2 className="text-lg font-semibold">No selected slide</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Select a slide to edit its fields.</p>
+      <aside className="self-start rounded-md border border-border bg-card p-5">
+        <h2 className="text-lg font-semibold">선택된 슬라이드 없음</h2>
+        <p className="mt-2 text-sm text-muted-foreground">왼쪽 목록에서 편집할 슬라이드를 선택하세요.</p>
       </aside>
     );
   }
@@ -98,37 +195,49 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   }
 
   return (
-    <aside className="grid gap-4 rounded-md border border-border bg-card p-5">
+    <aside className="grid self-start gap-4 rounded-md border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">{slide.title}</h2>
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">슬라이드 상세</p>
+          <h2 className="text-lg font-semibold">{localizeGeneratedText(slide.title)}</h2>
+        </div>
         <Button type="button" variant="outline" size="sm" onClick={deleteSlide}>
           <Trash2 className="size-4" aria-hidden="true" />
-          Delete
+          삭제
         </Button>
       </div>
-      <div className="grid grid-cols-3 rounded-md border border-border">
-        {(["content", "prompt", "images"] as const).map((item) => (
+      <div className="flex h-10 overflow-hidden rounded-md border border-border">
+        {[
+          ["content", "내용"],
+          ["prompt", "프롬프트"],
+          ["images", "이미지"],
+        ].map(([item, label]) => (
           <button
             key={item}
             type="button"
-            className={`h-9 text-sm font-medium ${tab === item ? "bg-secondary" : ""}`}
-            onClick={() => setTab(item)}
+            className={`h-full flex-1 text-sm font-medium ${tab === item ? "bg-secondary" : ""}`}
+            onClick={() => setTab(item as "content" | "prompt" | "images")}
           >
-            {item[0]!.toUpperCase() + item.slice(1)}
+            {label}
           </button>
         ))}
       </div>
       {tab === "content" ? (
         <div className="grid gap-3">
           {[
-            ["title", "Title", slide.title],
-            ["coreMessage", "Core message", slide.coreMessage],
-            ["contentPoints", "Content points", slide.contentPoints.join("\n")],
-            ["visualDirection", "Visual direction", slide.visualDirection],
-            ["slideRole", "Slide role", slide.slideRole],
+            ["title", "제목", localizeGeneratedText(slide.title)],
+            ["coreMessage", "핵심 메시지", localizeGeneratedText(slide.coreMessage)],
+            ["contentPoints", "본문 포인트", slide.contentPoints.map(localizeGeneratedText).join("\n")],
+            ["visualDirection", "시각화 방향", localizeGeneratedText(slide.visualDirection)],
+            ["slideRole", "슬라이드 역할", localizeGeneratedText(slide.slideRole)],
           ].map(([field, label, value]) => (
             <label key={field} className="grid gap-2 text-sm font-medium">
-              {label} <span className="text-xs text-muted-foreground">{slide.fieldEditState[field] ?? "aiGenerated"}</span>
+              <span className="flex items-center justify-between gap-2">
+                {label}
+                <span className="text-xs text-muted-foreground">
+                  {fieldStateLabels[slide.fieldEditState[field] ?? "aiGenerated"]}
+                </span>
+              </span>
               <textarea defaultValue={value} rows={field === "contentPoints" ? 4 : 2} className="rounded-md border border-border bg-background p-3" onBlur={(event) => saveField(field, event.currentTarget.value)} />
             </label>
           ))}
@@ -136,13 +245,18 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
       ) : null}
       {tab === "prompt" ? (
         <label className="grid gap-2 text-sm font-medium">
-          Image prompt <span className="text-xs text-muted-foreground">{slide.fieldEditState.imagePrompt}</span>
-          <textarea defaultValue={slide.imagePrompt} rows={8} className="rounded-md border border-border bg-background p-3" onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)} />
+          <span className="flex items-center justify-between gap-2">
+            이미지 프롬프트
+            <span className="text-xs text-muted-foreground">
+              {fieldStateLabels[slide.fieldEditState.imagePrompt] ?? "AI 생성"}
+            </span>
+          </span>
+          <textarea defaultValue={localizeGeneratedText(slide.imagePrompt)} rows={8} className="rounded-md border border-border bg-background p-3" onBlur={(event) => saveField("imagePrompt", event.currentTarget.value)} />
         </label>
       ) : null}
       {tab === "images" ? (
         <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-          Image history will appear after generation. Current status: {slide.imageGenerationStatus}
+          이미지 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
         </div>
       ) : null}
     </aside>
@@ -156,6 +270,7 @@ export function StoryboardWorkspace({
   project: ProjectView;
   initialSlides: SlideView[];
 }) {
+  const clientReady = useClientReady();
   const [compact, setCompact] = useState(false);
   const [slides, setSlides] = useState(initialSlides);
   const [selectedId, setSelectedId] = useState(initialSlides[0]?.id ?? null);
@@ -194,15 +309,15 @@ export function StoryboardWorkspace({
   }
 
   if (project.status === "storyboard_generation_failed") {
-    return <section className="rounded-md border border-red-300 bg-card p-5 text-red-800">Generation failed: {project.generationError}</section>;
+    return <section className="rounded-md border border-red-300 bg-card p-5 text-red-800">생성 실패: {project.generationError}</section>;
   }
 
   if (project.status === "storyboard_generating") {
-    return <section className="rounded-md border border-border bg-card p-5">Generating storyboard...</section>;
+    return <section className="rounded-md border border-border bg-card p-5">스토리보드 생성 중...</section>;
   }
 
   if (slides.length === 0) {
-    return <section className="rounded-md border border-dashed border-border p-8 text-center text-muted-foreground">No slides yet. Generate the storyboard to start review.</section>;
+    return <section className="rounded-md border border-dashed border-border p-8 text-center text-muted-foreground">아직 슬라이드가 없습니다. 스토리보드를 생성하면 검토를 시작할 수 있습니다.</section>;
   }
 
   return (
@@ -212,47 +327,66 @@ export function StoryboardWorkspace({
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" onClick={() => setCompact((value) => !value)}>
               <Layers3 className="size-4" aria-hidden="true" />
-              {compact ? "Expanded" : "Compact"}
+              {compact ? "상세 보기" : "간단히 보기"}
             </Button>
             <Button type="button" variant="outline" onClick={addBlank}>
               <Plus className="size-4" aria-hidden="true" />
-              Blank slide
+              빈 슬라이드 추가
             </Button>
           </div>
           <Button type="button" disabled={project.status !== "storyboard_confirmed"}>
             <ImageIcon className="size-4" aria-hidden="true" />
-            Generate image
+            이미지 생성
           </Button>
         </div>
         {project.improvementSuggestions?.length ? (
           <details className="rounded-md border border-border bg-card p-4">
-            <summary className="cursor-pointer font-semibold">Improvement suggestions</summary>
+            <summary className="cursor-pointer font-semibold">스토리라인 개선 제안</summary>
             <pre className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{JSON.stringify(project.improvementSuggestions, null, 2)}</pre>
           </details>
         ) : null}
         {project.targetSlideCountRationale ? (
-          <p className="text-sm text-muted-foreground">{project.targetSlideCountRationale}</p>
+          <p className="text-sm text-muted-foreground">{localizeGeneratedText(project.targetSlideCountRationale)}</p>
         ) : null}
-        <DndContext onDragEnd={onDragEnd}>
-          <SortableContext items={slides.map((slide) => slide.id)}>
-            <div className="grid gap-5">
-              {Object.entries(grouped).map(([sectionTitle, sectionSlides]) => (
-                <section key={sectionTitle} className="grid gap-3">
-                  <h2 className="border-b border-border pb-2 text-sm font-semibold uppercase text-muted-foreground">{sectionTitle}</h2>
-                  {sectionSlides.map((slide) => (
-                    <SortableSlideCard
-                      key={slide.id}
-                      slide={slide}
-                      compact={compact}
-                      selected={slide.id === selectedId}
-                      onSelect={() => setSelectedId(slide.id)}
-                    />
-                  ))}
-                </section>
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+        {clientReady ? (
+          <DndContext onDragEnd={onDragEnd}>
+            <SortableContext items={slides.map((slide) => slide.id)}>
+              <div className="grid gap-5">
+                {Object.entries(grouped).map(([sectionTitle, sectionSlides]) => (
+                  <section key={sectionTitle} className="grid gap-3">
+                    <h2 className="border-b border-border pb-2 text-sm font-semibold text-muted-foreground">{localizeGeneratedText(sectionTitle)}</h2>
+                    {sectionSlides.map((slide) => (
+                      <SortableSlideCard
+                        key={slide.id}
+                        slide={slide}
+                        compact={compact}
+                        selected={slide.id === selectedId}
+                        onSelect={() => setSelectedId(slide.id)}
+                      />
+                    ))}
+                  </section>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className="grid gap-5">
+            {Object.entries(grouped).map(([sectionTitle, sectionSlides]) => (
+              <section key={sectionTitle} className="grid gap-3">
+                <h2 className="border-b border-border pb-2 text-sm font-semibold text-muted-foreground">{localizeGeneratedText(sectionTitle)}</h2>
+                {sectionSlides.map((slide) => (
+                  <StaticSlideCard
+                    key={slide.id}
+                    slide={slide}
+                    compact={compact}
+                    selected={slide.id === selectedId}
+                    onSelect={() => setSelectedId(slide.id)}
+                  />
+                ))}
+              </section>
+            ))}
+          </div>
+        )}
       </section>
       <DetailPanel projectId={project.id} slide={selectedSlide} />
     </div>

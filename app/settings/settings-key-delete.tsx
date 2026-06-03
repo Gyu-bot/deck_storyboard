@@ -14,7 +14,7 @@ export function SettingsKeyDelete({ provider }: { provider: string }) {
   return (
     <Button type="button" variant="outline" onClick={onDelete}>
       <Trash2 className="size-4" aria-hidden="true" />
-      Delete
+      삭제
     </Button>
   );
 }

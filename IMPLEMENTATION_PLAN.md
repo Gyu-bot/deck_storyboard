@@ -138,6 +138,7 @@
   - [x] `.ai/status/active/T007-auth-ui.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - Settings의 key 교체/삭제는 T009에서 처리한다.
+  - 2026-06-03 user-directed Korean UI pass localized signup/login copy and verified the updated smoke CTA.
 
 ### Feature F03. User API Key Management
 
@@ -172,6 +173,7 @@
   - [x] `.ai/status/active/T009-api-key-settings.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - 서버 fallback provider key는 사용하지 않는다.
+  - 2026-06-03 user-directed Korean UI pass localized Settings key-management copy.
 
 ---
 
@@ -194,6 +196,7 @@
   - [x] `.ai/status/active/T010-project-list.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 새 프로젝트 상세 생성 form은 T011에서 처리한다.
+  - 2026-06-03 user-directed Korean UI pass localized project list status labels and project actions.
 
 ### Feature F05. New Project Creation
 
@@ -213,6 +216,7 @@
   - [x] `.ai/status/active/T011-new-project-form.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - 실제 storyboard generation 호출은 T014 이후에 연결한다.
+  - 2026-06-03 user-directed Korean UI pass localized the new-project form, option labels, and creation guidance copy.
 
 #### Task T012. 스타일 템플릿과 이미지 설정 구현
 - Priority: High
@@ -284,6 +288,7 @@
   - [x] `.ai/status/active/T015-slide-breakdown.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - UI 표시와 confirmation은 T016에서 처리한다.
+  - 2026-06-03 user-directed Korean UI pass updated deterministic fallback storyboard output to Korean for future generated sample data.
 
 ### Feature F07. Storyboard Review UI
 
@@ -305,6 +310,7 @@
   - [x] `.ai/status/active/T016-storyboard-review-ui.md`에 확인 결과가 기록되어 있다.
 - Notes:
   - slide side panel editing은 T017에서 처리한다.
+  - 2026-06-03 user-directed Product Design pass refreshed the review workspace as a Korean consultant workbench and verified it in the in-app browser at `/projects/5f105c90-fd07-4d08-abc3-1ebf53c9fecf`.
 
 ---
 
@@ -328,6 +334,7 @@
   - [x] `.ai/status/active/T017-slide-field-editing.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Images tab의 history 기능은 T023에서 채운다.
+  - 2026-06-03 user-directed Korean UI pass localized the side detail panel, tabs, editable field labels, field-state labels, and image status labels.
 
 ### Feature F09. Manual Slide Operations
 
@@ -347,6 +354,7 @@
   - [x] `.ai/status/active/T018-manual-slide-operations.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - operation history 기록은 T019에서 통합한다.
+  - 2026-06-03 user-directed Korean UI pass kept dnd-kit reorder behavior while avoiding SSR hydration mismatch from generated drag-handle accessibility IDs.
 
 #### Task T019. Manual split과 operation history 구현
 - Priority: High

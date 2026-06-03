@@ -881,10 +881,38 @@ MVP scope:
   - 2026-06-03 user direction: LLM 및 이미지 provider 호출부터 답변까지 로딩을 시각적으로 보여줄 수 있어야 한다.
   - 스트리밍이 없어도 polling, persisted status, optimistic step indicator 중 구현 가능한 방식을 선택한다.
 
+#### Task T027B. Actual provider usage ledger and admin cost dashboard 구현
+- Priority: High
+- Status: Backlog
+- Depends on: T009B, T015B, T021, T022, T024
+- Branch: `feature/T027B-provider-usage-ledger`
+- Expected PR Unit: `PR-T027B`
+- Acceptance Criteria:
+  - [ ] 모든 live LLM provider 호출 후 provider response의 실제 usage metadata를 저장한다.
+  - [ ] 모든 live image provider 호출 후 provider response 또는 provider request/result metadata에서 비용 산정에 필요한 실제 사용량 단위를 저장한다.
+  - [ ] 사용량 ledger는 최소 `userId`, `projectId`, optional `slideId`, `operationType`, `provider`, `model`, `requestId`, `inputTokens`, `outputTokens`, `reasoningTokens`, `cachedInputTokens`, `totalTokens`, `imageCount`, `imageSize`, `imageQuality`, `estimatedCost`, `currency`, `priceSnapshot`, `createdAt` 또는 동등한 필드를 기록한다.
+  - [ ] `operationType`은 최소 `story_structure`, `slide_breakdown`, `single_image_generation`, `batch_image_generation` 또는 동등한 project stage를 구분한다.
+  - [ ] usage 기록은 사전 token 추정이 아니라 provider 응답의 실제 usage/cost metadata를 우선 사용한다.
+  - [ ] provider가 usage 또는 cost metadata를 반환하지 않는 경우에는 `unknown`/`unsupported` 상태와 raw secret 없는 provider/model/request metadata를 기록하고, 임의 token 추정값으로 실제 사용량을 대체하지 않는다.
+  - [ ] 관리자 전용 usage/cost 페이지가 있다.
+  - [ ] 관리자 usage 페이지에서 전체 기간의 project별 사용량과 추정 비용을 합산해서 볼 수 있다.
+  - [ ] 관리자 usage 페이지에서 특정 project의 단계별 사용량과 추정 비용을 볼 수 있다. 단계는 최소 슬라이드 구조 생성과 이미지 생성을 구분한다.
+  - [ ] 관리자 usage 페이지는 MVP 범위에서 정산/청구 기능 없이 비용 추정용으로만 동작한다.
+  - [ ] 비용 계산은 호출 당시의 model/provider price snapshot을 기준으로 하며, 가격표 변경 이후에도 과거 추정값이 흔들리지 않는다.
+  - [ ] usage ledger에는 provider API key, prompt 전문, 민감한 response body를 저장하지 않는다.
+  - [ ] usage ledger 저장 실패가 provider generation 성공 자체를 되돌리지 않으며, 저장 실패는 관측 가능한 error/log/status로 남긴다.
+  - [ ] mocked provider tests가 LLM usage 저장, image usage 저장, usage metadata missing/unsupported case, project/stage aggregation을 검증한다.
+  - [ ] 브라우저 또는 equivalent visual check로 관리자 usage 페이지의 project별/단계별 합산 표시를 확인했다.
+  - [ ] `.ai/status/active/T027B-provider-usage-ledger.md`에 usage field contract, cost calculation policy, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-03 user direction: 비용 책정을 위해 사전 token 추정은 MVP에서 필요 없고, 실제 provider 사용량을 바탕으로 기록/집계한다.
+  - MVP usage page는 순수 비용 추정용이다. 결제, 청구, 사용자별 과금 확정, quota enforcement는 범위 밖이다.
+  - Text LLM usage와 image generation usage는 단위가 다를 수 있으므로 ledger schema는 token fields와 image unit fields를 함께 표현할 수 있어야 한다.
+
 #### Task T028. MVP end-to-end smoke와 Docker persistence 검증
 - Priority: High
 - Status: Backlog
-- Depends on: T002, T009C, T024, T026, T027, T027A
+- Depends on: T002, T009C, T024, T026, T027, T027A, T027B
 - Branch: `feature/T028-mvp-e2e-smoke`
 - Expected PR Unit: `PR-T028`
 - Acceptance Criteria:

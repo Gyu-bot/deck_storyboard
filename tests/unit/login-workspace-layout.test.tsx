@@ -150,6 +150,56 @@ describe("T017B storyboard detail floating panel", () => {
   });
 });
 
+describe("T017B storyboard improvement suggestions", () => {
+  it("renders suggestions as a readable list instead of raw JSON", () => {
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_review" as const,
+      improvementSuggestions: [
+        {
+          id: "i1",
+          title: "Pilot 후보를 더 구체화",
+          rationale: "고객 의사결정을 빠르게 만들려면 대표 품질 이슈 1~2개를 예시로 제시하면 좋다.",
+        },
+      ],
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = [
+      {
+        id: "slide-a",
+        sectionTitle: "Section",
+        position: 1,
+        title: "Slide A",
+        coreMessage: "Core message A",
+        contentPoints: ["Point A"],
+        visualDirection: "Visual A",
+        imagePrompt: "Prompt A",
+        slideRole: "Role A",
+        fieldEditState: {
+          title: "aiGenerated",
+          coreMessage: "aiGenerated",
+          contentPoints: "aiGenerated",
+          visualDirection: "aiGenerated",
+          imagePrompt: "aiGenerated",
+          slideRole: "aiGenerated",
+        },
+        imageGenerationStatus: "not_generated",
+      },
+    ];
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+
+    expect(screen.getByRole("heading", { name: "Pilot 후보를 더 구체화" })).toBeInTheDocument();
+    expect(
+      screen.getByText("고객 의사결정을 빠르게 만들려면 대표 품질 이슈 1~2개를 예시로 제시하면 좋다."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/"title"/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/"rationale"/)).not.toBeInTheDocument();
+  });
+});
+
 describe("T015B storyboard test mode toggle", () => {
   it("switches between sample fixture mode and live OpenRouter mode", () => {
     const { rerender } = render(<StoryboardTestModeToggle enabled={false} />);

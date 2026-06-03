@@ -13,6 +13,7 @@
 
 - desktop layout에서 상세 panel에 `lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]`를 적용했다.
 - panel header에는 선택 slide summary와 삭제 action을 유지하고, content/prompt/mockup tab 아래 입력 영역은 내부 `overflow-y-auto` scroll area로 분리했다.
+- `스토리라인 개선 제안` 영역은 raw JSON 대신 title/rationale을 정리한 readable list로 렌더링한다.
 - mobile/narrow viewport에서는 `lg:` sticky만 적용되어 panel이 list 아래로 쌓이는 non-floating fallback을 유지한다.
 - dev sample preview와 실제 project detail이 같은 `StoryboardWorkspace` 컴포넌트를 공유하므로 동일한 layout behavior를 사용한다.
 
@@ -30,7 +31,8 @@
 
 - `npm run typecheck`: passed.
 - `npm run lint`: passed.
-- `npm test`: passed, 9 files / 30 tests.
+- `npm test`: passed, 9 files / 31 tests.
 - Browser check at `http://localhost:3002/dev/storyboard-sample`: detail panel existed with sticky/max-height classes and `storyboard-detail-scroll-area` had `overflow-y-auto`.
+- Browser check at `http://localhost:3002/dev/storyboard-sample`: `스토리라인 개선 제안` showed suggestion title/rationale text and did not expose `"title"`/`"rationale"` JSON keys.
 - Browser mobile check at 390x844 on `/dev/storyboard-sample`: panel width was 327px inside a 375px body, confirming the narrow viewport fallback does not squeeze the editor into a desktop side column.
 - Actual project detail note: `/projects/{projectId}` uses the same `StoryboardWorkspace` component verified by unit tests and the dev sample route.

@@ -64,6 +64,49 @@ function localizeGeneratedText(value: string) {
     .replace(/^Show the path$/i, "실행 경로를 구체화");
 }
 
+type ImprovementSuggestionView = {
+  id: string;
+  title: string;
+  rationale: string;
+};
+
+function textField(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
+}
+
+function normalizeImprovementSuggestion(
+  suggestion: unknown,
+  index: number,
+): ImprovementSuggestionView {
+  const fallbackId = `suggestion-${index + 1}`;
+  const fallbackTitle = `개선 제안 ${index + 1}`;
+  const fallbackRationale = "제안 근거가 제공되지 않았습니다.";
+
+  if (typeof suggestion === "string") {
+    return {
+      id: fallbackId,
+      title: textField(suggestion, fallbackTitle),
+      rationale: fallbackRationale,
+    };
+  }
+
+  if (suggestion && typeof suggestion === "object") {
+    const record = suggestion as Record<string, unknown>;
+
+    return {
+      id: textField(record.id, fallbackId),
+      title: textField(record.title, fallbackTitle),
+      rationale: textField(record.rationale, fallbackRationale),
+    };
+  }
+
+  return {
+    id: fallbackId,
+    title: fallbackTitle,
+    rationale: fallbackRationale,
+  };
+}
+
 type ProjectView = {
   id: string;
   name: string;
@@ -371,7 +414,19 @@ export function StoryboardWorkspace({
         {project.improvementSuggestions?.length ? (
           <details className="rounded-md border border-border bg-card p-4">
             <summary className="cursor-pointer font-semibold">스토리라인 개선 제안</summary>
-            <pre className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{JSON.stringify(project.improvementSuggestions, null, 2)}</pre>
+            <ol className="mt-3 grid gap-3 text-sm">
+              {project.improvementSuggestions.map((suggestion, index) => {
+                const item = normalizeImprovementSuggestion(suggestion, index);
+
+                return (
+                  <li key={`${item.id}-${index}`} className="border-t border-border pt-3 first:border-t-0 first:pt-0">
+                    <h3 className="font-semibold text-foreground">{localizeGeneratedText(item.title)}</h3>
+                    <p className="mt-1 text-xs font-medium text-muted-foreground">제안 이유</p>
+                    <p className="mt-1 leading-6 text-muted-foreground">{localizeGeneratedText(item.rationale)}</p>
+                  </li>
+                );
+              })}
+            </ol>
           </details>
         ) : null}
         {project.targetSlideCountRationale ? (

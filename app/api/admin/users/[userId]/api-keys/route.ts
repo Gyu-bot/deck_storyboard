@@ -21,6 +21,14 @@ function adminUsersUrl(request: Request) {
   return new URL("/admin/users", request.url);
 }
 
+function redirectUrl(request: Request, form: FormData) {
+  const returnTo = String(form.get("returnTo") ?? "");
+  if (returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+    return new URL(returnTo, request.url);
+  }
+  return adminUsersUrl(request);
+}
+
 export async function POST(
   request: Request,
   context: { params: Promise<{ userId: string }> },
@@ -46,7 +54,7 @@ export async function POST(
 
   if (intent === "delete") {
     deleteUserApiKey(db, userId, provider);
-    return NextResponse.redirect(adminUsersUrl(request), 303);
+    return NextResponse.redirect(redirectUrl(request, form), 303);
   }
 
   const apiKey = String(form.get("apiKey") ?? "");
@@ -54,7 +62,7 @@ export async function POST(
     return NextResponse.json({ error: "API key is required." }, { status: 400 });
   }
   saveUserApiKey(db, userId, provider, apiKey);
-  return NextResponse.redirect(adminUsersUrl(request), 303);
+  return NextResponse.redirect(redirectUrl(request, form), 303);
 }
 
 export async function GET(

@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export default function DevStoryboardSamplePage() {
   if (process.env.NODE_ENV === "production") notFound();
 
-  const sample = loadStoryboardSampleFixture();
+  const sample = loadStoryboardSampleFixture({ testModeEnabled: true });
   if (!sample?.slides?.length) notFound();
 
   const now = new Date().toISOString();

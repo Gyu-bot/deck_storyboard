@@ -1,7 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import LoginPage from "@/app/login/page";
+import { AdminMemberKeySettings } from "@/app/settings/admin-member-key-settings";
+import { ProjectsHeaderActions } from "@/app/projects/projects-header-actions";
 import { StoryboardWorkspace } from "@/app/projects/[projectId]/storyboard-workspace";
+import { StoryboardTestModeToggle } from "@/app/projects/[projectId]/storyboard-test-mode-toggle";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -93,5 +96,108 @@ describe("T017A slide selection sync", () => {
     fireEvent.click(screen.getByRole("button", { name: /Slide B/ }));
 
     expect(imagePrompt()).toHaveValue("Prompt B");
+  });
+});
+
+describe("T015B storyboard test mode toggle", () => {
+  it("switches between sample fixture mode and live OpenRouter mode", () => {
+    const { rerender } = render(<StoryboardTestModeToggle enabled={false} />);
+
+    expect(
+      screen.getByRole("button", { name: "테스트 모드 켜기" }),
+    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue("true")).toHaveAttribute(
+      "name",
+      "enabled",
+    );
+
+    rerender(<StoryboardTestModeToggle enabled />);
+
+    expect(
+      screen.getByRole("button", { name: "테스트 모드 끄기" }),
+    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue("false")).toHaveAttribute(
+      "name",
+      "enabled",
+    );
+  });
+});
+
+describe("T009B admin settings navigation", () => {
+  it("shows the settings entry only for administrators", () => {
+    const { rerender } = render(<ProjectsHeaderActions isAdmin={false} />);
+
+    expect(screen.queryByRole("link", { name: "설정" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "새 프로젝트" })).toHaveAttribute(
+      "href",
+      "/projects/new",
+    );
+
+    rerender(<ProjectsHeaderActions isAdmin />);
+
+    expect(screen.getByRole("link", { name: "설정" })).toHaveAttribute(
+      "href",
+      "/settings",
+    );
+  });
+
+  it("lists members first and opens provider key management after selecting a member", () => {
+    const users = [
+      {
+        id: "member-1",
+        email: "test@example.local",
+        role: "member" as const,
+        createdAt: "2026-06-03T00:00:00.000Z",
+        updatedAt: "2026-06-03T00:00:00.000Z",
+        deletedAt: null,
+      },
+      {
+        id: "member-2",
+        email: "owner@example.local",
+        role: "member" as const,
+        createdAt: "2026-06-03T00:00:00.000Z",
+        updatedAt: "2026-06-03T00:00:00.000Z",
+        deletedAt: null,
+      },
+    ];
+
+    const { rerender } = render(
+      <AdminMemberKeySettings
+        users={users}
+        selectedUser={null}
+        selectedPresence={null}
+        query=""
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "회원 리스트" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "test@example.local" })).toHaveAttribute(
+      "href",
+      "/settings?userId=member-1",
+    );
+    expect(screen.queryByPlaceholderText("key 추가 또는 교체")).not.toBeInTheDocument();
+    expect(screen.getByText("회원을 선택하면 provider key를 관리할 수 있습니다.")).toBeInTheDocument();
+
+    rerender(
+      <AdminMemberKeySettings
+        users={users}
+        selectedUser={users[0]!}
+        selectedPresence={{
+          openrouter: "sk-o...1234",
+          openai: null,
+          anthropic: null,
+          gemini: null,
+        }}
+        query=""
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "test@example.local" })).toBeInTheDocument();
+    expect(screen.getByText("할당됨: sk-o...1234")).toBeInTheDocument();
+    expect(screen.getAllByPlaceholderText("key 추가 또는 교체")).toHaveLength(4);
+    expect(screen.getAllByDisplayValue("/settings?userId=member-1")).toHaveLength(4);
+    for (const returnTo of screen.getAllByDisplayValue("/settings?userId=member-1")) {
+      expect(returnTo).toHaveAttribute("name", "returnTo");
+    }
   });
 });

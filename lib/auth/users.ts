@@ -94,6 +94,15 @@ export function seedDevelopmentUsers(db: Db) {
       .where(and(eq(users.email, input.email), isNull(users.deletedAt)))
       .get();
     if (existing) {
+      if (existing.role !== input.role) {
+        const timestamp = now();
+        db.update(users)
+          .set({ role: input.role, updatedAt: timestamp })
+          .where(eq(users.id, existing.id))
+          .run();
+        seeded.push({ ...existing, role: input.role, updatedAt: timestamp });
+        continue;
+      }
       seeded.push(existing);
       continue;
     }

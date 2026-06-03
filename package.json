@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
+    "test:storyboard-sample": "tsx scripts/verify-storyboard-sample.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:push": "drizzle-kit push"
   },

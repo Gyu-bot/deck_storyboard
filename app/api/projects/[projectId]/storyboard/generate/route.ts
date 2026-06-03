@@ -4,6 +4,7 @@ import { requireCurrentUserId } from "@/lib/auth/session";
 import { getDecryptedUserApiKey } from "@/lib/repositories/user-api-keys";
 import { getProjectForUser } from "@/lib/repositories/projects";
 import { createOpenRouterProvider } from "@/lib/ai/openrouter";
+import { loadStoryboardSampleFixture } from "@/lib/storyboard/sample-fixture";
 import {
   analyzeStoryStructure,
   createSlideBreakdown,
@@ -65,13 +66,16 @@ export async function POST(
   const db = getDatabase();
   const project = getProjectForUser(db, projectId, userId);
   if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  const apiKey = getDecryptedUserApiKey(db, userId, "openrouter");
+  const sampleStoryboard = loadStoryboardSampleFixture();
+  const apiKey = sampleStoryboard
+    ? "dummy-openrouter-key"
+    : getDecryptedUserApiKey(db, userId, "openrouter");
   if (!apiKey) {
     return NextResponse.json({ error: "OpenRouter key is required." }, { status: 400 });
   }
   const provider = createOpenRouterProvider({
     apiKey,
-    fetcher: async () => deterministicStoryboard(project),
+    fetcher: async () => sampleStoryboard ?? deterministicStoryboard(project),
   });
   const structure = await analyzeStoryStructure(db, projectId, userId, provider);
   await createSlideBreakdown(db, projectId, userId, provider, structure);

@@ -4,6 +4,7 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrateDatabase } from "@/lib/db/migrate";
 import { schema } from "@/lib/db/schema";
+import { seedDevelopmentUsers } from "@/lib/auth/users";
 
 let singleton: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
@@ -22,5 +23,8 @@ export function getDatabase() {
   const sqlite = new Database(dbPath);
   migrateDatabase(sqlite);
   singleton = drizzle(sqlite, { schema });
+  if (process.env.NODE_ENV !== "production") {
+    seedDevelopmentUsers(singleton);
+  }
   return singleton;
 }

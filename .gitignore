@@ -4,6 +4,8 @@ node_modules/
 out/
 build/
 dist/
+tmp/
+tsconfig.tsbuildinfo
 .env
 .env*.local
 npm-debug.log*

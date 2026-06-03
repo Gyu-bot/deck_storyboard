@@ -139,6 +139,23 @@
 - Notes:
   - Settings의 key 교체/삭제는 T009에서 처리한다.
   - 2026-06-03 user-directed Korean UI pass localized signup/login copy and verified the updated smoke CTA.
+  - 가입 시 API key를 받는 현재 UI는 T009A 이후 제거하고, provider key 할당은 관리자 화면에서 처리하는 방향으로 전환한다.
+
+#### Task T007A. Login layout vertical spacing UX 수정
+- Priority: High
+- Status: Backlog
+- Depends on: T007
+- Branch: `fix/T007A-login-layout-spacing`
+- Expected PR Unit: `PR-T007A`
+- Acceptance Criteria:
+  - [ ] `/login` 화면의 세로 여백이 과도하지 않고 첫 viewport 안에서 자연스럽게 보인다.
+  - [ ] desktop과 mobile viewport에서 로그인 form, heading, 보조 링크가 과하게 분리되지 않는다.
+  - [ ] signup 화면과 login 화면의 spacing rhythm이 일관된다.
+  - [ ] 로그인 실패 메시지 표시 시 레이아웃이 크게 밀리지 않는다.
+  - [ ] 브라우저 또는 equivalent visual check로 `/login` 주요 viewport를 확인했다.
+  - [ ] `.ai/status/active/T007A-login-layout-spacing.md`에 before/after 확인 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-03 user feedback: 현재 `/login` 화면은 세로 방향 여백이 너무 크다.
 
 ### Feature F03. User API Key Management
 
@@ -157,6 +174,8 @@
   - [x] `.ai/status/active/T008-api-key-encryption.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - provider connection test는 초기 MVP 필수가 아니다.
+  - 향후 provider key는 이미지 전용 key(`openai_images`, `nano_banana`)가 아니라 계정/provider 단위 key(`openrouter`, `openai`, `anthropic`, `gemini`)로 통합한다.
+  - 같은 provider account key를 LLM 호출과 해당 provider의 이미지 생성 호출에 함께 사용할 수 있게 한다.
 
 #### Task T009. Settings API key 관리 화면 구현
 - Priority: High
@@ -174,6 +193,86 @@
 - Notes:
   - 서버 fallback provider key는 사용하지 않는다.
   - 2026-06-03 user-directed Korean UI pass localized Settings key-management copy.
+  - T009A 이후 일반 사용자의 self-service provider key 관리는 제거하거나 관리자 할당 상태 확인 전용으로 축소한다.
+  - T009C 이후 이미지 provider 전용 key 관리는 account-level provider key 관리로 대체한다.
+
+---
+
+## Epic E02A. MVP Admin User and API Key Management
+
+MVP scope:
+
+- Users sign up and log in without entering provider API keys.
+- Admins assign account-level provider keys to users before live LLM/image generation is connected.
+- Account-level provider keys are shared across LLM and image generation paths where the provider supports both.
+- Admin/member management is an MVP prerequisite, not a post-MVP feature.
+
+### Feature F03A. Admin-Managed Membership and Provider Keys
+
+#### Task T009A. User signup/login simplification and admin role foundation 구현
+- Priority: High
+- Status: Backlog
+- Depends on: T006, T007, T008
+- Branch: `feature/T009A-admin-role-auth-simplification`
+- Expected PR Unit: `PR-T009A`
+- Acceptance Criteria:
+  - [ ] `/signup`은 이메일, 비밀번호, 비밀번호 확인만 받는다.
+  - [ ] 일반 회원 가입 시 OpenRouter, OpenAI, Claude/Anthropic, Gemini 등 provider API key 입력은 요구하지 않는다.
+  - [ ] 일반 사용자는 자신의 API key full value를 입력, 교체, 조회할 수 없다.
+  - [ ] 관리자 권한을 식별할 수 있는 user role 또는 equivalent admin flag가 DB와 session에 반영된다.
+  - [ ] 관리자 권한이 없는 사용자는 admin routes/pages/API에 접근할 수 없다.
+  - [ ] 기존 key encryption/storage contract는 관리자 할당 flow에서도 재사용된다.
+  - [ ] signup/login/auth regression test가 있다.
+  - [ ] `.ai/status/active/T009A-admin-role-auth-simplification.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-03 user direction: 회원은 가입 시 API key 입력 없이 회원 가입과 로그인만 수행한다.
+  - API key 할당 책임은 일반 사용자 self-service에서 관리자 관리 방식으로 이동한다.
+
+#### Task T009B. Admin member and API key management page 구현
+- Priority: High
+- Status: Backlog
+- Depends on: T009A
+- Branch: `feature/T009B-admin-member-key-management-page`
+- Expected PR Unit: `PR-T009B`
+- Acceptance Criteria:
+  - [ ] 관리자 전용 `/admin` 또는 `/admin/users` 회원관리 화면이 있다.
+  - [ ] 관리자 화면에서 회원 목록, 이메일, 가입일, 최근 수정일, 계정 상태, provider key 할당 상태를 한 화면에서 볼 수 있다.
+  - [ ] 회원 검색 또는 최소한 이메일 기준 filtering이 가능하다.
+  - [ ] 회원 상세 또는 expandable row에서 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini API key 할당 상태를 확인할 수 있다.
+  - [ ] 회원별 API key 추가/교체/삭제 action으로 이동하거나 같은 화면에서 inline으로 실행할 수 있다.
+  - [ ] 저장된 API key 값은 masked form 또는 assigned/unassigned 상태로만 표시되고 full value는 노출되지 않는다.
+  - [ ] 회원별 generation 가능 여부를 provider key assignment 상태 기준으로 판단할 수 있다.
+  - [ ] 관리자 화면은 일반 프로젝트 작업 화면과 명확히 분리된다.
+  - [ ] 관리자 권한이 없는 접근은 login 또는 forbidden 상태로 차단된다.
+  - [ ] 브라우저 또는 equivalent visual check로 admin access control, 회원 목록, 회원별 API key 관리 UI를 확인했다.
+  - [ ] `.ai/status/active/T009B-admin-member-key-management-page.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 초기 범위는 회원 삭제보다 회원 조회, 계정 상태 확인, 회원별 key 할당/교체/삭제에 초점을 둔다.
+  - 회원관리와 회원별 API key 관리는 별도 흩어진 화면보다 같은 admin workflow 안에서 처리한다.
+
+#### Task T009C. Admin-managed user API key assignment 구현
+- Priority: High
+- Status: Backlog
+- Depends on: T009B, T008
+- Branch: `feature/T009C-admin-api-key-assignment`
+- Expected PR Unit: `PR-T009C`
+- Acceptance Criteria:
+  - [ ] 관리자는 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini account-level provider key를 추가/교체/삭제할 수 있다.
+  - [ ] 저장된 key는 모든 UI/API response에서 masked form 또는 presence status로만 노출된다.
+  - [ ] 일반 사용자 generation flow는 관리자에게 할당된 user-scoped account-level provider key만 사용한다.
+  - [ ] OpenAI key는 OpenAI LLM과 OpenAI image generation에 함께 사용할 수 있다.
+  - [ ] Gemini key는 Gemini LLM과 Gemini/Nano Banana image generation에 함께 사용할 수 있다.
+  - [ ] OpenRouter key는 MVP storyboard generation 기본 LLM provider key로 사용할 수 있다.
+  - [ ] Claude는 Anthropic account key로 저장/관리하되 LLM 호출 연결은 MVP 이후 T035에서 처리한다.
+  - [ ] key 미할당 회원이 storyboard/image generation을 실행하면 provider-key error가 명확히 표시된다.
+  - [ ] 관리자 key 변경/삭제 후 해당 회원의 신규 provider 호출 정책이 즉시 반영된다.
+  - [ ] key assignment audit metadata 또는 operation history를 남길지 구현 전 결정하고, 결정 내용을 status에 기록한다.
+  - [ ] admin API negative test와 encryption round-trip regression test가 있다.
+  - [ ] `.ai/status/active/T009C-admin-api-key-assignment.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 서버 fallback provider key는 계속 사용하지 않는다.
+  - 일반 사용자 `/settings`는 T009C 이후 제거하거나 key 할당 상태 확인 전용으로 축소한다.
+  - MVP key policy: 이미지 전용 API key를 별도로 받지 않고 provider account key를 LLM과 이미지 생성에 공통 사용한다.
 
 ---
 
@@ -233,6 +332,8 @@
   - [x] `.ai/status/active/T012-style-image-settings.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - provider key 존재 여부 validation은 이미지 생성 시점에서 처리한다.
+  - MVP 이미지 모델 선택은 기존 default image model 기반으로 유지하되, provider key는 account-level key를 쓰는 방향으로 T009C/T021/T022에서 전환한다.
+  - LLM provider/model 선택 UI는 MVP 이후 T036에서 처리한다.
 
 ---
 
@@ -256,6 +357,8 @@
   - [x] `.ai/status/active/T013-openrouter-structured-output.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Phase 5용 `merge_slides`, `split_slide`, `insert_slide`는 예약만 하고 구현하지 않는다.
+  - 현재 완료 범위는 structured output schema, provider boundary, validation/retry contract다.
+  - 실제 OpenRouter HTTP 호출 연결은 샘플 출력 객체 기반 계약 테스트가 고정된 뒤 T015B에서 처리한다.
 
 #### Task T014. Story structure analysis와 improvement suggestion 생성
 - Priority: High
@@ -289,6 +392,49 @@
 - Notes:
   - UI 표시와 confirmation은 T016에서 처리한다.
   - 2026-06-03 user-directed Korean UI pass updated deterministic fallback storyboard output to Korean for future generated sample data.
+
+#### Task T015A. Storyline-to-slide sample fixture contract 정리
+- Priority: High
+- Status: Backlog
+- Depends on: T013, T014, T015
+- Branch: `feature/T015A-storyboard-sample-contract`
+- Expected PR Unit: `PR-T015A`
+- Acceptance Criteria:
+  - [ ] 하나의 대표 consulting/storyline sample text fixture가 있다.
+  - [ ] sample storyline에 대응하는 expected storyboard JSON fixture가 있다.
+  - [ ] expected JSON fixture가 `storyboardResponseSchema`와 `slideBreakdownSchema`를 통과한다.
+  - [ ] 각 slide fixture가 `sectionId`, `sectionTitle`, `title`, `coreMessage`, `contentPoints`, `visualDirection`, `imagePrompt`, `slideRole`을 포함한다.
+  - [ ] fixture를 `createSlideBreakdown` persistence flow에 넣으면 slide rows가 기대 필드와 순서로 저장된다.
+  - [ ] LLM prompt가 요구할 최종 출력 객체 형태와 필수/선택 필드가 문서 또는 테스트 설명에 명확히 기록되어 있다.
+  - [ ] `.ai/status/active/T015A-storyboard-sample-contract.md`에 샘플, 검증 명령, 확인 결과가 기록되어 있다.
+- Notes:
+  - 실제 LLM/API 호출은 포함하지 않는다.
+  - 이 Task의 목적은 실제 LLM 연결 전에 "스토리라인을 슬라이드 객체 배열로 쪼갠 결과"의 정답 형태를 먼저 고정하는 것이다.
+  - 샘플 출력은 Markdown 설명, plain text source, JSON fixture 중 테스트에 가장 적합한 조합을 사용하되, 검증 기준은 JSON structured output으로 둔다.
+
+#### Task T015B. Real OpenRouter storyboard generation 연결
+- Priority: High
+- Status: Backlog
+- Depends on: T015A, T009C
+- Branch: `feature/T015B-openrouter-storyboard-call`
+- Expected PR Unit: `PR-T015B`
+- Acceptance Criteria:
+  - [ ] `story_structure` task가 자유 양식 사용자 입력을 정규화해 `documentPurpose`, `overallThesis`, `sections`, optional `improvementSuggestions`, optional `slides`를 생성한다.
+  - [ ] `story_structure` 결과에 schema-valid `slides`가 없거나 품질 게이트를 통과하지 못하면 `slide_breakdown` task가 실제 OpenRouter HTTP request로 호출된다.
+  - [ ] `story_structure` 결과에 schema-valid `slides`가 있고 품질 게이트를 통과하면 `slide_breakdown` task를 생략하고 해당 slide objects를 저장한다.
+  - [ ] request prompt가 T015A에서 고정한 sample output object contract를 따른다.
+  - [ ] response가 `storyboardResponseSchema`로 validation되고 invalid output은 accepted storyboard data로 저장되지 않는다.
+  - [ ] validation failure는 한 번 retry 후 stage-specific error로 surfaced 된다.
+  - [ ] 관리자에게 할당된 OpenRouter account-level user/provider API key가 없으면 server fallback 없이 provider-key error를 반환한다.
+  - [ ] mocked HTTP test가 실제 request payload, schema validation, retry, error normalization을 검증한다.
+  - [ ] 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
+  - [ ] `.ai/status/active/T015B-openrouter-storyboard-call.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 기존 deterministic storyboard fallback은 T015A fixture 계약 검증용 또는 테스트용 helper로만 남기고 production generation path에서는 사용하지 않는다.
+  - 실제 LLM 연결은 샘플 텍스트와 기대 JSON 객체 기반 테스트가 먼저 통과한 뒤 진행한다.
+  - 실사용 입력은 샘플처럼 잘 구조화되어 있지 않을 가능성이 높으므로 기본 설계는 2단계 품질 우선 흐름으로 둔다.
+  - 단, 비용과 지연을 줄이기 위해 1차 `story_structure` 결과에 충분한 `slides`가 포함되면 2차 호출을 생략하는 hybrid path를 지원한다.
+  - MVP에서는 OpenRouter를 기본 storyboard LLM provider로 사용하고, 사용자 model 선택 UI는 제공하지 않는다.
 
 ### Feature F07. Storyboard Review UI
 
@@ -336,6 +482,24 @@
   - Images tab의 history 기능은 T023에서 채운다.
   - 2026-06-03 user-directed Korean UI pass localized the side detail panel, tabs, editable field labels, field-state labels, and image status labels.
 
+#### Task T017A. Slide card selection detail panel sync bug 수정
+- Priority: High
+- Status: Backlog
+- Depends on: T017
+- Branch: `fix/T017A-slide-selection-detail-sync`
+- Expected PR Unit: `PR-T017A`
+- Acceptance Criteria:
+  - [ ] left storyboard slide card를 클릭하면 right-side detail panel의 title, core message, content points, visual direction, image prompt, slide role이 선택한 slide의 값으로 즉시 갱신된다.
+  - [ ] 선택된 card의 visual selected state와 detail panel 대상 slide가 항상 일치한다.
+  - [ ] dev sample preview(`/dev/storyboard-sample`)와 실제 project detail(`/projects/{projectId}`) 양쪽에서 동일하게 동작한다.
+  - [ ] textareas가 이전 slide의 stale default value를 유지하지 않는다.
+  - [ ] 선택 변경 후 field edit/save/delete action이 현재 선택된 slide id에만 적용된다.
+  - [ ] 브라우저 또는 equivalent visual check로 여러 slide 선택 전환을 확인했다.
+  - [ ] `.ai/status/active/T017A-slide-selection-detail-sync.md`에 재현, 원인, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-03 `/dev/storyboard-sample`에서 slide card 클릭 시 오른쪽 textbox 내용이 선택 card와 동기화되지 않는 현상이 관찰되었다.
+  - 구현 시 uncontrolled textarea `defaultValue` 재사용, selected slide state, component keying, client hydration state를 함께 점검한다.
+
 ### Feature F09. Manual Slide Operations
 
 #### Task T018. Reorder, add blank, delete slide 구현
@@ -375,6 +539,13 @@
 
 ## Epic E06. Image Generation
 
+MVP scope:
+
+- Image generation uses provider account keys assigned by an administrator, not separate image-only keys entered by the user.
+- OpenAI image generation uses the OpenAI account key.
+- Gemini/Nano Banana image generation uses the Gemini account key.
+- User-selectable LLM model/provider choices are not part of MVP.
+
 ### Feature F10. Image Provider and Storage Foundation
 
 #### Task T020. Image provider interface와 local storage provider 구현
@@ -396,11 +567,11 @@
 #### Task T021. GPT Image / OpenAI Images provider 구현
 - Priority: High
 - Status: Backlog
-- Depends on: T020, T009
+- Depends on: T020, T009C
 - Branch: `feature/T021-openai-images-provider`
 - Expected PR Unit: `PR-T021`
 - Acceptance Criteria:
-  - [ ] `gpt-image-2`가 `openai_images` user API key를 사용한다.
+  - [ ] `gpt-image-2`가 `openai` account-level user/provider API key를 사용한다.
   - [ ] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
   - [ ] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
   - [ ] provider response의 bytes 또는 URL이 local storage로 저장된다.
@@ -408,15 +579,17 @@
   - [ ] `.ai/status/active/T021-openai-images-provider.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
+  - 별도 `openai_images` key가 아니라 OpenAI account key를 LLM과 이미지 생성에 함께 쓰는 방향으로 구현한다.
 
-#### Task T022. Nano Banana image provider 구현
+#### Task T022. Gemini/Nano Banana image provider 구현
 - Priority: High
 - Status: Backlog
-- Depends on: T020, T009
-- Branch: `feature/T022-nano-banana-provider`
+- Depends on: T020, T009C
+- Branch: `feature/T022-gemini-image-provider`
 - Expected PR Unit: `PR-T022`
 - Acceptance Criteria:
-  - [ ] `nano-banana`이 `nano_banana` user API key를 사용한다.
+  - [ ] Gemini image generation path가 `gemini` account-level user/provider API key를 사용한다.
+  - [ ] project default image model의 `nano-banana` 선택은 Gemini provider key로 해석된다.
   - [ ] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
   - [ ] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
   - [ ] provider response의 bytes 또는 URL이 local storage로 저장된다.
@@ -424,6 +597,7 @@
   - [ ] `.ai/status/active/T022-nano-banana-provider.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
+  - 별도 `nano_banana` key가 아니라 Gemini account key를 LLM과 이미지 생성에 함께 쓰는 방향으로 구현한다.
 
 ### Feature F11. Individual and Batch Image Generation
 
@@ -522,18 +696,80 @@
 #### Task T028. MVP end-to-end smoke와 Docker persistence 검증
 - Priority: High
 - Status: Backlog
-- Depends on: T002, T024, T026, T027
+- Depends on: T002, T009C, T024, T026, T027
 - Branch: `feature/T028-mvp-e2e-smoke`
 - Expected PR Unit: `PR-T028`
 - Acceptance Criteria:
   - [ ] Docker Compose로 앱을 실행할 수 있다.
   - [ ] `/app/data` volume에 SQLite DB와 generated images가 persistence 된다.
-  - [ ] signup -> settings -> project create -> storyboard generate -> confirm -> image generate -> export 흐름을 검증했다.
+  - [ ] signup/login -> admin user key assignment -> project create -> storyboard generate -> confirm -> image generate -> export 흐름을 검증했다.
   - [ ] frontend/UI 변경 결과를 브라우저 또는 equivalent visual check로 확인했다.
   - [ ] 실패/재시도/partial batch failure state를 최소 한 번 검증했다.
   - [ ] `.ai/status/active/T028-mvp-e2e-smoke.md`에 전체 검증 명령, URL, 결과, 한계가 기록되어 있다.
 - Notes:
   - 이 Task가 merge된 뒤 초기 MVP를 실사용 후보로 판단한다.
+
+## Epic E07B. Post-MVP Multi-LLM Providers and Model Selection
+
+This epic is explicitly after MVP. MVP should keep the primary storyboard generation path simple and use the fixed provider path defined in E04/E02A.
+
+### Feature F13B. Multi-Provider LLM Generation
+
+#### Task T035. OpenRouter, OpenAI, Claude, Gemini LLM provider adapters 구현
+- Priority: Medium
+- Status: Backlog
+- Depends on: T015B, T009C
+- Branch: `feature/T035-multi-llm-providers`
+- Expected PR Unit: `PR-T035`
+- Acceptance Criteria:
+  - [ ] OpenRouter LLM provider path remains supported.
+  - [ ] OpenAI LLM provider adapter supports `story_structure` and `slide_breakdown`.
+  - [ ] Anthropic Claude LLM provider adapter supports `story_structure` and `slide_breakdown`.
+  - [ ] Google Gemini LLM provider adapter supports `story_structure` and `slide_breakdown`.
+  - [ ] 모든 provider output은 동일한 `storyboardResponseSchema` / `slideBreakdownSchema` validation을 통과해야 accepted storyboard data로 저장된다.
+  - [ ] provider별 API key는 T009C의 account-level provider key store에서 가져온다.
+  - [ ] provider별 failure, rate limit, invalid JSON/schema error가 표준 generation error로 surfaced 된다.
+  - [ ] mocked provider tests가 request mapping, schema validation, retry/error behavior를 검증한다.
+  - [ ] `.ai/status/active/T035-multi-llm-providers.md`에 provider별 검증 결과와 미검증 외부 API 한계가 기록되어 있다.
+- Notes:
+  - "Claude"는 provider implementation에서 Anthropic account/API key로 취급한다.
+  - 실제 provider별 최신 API shape와 model id는 구현 시점에 공식 문서로 확인한다.
+
+#### Task T036. User-selectable LLM provider/model selection 구현
+- Priority: Medium
+- Status: Backlog
+- Depends on: T035
+- Branch: `feature/T036-llm-model-selection`
+- Expected PR Unit: `PR-T036`
+- Acceptance Criteria:
+  - [ ] 사용자가 storyboard generation에 사용할 LLM provider와 주요 model을 선택할 수 있다.
+  - [ ] 선택 가능 provider는 OpenRouter, OpenAI, Claude/Anthropic, Gemini를 포함한다.
+  - [ ] 모델 목록은 provider별 주요 모델을 표시하되, 구현 시점의 공식 model id를 기준으로 관리한다.
+  - [ ] project creation 또는 project settings에서 선택한 provider/model이 project에 저장된다.
+  - [ ] model 선택이 없으면 system default provider/model을 사용한다.
+  - [ ] 선택한 provider key가 해당 user에게 할당되어 있지 않으면 generation 전에 명확한 provider-key error를 표시한다.
+  - [ ] generation history 또는 project metadata에 사용한 provider/model snapshot이 저장된다.
+  - [ ] 브라우저 또는 equivalent visual check로 provider/model 선택 UX를 확인했다.
+  - [ ] `.ai/status/active/T036-llm-model-selection.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 이 기능은 MVP 이후로 미룬다.
+  - MVP에서는 사용자에게 LLM model 선택 UI를 노출하지 않는다.
+
+#### Task T037. Unified provider key migration cleanup 구현
+- Priority: Medium
+- Status: Backlog
+- Depends on: T009C, T035, T036
+- Branch: `chore/T037-unified-provider-key-cleanup`
+- Expected PR Unit: `PR-T037`
+- Acceptance Criteria:
+  - [ ] 기존 `openai_images`, `nano_banana` 등 image-only provider key naming이 code/docs/tests에서 제거되거나 compatibility layer로 격리된다.
+  - [ ] account-level provider key names(`openrouter`, `openai`, `anthropic`, `gemini`)가 API, DB, admin UI, tests에서 일관된다.
+  - [ ] image generation provider와 LLM provider가 같은 account-level key source를 공유한다.
+  - [ ] migration 또는 compatibility decision이 status file에 기록되어 있다.
+  - [ ] `.ai/status/active/T037-unified-provider-key-cleanup.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 신규 설치/신규 DB 기준으로는 account-level provider key model을 우선한다.
+  - 기존 개발 데이터 호환이 필요하면 temporary compatibility mapping을 명시적으로 둔다.
 
 ---
 
@@ -541,21 +777,24 @@
 
 ### Feature F14. AI-Assisted Slide Editing
 
-#### Task T029. AI merge for adjacent slides 구현
+#### Task T029. AI merge for selected slides 구현
 - Priority: Medium
 - Status: Backlog
 - Depends on: T019, T013
-- Branch: `feature/T029-ai-merge-slides`
+- Branch: `feature/T029-ai-merge-selected-slides`
 - Expected PR Unit: `PR-T029`
 - Acceptance Criteria:
-  - [ ] adjacent slides를 AI로 merge할 수 있다.
+  - [ ] 사용자가 2개 이상의 slide를 선택해 하나의 slide로 merge할 수 있다.
+  - [ ] MVP 후속 범위에서는 우선 인접한 selected slides 병합을 지원하고, 비인접 slides 병합 지원 여부는 구현 전 확정한다.
   - [ ] merged slide는 title, core message, content points, visual direction, image prompt, slide role을 포함한다.
-  - [ ] source slides와 merged result의 before/after snapshot이 operation history에 저장된다.
+  - [ ] source slides의 순서, 선택 범위, merged result의 before/after snapshot이 operation history에 저장된다.
+  - [ ] merge 적용 후 retained slide와 soft-deleted source slides의 ordering이 안정적으로 재계산된다.
   - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
   - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
   - [ ] `.ai/status/active/T029-ai-merge-slides.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
+  - 2026-06-03 user feedback: 여러 slide를 하나로 합치는 병합 기능이 필요하다.
 
 #### Task T030. AI split slide 구현
 - Priority: Medium

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createTestDatabase } from "@/lib/db/test-utils";
-import { createUser, verifyUserPassword } from "@/lib/auth/users";
+import {
+  createUser,
+  seedDevelopmentUsers,
+  verifyUserPassword,
+} from "@/lib/auth/users";
 import {
   deleteUserApiKey,
   getUserApiKeyPresence,
@@ -28,6 +32,20 @@ describe("T006 credentials auth", () => {
     await expect(
       verifyUserPassword(db, "owner@example.com", "correct-horse-battery"),
     ).resolves.toMatchObject({ id: user.id, email: "owner@example.com" });
+  });
+
+  it("seeds local development test and admin accounts with short aliases", async () => {
+    const db = createTestDatabase();
+
+    await seedDevelopmentUsers(db);
+    await seedDevelopmentUsers(db);
+
+    await expect(verifyUserPassword(db, "test", "test")).resolves.toMatchObject({
+      email: "test@example.local",
+    });
+    await expect(verifyUserPassword(db, "admin", "admin")).resolves.toMatchObject({
+      email: "admin@example.local",
+    });
   });
 });
 

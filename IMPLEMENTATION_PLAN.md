@@ -4,11 +4,14 @@
 
 ## Tracking Policy
 
-- **Status values:** `Backlog`, `In Progress`, `Needs Review`, `Done`, `Blocked`
+- **Status values:** `Backlog`, `Ready`, `In Progress`, `Needs Review`, `Done`, `Blocked`
 - **Done 기준:** A task is `Done` only after its PR has been merged into `main`.
+- **Issue field:** Each task should include an `Issue` field. Use `None` when no GitHub Issue is linked yet.
+- **PR field:** Each task should include a `PR` field. Use `None` until the task is completed by a merged PR, then record the closing PR number such as `#123`.
+- **GitHub Issue sync:** Create GitHub Issues only for tasks whose `Status` is `Ready` and whose `Issue` field is `None`; after creation, update the task's `Issue` field with the issue number.
 - **Default PR 단위:** One task per PR unless this plan explicitly groups tasks or the user approves a different split.
 - **Task status file:** Each implementation branch should create or update `.ai/status/active/<task-id>-<short-name>.md`.
-- **PR body:** Each PR should be written in Korean and mention the task ID, acceptance criteria covered, status-file path, and any follow-up work.
+- **PR body:** Each PR should be written in Korean and mention the task ID, linked issue number, acceptance criteria covered, status-file path, and any follow-up work. If a task has a linked Issue, include a GitHub closing keyword such as `Closes #123`.
 - **Plan updates:** Update this document from merged PRs, PR notes, task status files, or direct user instruction in a dedicated planning/docs session.
 
 ---
@@ -20,6 +23,8 @@
 #### Task T001. Next.js 앱 스캐폴드와 기본 런타임 구성
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: None
 - Branch: `feature/T001-app-scaffold`
 - Expected PR Unit: `PR-T001`
@@ -36,6 +41,8 @@
 #### Task T002. Dockerfile과 Docker Compose 개발 환경 구성
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T001
 - Branch: `feature/T002-docker-foundation`
 - Expected PR Unit: `PR-T002`
@@ -51,6 +58,8 @@
 #### Task T003. 테스트, 린트, 포맷 기본 명령 정리
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T001
 - Branch: `feature/T003-quality-baseline`
 - Expected PR Unit: `PR-T003`
@@ -65,7 +74,9 @@
 
 #### Task T003A. First screen product-purpose copy 보강
 - Priority: Low
-- Status: Backlog
+- Status: Ready
+- Issue: #6
+- PR: None
 - Depends on: T001
 - Branch: `fix/T003A-home-purpose-copy`
 - Expected PR Unit: `PR-T003A`
@@ -92,6 +103,8 @@
 #### Task T004. SQLite + Drizzle 초기 스키마 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T001
 - Branch: `feature/T004-drizzle-schema`
 - Expected PR Unit: `PR-T004`
@@ -108,6 +121,8 @@
 #### Task T005. 데이터 접근 계층과 사용자 소유권 필터 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T004
 - Branch: `feature/T005-data-access-ownership`
 - Expected PR Unit: `PR-T005`
@@ -129,6 +144,8 @@
 #### Task T006. Auth.js Credentials 기반 세션 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T004
 - Branch: `feature/T006-auth-session`
 - Expected PR Unit: `PR-T006`
@@ -145,6 +162,8 @@
 #### Task T007. 회원가입, 로그인, 로그아웃 UI 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T006
 - Branch: `feature/T007-auth-ui`
 - Expected PR Unit: `PR-T007`
@@ -164,6 +183,8 @@
 #### Task T007A. Login layout vertical spacing UX 수정
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T007
 - Branch: `fix/T007A-login-layout-spacing`
 - Expected PR Unit: `PR-T007A`
@@ -183,6 +204,8 @@
 #### Task T008. API key AES-GCM 암호화 저장 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T004
 - Branch: `feature/T008-api-key-encryption`
 - Expected PR Unit: `PR-T008`
@@ -201,6 +224,8 @@
 #### Task T009. Settings API key 관리 화면 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T007, T008
 - Branch: `feature/T009-api-key-settings`
 - Expected PR Unit: `PR-T009`
@@ -236,6 +261,8 @@ MVP scope:
 #### Task T009A. User signup/login simplification and admin role foundation 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T006, T007, T008
 - Branch: `feature/T009A-admin-role-auth-simplification`
 - Expected PR Unit: `PR-T009A`
@@ -259,6 +286,8 @@ MVP scope:
 #### Task T009B. Admin member and API key management page 구현
 - Priority: High
 - Status: Needs Review
+- Issue: None
+- PR: None
 - Depends on: T009A
 - Branch: `feature/T009B-admin-member-key-management-page`
 - Expected PR Unit: `PR-T009B`
@@ -287,6 +316,8 @@ MVP scope:
 #### Task T009C. Admin-managed user API key assignment 구현
 - Priority: High
 - Status: Needs Review
+- Issue: None
+- PR: None
 - Depends on: T009B, T008
 - Branch: `feature/T009C-admin-api-key-assignment`
 - Expected PR Unit: `PR-T009C`
@@ -320,6 +351,8 @@ MVP scope:
 #### Task T010. 프로젝트 목록과 soft delete 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T005, T007
 - Branch: `feature/T010-project-list`
 - Expected PR Unit: `PR-T010`
@@ -339,6 +372,8 @@ MVP scope:
 #### Task T011. 새 프로젝트 one-page 생성 form 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T010
 - Branch: `feature/T011-new-project-form`
 - Expected PR Unit: `PR-T011`
@@ -356,7 +391,9 @@ MVP scope:
 
 #### Task T011A. Slide count range preference UI와 project contract 정리
 - Priority: High
-- Status: Backlog
+- Status: Ready
+- Issue: #7
+- PR: None
 - Depends on: T011, T015B
 - Branch: `feature/T011A-slide-count-range-preference`
 - Expected PR Unit: `PR-T011A`
@@ -381,6 +418,8 @@ MVP scope:
 #### Task T012. 스타일 템플릿과 이미지 설정 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T011
 - Branch: `feature/T012-style-image-settings`
 - Expected PR Unit: `PR-T012`
@@ -405,6 +444,8 @@ MVP scope:
 #### Task T013. OpenRouter LLM provider와 Zod schema 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T008, T012
 - Branch: `feature/T013-openrouter-structured-output`
 - Expected PR Unit: `PR-T013`
@@ -424,6 +465,8 @@ MVP scope:
 #### Task T014. Story structure analysis와 improvement suggestion 생성
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T013
 - Branch: `feature/T014-story-structure-analysis`
 - Expected PR Unit: `PR-T014`
@@ -440,6 +483,8 @@ MVP scope:
 #### Task T015. Slide breakdown 생성과 slide persistence 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T014
 - Branch: `feature/T015-slide-breakdown`
 - Expected PR Unit: `PR-T015`
@@ -457,6 +502,8 @@ MVP scope:
 #### Task T015A. Storyline-to-slide sample fixture contract 정리
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T013, T014, T015
 - Branch: `feature/T015A-storyboard-sample-contract`
 - Expected PR Unit: `PR-T015A`
@@ -481,6 +528,8 @@ MVP scope:
 #### Task T015B. Real OpenRouter storyboard generation 연결
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T015A, T009C
 - Branch: `feature/T015B-openrouter-storyboard-call`
 - Expected PR Unit: `PR-T015B`
@@ -506,6 +555,8 @@ MVP scope:
 #### Task T015C. Slide count range policy generation integration
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T011A, T015B
 - Branch: `feature/T015C-slide-count-range-policy`
 - Expected PR Unit: `PR-T015C`
@@ -526,6 +577,8 @@ MVP scope:
 #### Task T015D. Reusable LLM prompt quality baseline and prompt-engineer review
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T028
 - Branch: `feature/T015D-storyboard-prompt-hardening`
 - Expected PR Unit: `PR-T015D`
@@ -567,6 +620,8 @@ MVP scope:
 #### Task T016. Vertical storyboard review UI와 confirmation 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T015
 - Branch: `feature/T016-storyboard-review-ui`
 - Expected PR Unit: `PR-T016`
@@ -593,6 +648,8 @@ MVP scope:
 #### Task T017. Side panel field editing 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T016
 - Branch: `feature/T017-slide-field-editing`
 - Expected PR Unit: `PR-T017`
@@ -611,6 +668,8 @@ MVP scope:
 #### Task T017A. Slide card selection detail panel sync bug 수정
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T017
 - Branch: `fix/T017A-slide-selection-detail-sync`
 - Expected PR Unit: `PR-T017A`
@@ -629,7 +688,9 @@ MVP scope:
 
 #### Task T017B. Storyboard detail input floating panel UX 수정
 - Priority: Medium
-- Status: Backlog
+- Status: Ready
+- Issue: #8
+- PR: None
 - Depends on: T017A
 - Branch: `fix/T017B-floating-detail-panel`
 - Expected PR Unit: `PR-T017B`
@@ -651,6 +712,8 @@ MVP scope:
 #### Task T018. Reorder, add blank, delete slide 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T017
 - Branch: `feature/T018-manual-slide-operations`
 - Expected PR Unit: `PR-T018`
@@ -669,6 +732,8 @@ MVP scope:
 #### Task T019. Manual split과 operation history 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T018
 - Branch: `feature/T019-operation-history`
 - Expected PR Unit: `PR-T019`
@@ -697,6 +762,8 @@ MVP scope:
 #### Task T020. Image provider interface와 local storage provider 구현
 - Priority: High
 - Status: Done
+- Issue: None
+- PR: None
 - Depends on: T016
 - Branch: `feature/T020-image-provider-storage`
 - Expected PR Unit: `PR-T020`
@@ -712,7 +779,9 @@ MVP scope:
 
 #### Task T021. GPT Image / OpenAI Images provider 구현
 - Priority: High
-- Status: Backlog
+- Status: Ready
+- Issue: #9
+- PR: None
 - Depends on: T020, T009C
 - Branch: `feature/T021-openai-images-provider`
 - Expected PR Unit: `PR-T021`
@@ -729,7 +798,9 @@ MVP scope:
 
 #### Task T022. Gemini/Nano Banana image provider 구현
 - Priority: High
-- Status: Backlog
+- Status: Ready
+- Issue: #10
+- PR: None
 - Depends on: T020, T009C
 - Branch: `feature/T022-gemini-image-provider`
 - Expected PR Unit: `PR-T022`
@@ -750,6 +821,8 @@ MVP scope:
 #### Task T023. Single slide image generation, regeneration, history 구현
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T017, T021, T022
 - Branch: `feature/T023-single-image-generation`
 - Expected PR Unit: `PR-T023`
@@ -767,6 +840,8 @@ MVP scope:
 #### Task T023A. Image prompt cache readiness와 regeneration prompt assembly 정리
 - Priority: Low
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T023, T015D
 - Branch: `feature/T023A-image-prompt-cache-readiness`
 - Expected PR Unit: `PR-T023A`
@@ -789,6 +864,8 @@ MVP scope:
 #### Task T024. Batch image generation과 concurrency/progress 구현
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T023
 - Branch: `feature/T024-batch-image-generation`
 - Expected PR Unit: `PR-T024`
@@ -813,6 +890,8 @@ MVP scope:
 #### Task T025. Markdown export 구현
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T016, T019, T023
 - Branch: `feature/T025-markdown-export`
 - Expected PR Unit: `PR-T025`
@@ -830,6 +909,8 @@ MVP scope:
 #### Task T026. Selected image ZIP export 구현
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T025
 - Branch: `feature/T026-selected-image-zip-export`
 - Expected PR Unit: `PR-T026`
@@ -848,6 +929,8 @@ MVP scope:
 #### Task T027. 보안/소유권/삭제 데이터 hardening
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T020, T026
 - Branch: `feature/T027-security-hardening`
 - Expected PR Unit: `PR-T027`
@@ -864,6 +947,8 @@ MVP scope:
 #### Task T027A. Provider call progress and loading visualization 구현
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T015B, T023, T024
 - Branch: `feature/T027A-provider-call-progress-ui`
 - Expected PR Unit: `PR-T027A`
@@ -884,6 +969,8 @@ MVP scope:
 #### Task T027B. Actual provider usage ledger and admin cost dashboard 구현
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T009B, T015B, T021, T022, T024
 - Branch: `feature/T027B-provider-usage-ledger`
 - Expected PR Unit: `PR-T027B`
@@ -912,6 +999,8 @@ MVP scope:
 #### Task T028. MVP end-to-end smoke와 Docker persistence 검증
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T002, T009C, T024, T026, T027, T027A, T027B
 - Branch: `feature/T028-mvp-e2e-smoke`
 - Expected PR Unit: `PR-T028`
@@ -934,6 +1023,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T035. OpenRouter, OpenAI, Claude, Gemini LLM provider adapters 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T015B, T009C
 - Branch: `feature/T035-multi-llm-providers`
 - Expected PR Unit: `PR-T035`
@@ -954,6 +1045,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T036. User-selectable LLM model selection 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T035
 - Branch: `feature/T036-llm-model-selection`
 - Expected PR Unit: `PR-T036`
@@ -983,6 +1076,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T037. Unified provider key migration cleanup 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T009C, T035, T036
 - Branch: `chore/T037-unified-provider-key-cleanup`
 - Expected PR Unit: `PR-T037`
@@ -1008,6 +1103,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T038. Post-MVP provider error and recovery UX 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T027A, T035, T036, T037
 - Branch: `feature/T038-provider-error-recovery-ux`
 - Expected PR Unit: `PR-T038`
@@ -1035,6 +1132,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T029. AI merge for selected slides 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T019, T015D
 - Branch: `feature/T029-ai-merge-selected-slides`
 - Expected PR Unit: `PR-T029`
@@ -1055,6 +1154,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T030. AI split slide 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T019, T015D
 - Branch: `feature/T030-ai-split-slide`
 - Expected PR Unit: `PR-T030`
@@ -1072,6 +1173,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T031. AI insert slide from natural language 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T019, T015D
 - Branch: `feature/T031-ai-insert-slide`
 - Expected PR Unit: `PR-T031`
@@ -1089,6 +1192,8 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T032. AI deck flow reflow after structural slide edits 구현
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: T019, T029, T030, T031, T015D
 - Branch: `feature/T032-ai-deck-flow-reflow`
 - Expected PR Unit: `PR-T032`
@@ -1115,6 +1220,8 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 #### Task D001. IMPLEMENTATION_PLAN.md 상태 갱신
 - Priority: High
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: Merged PR evidence
 - Branch: `docs/update-implementation-plan`
 - Expected PR Unit: `PR-D001`
@@ -1129,6 +1236,8 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 #### Task D002. 프로젝트 backlog/status/roadmap 문서 정리
 - Priority: Medium
 - Status: Backlog
+- Issue: None
+- PR: None
 - Depends on: Merged PR evidence or user instruction
 - Branch: `docs/update-project-status`
 - Expected PR Unit: `PR-D002`

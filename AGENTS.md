@@ -30,11 +30,16 @@ Work in this project should proceed by `IMPLEMENTATION_PLAN.md` task IDs wheneve
 - Keep each PR traceable to its task ID.
 - In every PR body, mention:
   - task ID and task title
+  - linked GitHub Issue number from the task's `Issue` field, if present
+  - current task `PR` field value, usually `None` before merge
   - what was implemented
   - acceptance criteria covered
   - task status file path
   - follow-up work or known gaps
 - Write PR bodies in Korean unless the user explicitly asks for another language.
+- If the task has a linked GitHub Issue in `IMPLEMENTATION_PLAN.md`, include a closing keyword such as `Closes #<issue-number>` in the PR body so the Issue is closed when the PR is merged.
+- If the task has no linked Issue, explicitly state `Issue: None` in the PR body and do not invent an Issue number.
+- After a PR is merged and verified in a planning/docs session, update that task's `PR` field in `IMPLEMENTATION_PLAN.md` to the merged PR number.
 - Do not mark a task `Done` in `IMPLEMENTATION_PLAN.md` until its PR has been merged into `main`.
 - Before marking a task `Done` in `IMPLEMENTATION_PLAN.md`, verify every Acceptance Criteria item for that task and change the completed criteria from `[ ]` to `[x]`.
 - If any Acceptance Criteria item is not satisfied, do not mark the task `Done`; mark it `Needs Review` or keep it in progress and explain the gap in the task status file.

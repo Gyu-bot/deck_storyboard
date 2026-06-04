@@ -13,7 +13,7 @@
   - PR #39: T015C slide count range policy generation integration, closed Issue #14.
   - PR #40: T023 single-slide image generation history, closed Issue #15.
 - Confirmed open Issues #17-#35.
-- Confirmed Issue #36 and Issue #37 do not exist in the remote repository; D001/D002 are now tracked as Issues #58/#59 instead.
+- Confirmed Issue #36 and Issue #37 do not exist in the remote repository; D001 is now tracked as Issue #58.
 
 ## Plan Updates
 
@@ -33,13 +33,15 @@
 - Added T017C as a Ready bugfix after confirming slide-detail `onBlur` saves unchanged fields and marks them `userModified` without value comparison.
 - Added T009D/T010A/T011D as Low-priority post-MVP feature tasks for master-admin role revocation, public read-only project sharing, and pre-confirm project generation settings editing.
 - Added T007B as a Low-priority auth UI polish task for compact `/signup` email/password input sizing while preserving `/login` spacing.
-- Created GitHub Issues #41-#59 for newly split/added active planning tasks and updated their `Issue` fields in `IMPLEMENTATION_PLAN.md`.
+- Created GitHub Issues #41-#59 for newly split/added active planning tasks and updated their `Issue` fields in `IMPLEMENTATION_PLAN.md`; #59 was later retired when D002 was removed.
 - Updated GitHub Project `Deck_storyboard MVP` item fields with `gh project item-edit` for all 46 issue-backed tasks: Status maps `Backlog`/`Ready`/`In Progress`/`Needs Review`/`Done` to Project `Backlog`/`Ready`/`In progress`/`In review`/`Done`, and Priority maps `Critical`/`High`/`Medium`/`Low` to `P0`/`P1`/`P2`/`P3`.
 - Linked T027A1/T027A2/T027A3 Issues #53/#54/#55 as GitHub sub-issues of T027A Issue #26.
 - Updated README.md and README_KO.md with a dedicated LLM calls / prompt structure section documenting `story_structure`, `slide_breakdown`, image prompt assembly, structured outputs, and the current visualDirection/imagePrompt gap.
 - Added T011B as a Needs Review investigation task for an intermittent project creation redirect-to-login report after selecting detailed slide count.
 - Added/expanded T011C as a Low-priority minor UI improvement bucket for project creation form polish and project list/detail metadata display, starting with a live 60,000-character storyline counter plus slide-count/style/mockup setting visibility.
-- Replaced invalid D001/D002 Issue references with newly created Issues #58/#59.
+- Replaced invalid D001 Issue reference with newly created Issue #58.
+- Removed D002 after user decision that `PROJECT_BACKLOG.md`, `PROJECT_STATUS.md`, `ROADMAP.md`, and `DECISIONS.md` would duplicate `IMPLEMENTATION_PLAN.md`, GitHub Issues/Project, `.ai/status/active/`, and git history.
+- Closed D002 Issue #59 as `not planned` and removed it from the GitHub Project so it no longer appears as active backlog.
 - Marked D001 as In Progress on the current docs branch.
 
 ## Verification
@@ -48,11 +50,11 @@
 - `gh issue view 36 --repo Gyu-bot/deck_storyboard --json number,title,state,url,closedAt` -> not found.
 - `gh issue view 37 --repo Gyu-bot/deck_storyboard --json number,title,state,url,closedAt` -> not found.
 - `git diff --check -- IMPLEMENTATION_PLAN.md` -> passed.
-- `node tmp/verify-github-project-fields.mjs` -> checked 46 project issue tasks, mismatches 0.
+- `node tmp/verify-github-project-fields.mjs` -> checked 49 project issue items against plan-backed tasks after umbrella issue additions and D002 project removal, mismatches 0.
 - GitHub GraphQL query for Issue #26 sub-issues -> confirmed #53, #54, and #55 are linked under T027A.
 - Stale-marker search for invalid Issue #36/#37 references and outdated Ready/Needs Review notes in `IMPLEMENTATION_PLAN.md` -> no matches.
 - Independent reviewer pass found that T009C should not be marked Done by redefining OpenAI/Gemini LLM reuse criteria; corrected T009C back to Needs Review.
-- Task metadata/dependency audit after latest updates -> 71 tasks, no missing dependencies, no Ready tasks with unfinished dependencies.
+- Task metadata/dependency audit after latest updates -> 70 tasks, no D002 task, no missing dependencies, no Ready tasks with unfinished dependencies.
 
 ## Known Gaps
 

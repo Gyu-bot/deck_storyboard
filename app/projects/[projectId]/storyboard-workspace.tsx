@@ -118,6 +118,19 @@ type ProjectView = {
   generationError: string | null;
 };
 
+type SlideImageView = {
+  id: string;
+  imageUrl: string;
+  provider: string;
+  model: string;
+  aspectRatio: "16:9" | "4:3";
+  status: "succeeded" | "failed";
+  selected: boolean;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type SlideView = {
   id: string;
   sectionTitle: string;
@@ -131,18 +144,14 @@ type SlideView = {
   fieldEditState: Record<string, string>;
   imageGenerationStatus: string;
   imageUrl?: string | null;
+  images?: SlideImageView[];
 };
 
 type ImageGenerationResponse = {
   generated: number;
   failed: number;
   error: string | null;
-  images?: Array<{
-    slideId: string | null;
-    imageUrl: string;
-    provider: string;
-    model: string;
-  }>;
+  images?: Array<SlideImageView & { slideId: string | null }>;
 };
 
 function SortableSlideCard({
@@ -265,7 +274,15 @@ function StaticSlideCard({
   );
 }
 
-function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView | null }) {
+function DetailPanel({
+  projectId,
+  slide,
+  onSelectImage,
+}: {
+  projectId: string;
+  slide: SlideView | null;
+  onSelectImage: (slideId: string, image: SlideImageView) => void;
+}) {
   const [tab, setTab] = useState<"content" | "prompt" | "images">("content");
   if (!slide) {
     return (
@@ -279,6 +296,11 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
     );
   }
   const selectedSlide = slide;
+  const imageHistory = slide.images ?? [];
+  const selectedImage = imageHistory.find((image) => image.selected) ?? null;
+  const selectedImageUrl = imageHistory.length
+    ? selectedImage?.imageUrl ?? null
+    : slide.imageUrl ?? null;
 
   async function saveField(field: string, value: string) {
     const form = new FormData();
@@ -293,6 +315,27 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
     window.location.reload();
   }
 
+  async function selectImage(imageId: string, selected = true) {
+    const response = await fetch(`/api/projects/${projectId}/images/${imageId}`, {
+      method: "PATCH",
+      ...(selected
+        ? {}
+        : {
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ selected: false }),
+          }),
+    });
+    if (!response.ok) {
+      if (projectId === "dev-storyboard-sample") {
+        const localImage = imageHistory.find((image) => image.id === imageId);
+        if (localImage) onSelectImage(selectedSlide.id, { ...localImage, selected });
+      }
+      return;
+    }
+    const image = (await response.json()) as SlideImageView & { slideId: string | null };
+    if (image.slideId) onSelectImage(image.slideId, image);
+  }
+
   function fieldRows(field: string) {
     if (field === "contentPoints") return 7;
     if (field === "coreMessage" || field === "visualDirection") return 5;
@@ -302,7 +345,7 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
   return (
     <aside
       aria-label="선택 슬라이드 상세 편집 패널"
-      className="grid self-start overflow-hidden rounded-md border border-border bg-card shadow-sm lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]"
+      className="grid self-start overflow-hidden rounded-md border border-border bg-card shadow-sm lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:max-h-[calc(100vh-3rem)] lg:grid-rows-[auto_auto_minmax(0,1fr)]"
     >
       <div className="flex items-center justify-between gap-3 p-5">
         <div className="min-w-0">
@@ -330,7 +373,10 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
           </button>
         ))}
       </div>
-      <div data-testid="storyboard-detail-scroll-area" className="min-h-0 overflow-y-auto px-5 pb-5">
+      <div
+        data-testid="storyboard-detail-scroll-area"
+        className="min-h-0 overflow-y-auto overscroll-contain px-5 pb-5"
+      >
         {tab === "content" ? (
           <div className="grid gap-3">
             {[
@@ -377,25 +423,96 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
         ) : null}
         {tab === "images" ? (
           <div className="grid gap-3">
-            {slide.imageUrl ? (
-              <div className="overflow-hidden rounded-md border border-border bg-background">
-                <Image
-                  src={slide.imageUrl}
-                  alt={`${localizeGeneratedText(slide.title)} 목업`}
-                  width={960}
-                  height={540}
-                  unoptimized
-                  className="aspect-video w-full object-contain"
-                />
-              </div>
-            ) : (
-              <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-                생성된 목업 이미지가 아직 없습니다.
-              </div>
-            )}
+            <section className="grid gap-2">
+              <h3 className="text-sm font-semibold">선택된 목업</h3>
+              {selectedImageUrl ? (
+                <div className="overflow-hidden rounded-md border border-border bg-background">
+                  <Image
+                    src={selectedImageUrl}
+                    alt={`${localizeGeneratedText(slide.title)} 선택 목업`}
+                    width={960}
+                    height={540}
+                    unoptimized
+                    className="aspect-video w-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+                  선택된 목업 이미지가 아직 없습니다.
+                </div>
+              )}
+            </section>
             <p className="text-sm text-muted-foreground">
               현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
             </p>
+            <section className="grid gap-2">
+              <h3 className="text-sm font-semibold">생성 이력</h3>
+              {imageHistory.length ? (
+                <ol className="grid gap-2">
+                  {imageHistory.map((image) => (
+                    <li
+                      key={image.id || image.imageUrl}
+                      className="grid gap-2 rounded-md border border-border bg-background p-3 text-sm"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="font-medium">
+                            {image.provider} · {image.model} · {image.aspectRatio}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {image.status === "succeeded" ? "완료" : "실패"} ·{" "}
+                            {new Date(image.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        {image.selected ? (
+                          <div className="flex items-center gap-2">
+                            <span className="rounded-sm bg-secondary px-2 py-1 text-xs font-medium">
+                              선택됨
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              aria-label={`목업 ${image.id} 선택 해제`}
+                              onClick={() => selectImage(image.id, false)}
+                            >
+                              선택 해제
+                            </Button>
+                          </div>
+                        ) : image.status === "succeeded" && image.id ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            aria-label={`목업 ${image.id} 선택`}
+                            onClick={() => selectImage(image.id)}
+                          >
+                            선택
+                          </Button>
+                        ) : null}
+                      </div>
+                      {image.status === "succeeded" && image.imageUrl ? (
+                        <Image
+                          src={image.imageUrl}
+                          alt={`${localizeGeneratedText(slide.title)} 이력 목업 ${image.id}`}
+                          width={320}
+                          height={180}
+                          unoptimized
+                          className="aspect-video w-full rounded-sm border border-border object-contain"
+                        />
+                      ) : null}
+                      {image.errorMessage ? (
+                        <p className="text-xs text-red-700">{image.errorMessage}</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+                  생성된 목업 이력이 아직 없습니다.
+                </div>
+              )}
+            </section>
           </div>
         ) : null}
       </div>
@@ -451,6 +568,31 @@ export function StoryboardWorkspace({
     window.location.reload();
   }
 
+  function applySelectedImage(slideId: string, image: SlideImageView) {
+    setSlides((currentSlides) =>
+      currentSlides.map((slide) => {
+        if (slide.id !== slideId) return slide;
+        const images = [
+          image,
+          ...(slide.images ?? []).filter((candidate) => candidate.id !== image.id),
+        ].map((candidate) => ({
+          ...candidate,
+          selected: image.selected
+            ? candidate.id === image.id
+            : candidate.id === image.id
+              ? false
+              : candidate.selected,
+        }));
+        return {
+          ...slide,
+          imageGenerationStatus: "generated",
+          imageUrl: image.selected ? image.imageUrl : null,
+          images,
+        };
+      }),
+    );
+  }
+
   async function generateMockups(slideId?: string) {
     setMockupGenerationPending(true);
     if (slideId) setGeneratingSlideIds((ids) => [...new Set([...ids, slideId])]);
@@ -469,22 +611,38 @@ export function StoryboardWorkspace({
       return;
     }
     const payload = (await response.json().catch(() => null)) as ImageGenerationResponse | null;
-    const imageUrlBySlideId = new Map(
+    const imageBySlideId = new Map(
       (payload?.images ?? [])
         .filter((image) => image.slideId)
-        .map((image) => [image.slideId as string, image.imageUrl]),
+        .map((image) => [image.slideId as string, image]),
     );
     setSlides((currentSlides) =>
       currentSlides.map((slide) => {
-        const generatedImageUrl = imageUrlBySlideId.get(slide.id);
+        const generatedImage = imageBySlideId.get(slide.id);
         const wasRequested = !slideId || slide.id === slideId;
+        const generatedSelected =
+          generatedImage?.selected ??
+          (generatedImage ? !(slide.images ?? []).some((image) => image.selected) : false);
+        const images = generatedImage
+          ? [
+              { ...generatedImage, selected: generatedSelected },
+              ...(slide.images ?? []).filter((image) => image.id !== generatedImage.id),
+            ].map((image) => ({
+              ...image,
+              selected: generatedSelected
+                ? image.id === generatedImage.id
+                : image.selected,
+            }))
+          : slide.images;
+        const selectedImage = images?.find((image) => image.selected);
         return {
           ...slide,
           imageGenerationStatus:
-            generatedImageUrl || (wasRequested && !payload?.images?.length)
+            generatedImage || (wasRequested && !payload?.images?.length)
               ? "generated"
               : slide.imageGenerationStatus,
-          imageUrl: generatedImageUrl ?? slide.imageUrl,
+          imageUrl: selectedImage?.imageUrl ?? (generatedSelected ? generatedImage?.imageUrl : slide.imageUrl),
+          images,
         };
       }),
     );
@@ -628,7 +786,7 @@ export function StoryboardWorkspace({
           </div>
         )}
       </section>
-      <DetailPanel projectId={project.id} slide={selectedSlide} />
+      <DetailPanel projectId={project.id} slide={selectedSlide} onSelectImage={applySelectedImage} />
     </div>
   );
 }

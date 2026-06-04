@@ -257,13 +257,105 @@ export function listLatestSuccessfulSlideImagesForProject(
     )
     .orderBy(desc(slideImageGenerations.createdAt))
     .all();
-  const latestBySlideId = new Map<string, (typeof records)[number]>();
+  const selectedBySlideId = new Map<string, (typeof records)[number]>();
   for (const record of records) {
-    if (record.slideId && !latestBySlideId.has(record.slideId)) {
-      latestBySlideId.set(record.slideId, record);
+    if (record.slideId && record.selected && !selectedBySlideId.has(record.slideId)) {
+      selectedBySlideId.set(record.slideId, record);
     }
   }
-  return [...latestBySlideId.values()];
+  return [...selectedBySlideId.values()];
+}
+
+export function listSlideImageGenerationsForProject(
+  db: Db,
+  projectId: string,
+  userId: string,
+) {
+  if (!getProjectForUser(db, projectId, userId)) return [];
+  return db
+    .select()
+    .from(slideImageGenerations)
+    .where(
+      and(
+        eq(slideImageGenerations.projectId, projectId),
+        isNull(slideImageGenerations.deletedAt),
+      ),
+    )
+    .orderBy(desc(slideImageGenerations.createdAt))
+    .all();
+}
+
+export function setSlideImageGenerationSelectionForProject(
+  db: Db,
+  projectId: string,
+  userId: string,
+  imageGenerationId: string,
+  selected: boolean,
+) {
+  if (!getProjectForUser(db, projectId, userId)) return null;
+  const target = db
+    .select()
+    .from(slideImageGenerations)
+    .where(
+      and(
+        eq(slideImageGenerations.id, imageGenerationId),
+        eq(slideImageGenerations.projectId, projectId),
+        eq(slideImageGenerations.status, "succeeded"),
+        isNull(slideImageGenerations.deletedAt),
+      ),
+    )
+    .get();
+  if (!target?.slideId) return null;
+  const slide = db
+    .select({ id: slides.id })
+    .from(slides)
+    .where(
+      and(
+        eq(slides.id, target.slideId),
+        eq(slides.projectId, projectId),
+        isNull(slides.deletedAt),
+      ),
+    )
+    .get();
+  if (!slide) return null;
+  const timestamp = now();
+  if (selected) {
+    db.update(slideImageGenerations)
+      .set({ selected: false, updatedAt: timestamp })
+      .where(
+        and(
+          eq(slideImageGenerations.projectId, projectId),
+          eq(slideImageGenerations.slideId, target.slideId),
+        ),
+      )
+      .run();
+  }
+  db.update(slideImageGenerations)
+    .set({ selected, updatedAt: timestamp })
+    .where(eq(slideImageGenerations.id, target.id))
+    .run();
+  return (
+    db
+      .select()
+      .from(slideImageGenerations)
+      .where(eq(slideImageGenerations.id, target.id))
+      .get() ?? null
+  );
+}
+
+export function selectSlideImageGenerationForProject(
+  db: Db,
+  projectId: string,
+  userId: string,
+  imageGenerationId: string,
+) {
+  return setSlideImageGenerationSelectionForProject(
+    db,
+    projectId,
+    userId,
+    imageGenerationId,
+    true,
+  );
 }
 
 export function updateSlideForProject(

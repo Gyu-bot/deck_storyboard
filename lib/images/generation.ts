@@ -93,6 +93,23 @@ function insertImageGenerationRecord(
   return input;
 }
 
+function hasSuccessfulImage(db: Db, projectId: string, slideId: string) {
+  return Boolean(
+    db
+      .select({ id: slideImageGenerations.id })
+      .from(slideImageGenerations)
+      .where(
+        and(
+          eq(slideImageGenerations.projectId, projectId),
+          eq(slideImageGenerations.slideId, slideId),
+          eq(slideImageGenerations.status, "succeeded"),
+          isNull(slideImageGenerations.deletedAt),
+        ),
+      )
+      .get(),
+  );
+}
+
 export async function generateSlideImageForProject(
   db: Db,
   input: GenerateSlideImageInput,
@@ -141,7 +158,10 @@ export async function generateSlideImageForProject(
         aspectRatio: project.aspectRatio,
         prompt,
       });
-      const fileName = `${slide.id}.${extensionForContentType(generated.contentType)}`;
+      const recordId = randomUUID();
+      const timestamp = now();
+      const selected = !hasSuccessfulImage(db, project.id, slide.id);
+      const fileName = `${slide.id}-${recordId}.${extensionForContentType(generated.contentType)}`;
       const stored = await storage.saveProjectImage({
         projectId: project.id,
         ownerUserId: input.userId,
@@ -150,7 +170,7 @@ export async function generateSlideImageForProject(
         bytes: generated.bytes,
       });
       const record = insertImageGenerationRecord(db, {
-        id: randomUUID(),
+        id: recordId,
         projectId: project.id,
         slideId: slide.id,
         provider,
@@ -158,11 +178,14 @@ export async function generateSlideImageForProject(
         promptSnapshot: prompt,
         commonPromptSnapshot: project.resolvedCommonPrompt,
         slidePromptSnapshot: slide.imagePrompt,
+        aspectRatio: project.aspectRatio,
         storageKey: stored.storageKey,
         imageUrl: stored.url,
         status: "succeeded",
         errorMessage: null,
-        createdAt: now(),
+        selected,
+        createdAt: timestamp,
+        updatedAt: timestamp,
         deletedAt: null,
       });
       db.update(slides)
@@ -195,11 +218,14 @@ export async function generateSlideImageForProject(
     promptSnapshot: prompt,
     commonPromptSnapshot: project.resolvedCommonPrompt,
     slidePromptSnapshot: slide.imagePrompt,
+    aspectRatio: project.aspectRatio,
     storageKey: "",
     imageUrl: "",
     status: "failed",
     errorMessage: normalized.message,
+    selected: false,
     createdAt: now(),
+    updatedAt: now(),
     deletedAt: null,
   });
   db.update(slides)

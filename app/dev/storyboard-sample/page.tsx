@@ -6,6 +6,11 @@ import { loadStoryboardSampleFixture } from "@/lib/storyboard/sample-fixture";
 
 export const runtime = "nodejs";
 
+const sampleImageUrls = [
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NjAiIGhlaWdodD0iNTQwIiB2aWV3Qm94PSIwIDAgOTYwIDU0MCI+PHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmOGZhZmMiLz48cmVjdCB4PSI2MCIgeT0iNjAiIHdpZHRoPSI4NDAiIGhlaWdodD0iNDIwIiBmaWxsPSIjZTVlN2ViIi8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmaWxsPSIjMTExODI3Ij5TZWxlY3RlZCBNb2NrdXA8L3RleHQ+PC9zdmc+",
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NjAiIGhlaWdodD0iNTQwIiB2aWV3Qm94PSIwIDAgOTYwIDU0MCI+PHJlY3Qgd2lkdGg9Ijk2MCIgaGVpZ2h0PSI1NDAiIGZpbGw9IiNmZmZiZWIiLz48cmVjdCB4PSI2MCIgeT0iNjAiIHdpZHRoPSI4NDAiIGhlaWdodD0iNDIwIiBmaWxsPSIjZmRlNjhkIi8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmaWxsPSIjMTExODI3Ij5QcmV2aW91cyBNb2NrdXA8L3RleHQ+PC9zdmc+",
+];
+
 export default function DevStoryboardSamplePage() {
   if (process.env.NODE_ENV === "production") notFound();
 
@@ -21,31 +26,65 @@ export default function DevStoryboardSamplePage() {
     targetSlideCountRationale: sample.targetSlideCountRationale ?? null,
     generationError: null,
   };
-  const slides = sample.slides.map((slide, index) => ({
-    id: `dev-sample-slide-${index + 1}`,
-    projectId: project.id,
-    sectionId: slide.sectionId,
-    sectionTitle: slide.sectionTitle,
-    position: index + 1,
-    title: slide.title,
-    coreMessage: slide.coreMessage,
-    contentPoints: slide.contentPoints,
-    visualDirection: slide.visualDirection,
-    imagePrompt: slide.imagePrompt,
-    slideRole: slide.slideRole,
-    fieldEditState: {
-      title: "aiGenerated",
-      coreMessage: "aiGenerated",
-      contentPoints: "aiGenerated",
-      visualDirection: "aiGenerated",
-      imagePrompt: "aiGenerated",
-      slideRole: "aiGenerated",
-    },
-    imageGenerationStatus: "not_generated",
-    createdAt: now,
-    updatedAt: now,
-    deletedAt: null,
-  }));
+  const slides = sample.slides.map((slide, index) => {
+    const imageHistory =
+      index === 0
+        ? [
+            {
+              id: "dev-sample-image-selected",
+              imageUrl: sampleImageUrls[0]!,
+              provider: "openrouter",
+              model: "gpt-image-2",
+              aspectRatio: "16:9" as const,
+              status: "succeeded" as const,
+              selected: true,
+              errorMessage: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+            {
+              id: "dev-sample-image-previous",
+              imageUrl: sampleImageUrls[1]!,
+              provider: "openrouter",
+              model: "gpt-image-2",
+              aspectRatio: "16:9" as const,
+              status: "succeeded" as const,
+              selected: false,
+              errorMessage: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ]
+        : [];
+
+    return {
+      id: `dev-sample-slide-${index + 1}`,
+      projectId: project.id,
+      sectionId: slide.sectionId,
+      sectionTitle: slide.sectionTitle,
+      position: index + 1,
+      title: slide.title,
+      coreMessage: slide.coreMessage,
+      contentPoints: slide.contentPoints,
+      visualDirection: slide.visualDirection,
+      imagePrompt: slide.imagePrompt,
+      slideRole: slide.slideRole,
+      fieldEditState: {
+        title: "aiGenerated",
+        coreMessage: "aiGenerated",
+        contentPoints: "aiGenerated",
+        visualDirection: "aiGenerated",
+        imagePrompt: "aiGenerated",
+        slideRole: "aiGenerated",
+      },
+      imageGenerationStatus: imageHistory.length ? "generated" : "not_generated",
+      imageUrl: imageHistory.find((image) => image.selected)?.imageUrl ?? null,
+      images: imageHistory,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    };
+  });
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1500px] px-6 py-6">

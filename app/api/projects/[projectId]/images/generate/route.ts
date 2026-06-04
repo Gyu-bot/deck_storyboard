@@ -42,10 +42,17 @@ export async function POST(
   let generated = 0;
   const errors: string[] = [];
   const images: Array<{
+    id: string;
     slideId: string | null;
     imageUrl: string;
     provider: string;
     model: string;
+    aspectRatio: "16:9" | "4:3";
+    status: "succeeded" | "failed";
+    selected: boolean;
+    errorMessage: string | null;
+    createdAt: string;
+    updatedAt: string;
   }> = [];
 
   for (const slide of slides) {
@@ -57,10 +64,17 @@ export async function POST(
       });
       generated += 1;
       images.push({
+        id: image.id,
         slideId: image.slideId ?? null,
         imageUrl: image.imageUrl,
         provider: image.provider,
         model: image.model,
+        aspectRatio: image.aspectRatio ?? "16:9",
+        status: image.status,
+        selected: image.selected ?? false,
+        errorMessage: image.errorMessage ?? null,
+        createdAt: image.createdAt,
+        updatedAt: image.updatedAt,
       });
     } catch (error) {
       errors.push(imageGenerationErrorMessage(error));

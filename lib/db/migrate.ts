@@ -84,11 +84,14 @@ export function migrateDatabase(sqlite: Database.Database) {
       prompt_snapshot TEXT NOT NULL,
       common_prompt_snapshot TEXT NOT NULL DEFAULT '',
       slide_prompt_snapshot TEXT NOT NULL DEFAULT '',
+      aspect_ratio TEXT NOT NULL DEFAULT '16:9',
       storage_key TEXT NOT NULL,
       image_url TEXT NOT NULL,
       status TEXT NOT NULL,
       error_message TEXT,
+      selected INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT '',
       deleted_at TEXT
     );
 
@@ -163,6 +166,42 @@ export function migrateDatabase(sqlite: Database.Database) {
         min_slide_count = target_slide_count,
         max_slide_count = target_slide_count,
         preferred_slide_count = target_slide_count
+    `);
+  }
+
+  const imageGenerationColumns = sqlite
+    .prepare("PRAGMA table_info(slide_image_generations)")
+    .all() as Array<{ name: string }>;
+  const hasImageGenerationColumn = (name: string) =>
+    imageGenerationColumns.some((column) => column.name === name);
+
+  if (!hasImageGenerationColumn("aspect_ratio")) {
+    sqlite.exec("ALTER TABLE slide_image_generations ADD COLUMN aspect_ratio TEXT NOT NULL DEFAULT '16:9'");
+  }
+  if (!hasImageGenerationColumn("selected")) {
+    sqlite.exec("ALTER TABLE slide_image_generations ADD COLUMN selected INTEGER NOT NULL DEFAULT 0");
+  }
+  if (!hasImageGenerationColumn("updated_at")) {
+    sqlite.exec("ALTER TABLE slide_image_generations ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''");
+    sqlite.exec("UPDATE slide_image_generations SET updated_at = created_at WHERE updated_at = ''");
+  }
+  if (!hasImageGenerationColumn("selected")) {
+    sqlite.exec(`
+      UPDATE slide_image_generations
+      SET selected = 1
+      WHERE
+        status = 'succeeded'
+        AND deleted_at IS NULL
+        AND slide_id IS NOT NULL
+        AND created_at = (
+          SELECT MAX(latest.created_at)
+          FROM slide_image_generations AS latest
+          WHERE
+            latest.project_id = slide_image_generations.project_id
+            AND latest.slide_id = slide_image_generations.slide_id
+            AND latest.status = 'succeeded'
+            AND latest.deleted_at IS NULL
+        )
     `);
   }
 }

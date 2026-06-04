@@ -1,7 +1,7 @@
 import { z } from "zod";
 import {
-  describeSlideCountPreferenceForPrompt,
   type SlideCountMode,
+  type SlideMarkerConfidence,
 } from "@/lib/projects/slide-count";
 
 export const storySectionSchema = z.object({
@@ -74,17 +74,25 @@ export const storyboardResponseSchema = z.object({
 
 export type OpenRouterTask = "story_structure" | "slide_breakdown";
 
+type SlideCountPolicyInput = {
+  mode: SlideCountMode;
+  minSlideCount: number | null;
+  maxSlideCount: number | null;
+  preferredSlideCount: number | null;
+  storylineSlideMarkerCount: number | null;
+  storylineSlideMarkerConfidence: SlideMarkerConfidence;
+  targetSlideCountRationale: string | null;
+};
+
+export type OpenRouterSlideCountPolicy = Omit<SlideCountPolicyInput, "mode"> & {
+  mode: Exclude<SlideCountMode, "custom"> | "custom_range";
+};
+
 export type OpenRouterProvider = {
   generateStoryboard(input: {
     task: OpenRouterTask;
     storyline: string;
-    targetSlideCount: number;
-    slideCountPreference?: {
-      mode: SlideCountMode;
-      minSlideCount: number | null;
-      maxSlideCount: number | null;
-      preferredSlideCount: number | null;
-    };
+    slideCountPolicy: SlideCountPolicyInput;
     includeSuggestions: boolean;
     previousStructure?: StoryboardResponse;
   }): Promise<StoryboardResponse>;
@@ -95,13 +103,7 @@ export type OpenRouterFetcherInput = {
   apiKey: string;
   task: OpenRouterTask;
   storyline: string;
-  targetSlideCount: number;
-  slideCountPreference?: {
-    mode: SlideCountMode;
-    minSlideCount: number | null;
-    maxSlideCount: number | null;
-    preferredSlideCount: number | null;
-  };
+  slideCountPolicy: OpenRouterSlideCountPolicy;
   includeSuggestions: boolean;
   previousStructure?: StoryboardResponse;
 };
@@ -230,6 +232,38 @@ const openRouterResponseSchema = z.object({
     .min(1),
 });
 
+function toProviderSlideCountPolicy(
+  policy: SlideCountPolicyInput,
+): OpenRouterSlideCountPolicy {
+  return {
+    ...policy,
+    mode: policy.mode === "custom" ? "custom_range" : policy.mode,
+  };
+}
+
+function formatSlideCountPolicyForPrompt(policy: OpenRouterSlideCountPolicy) {
+  return JSON.stringify(
+    {
+      mode: policy.mode,
+      userSelectedRange:
+        policy.mode === "auto"
+          ? null
+          : {
+              minSlideCount: policy.minSlideCount,
+              maxSlideCount: policy.maxSlideCount,
+            },
+      preferredSlideCount: policy.preferredSlideCount,
+      heuristicMarker: {
+        estimatedCount: policy.storylineSlideMarkerCount,
+        confidence: policy.storylineSlideMarkerConfidence,
+      },
+      existingRationale: policy.targetSlideCountRationale,
+    },
+    null,
+    2,
+  );
+}
+
 function buildStoryboardPrompt(input: OpenRouterFetcherInput) {
   const previousStructure = input.previousStructure
     ? `\nPrevious story structure JSON:\n${JSON.stringify(input.previousStructure, null, 2)}`
@@ -249,14 +283,17 @@ function buildStoryboardPrompt(input: OpenRouterFetcherInput) {
 
   return [
     `task: ${input.task}`,
-    `slideCountPreference: ${
-      input.slideCountPreference
-        ? describeSlideCountPreferenceForPrompt(input.slideCountPreference)
-        : `custom range ${input.targetSlideCount}-${input.targetSlideCount} slides, preferred ${input.targetSlideCount}`
-    }`,
+    "slideCountPolicy:",
+    formatSlideCountPolicyForPrompt(input.slideCountPolicy),
     `includeSuggestions: ${input.includeSuggestions}`,
     "",
     ...taskGuidance,
+    "",
+    "Slide count policy rules:",
+    "- For auto mode, choose the appropriate slide count from storyline complexity, section count, page-like markers, and content density.",
+    "- For brief, standard, detailed, and custom_range modes, generate within the userSelectedRange whenever the storyline can support it.",
+    "- If high-confidence explicit slide/page markers conflict with the selected range, respect the input structure where useful and explain any compression or expansion in targetSlideCountRationale.",
+    "- If custom_range output must fall outside min/max, keep the storyboard coherent and store the reason in targetSlideCountRationale.",
     "",
     "Return only a JSON object matching the provided response schema.",
     "Use the same language as the user's storyline unless the storyline asks for a different language.",
@@ -361,8 +398,7 @@ export function createOpenRouterProvider({
       apiKey,
       task: input.task,
       storyline: input.storyline,
-      targetSlideCount: input.targetSlideCount,
-      slideCountPreference: input.slideCountPreference,
+      slideCountPolicy: toProviderSlideCountPolicy(input.slideCountPolicy),
       includeSuggestions: input.includeSuggestions,
       previousStructure: input.previousStructure,
     });

@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:storyboard-sample": "tsx scripts/verify-storyboard-sample.ts",
+    "github:sync-plan": "node scripts/sync-implementation-plan-github.mjs",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:push": "drizzle-kit push"
   },

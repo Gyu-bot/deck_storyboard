@@ -1653,9 +1653,9 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 
 #### Task D001. IMPLEMENTATION_PLAN.md 상태 갱신
 - Priority: High
-- Status: In Progress
+- Status: Done
 - Issue: #58
-- PR: None
+- PR: #64
 - Depends on: Merged PR evidence
 - Branch: `docs/fix-global-dev-docs-and-bugs`
 - Expected PR Unit: `PR-D001`
@@ -1667,4 +1667,24 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 - Notes:
   - 이 Task는 코드 파일을 수정하지 않는다.
   - 2026-06-04 sync checked remote PRs through #40 and Issues #6-#35. No open PRs were present at sync time.
-  - Issue #36 does not exist in the remote repository as of the 2026-06-04 sync, so this planning task is tracked without a GitHub Issue until one is explicitly created.
+  - Done by merged PR #64, which closed Issue #58 and synced GitHub Issues/Project fields for the planning refresh.
+
+#### Task D003. GitHub plan sync script and skill 정리
+- Priority: High
+- Status: In Progress
+- Issue: None
+- PR: None
+- Depends on: D001
+- Branch: `chore/github-plan-sync-tooling`
+- Expected PR Unit: `PR-D003`
+- Acceptance Criteria:
+  - [ ] `IMPLEMENTATION_PLAN.md` task metadata를 파싱해 GitHub Issue title/body와 GitHub Project fields를 동기화하는 재사용 스크립트가 있다.
+  - [ ] GitHub Issue body 생성은 raw task block code fence를 사용하지 않고, renderable Markdown 섹션으로 `Task`, `Dependency Relationships`, `Acceptance Criteria`, `Notes`를 조립한다.
+  - [ ] 동기화 스크립트는 `--dry-run`, `--verify`, `--apply` 모드를 제공하고, 기본적으로 `--apply` 없이는 원격 GitHub 상태를 수정하지 않는다.
+  - [ ] Project `Status`/`Priority` 필드 검증 또는 갱신이 issue label/body와 분리되어 동작한다.
+  - [ ] repo-local Codex skill이 planning/docs 세션에서 이 동기화 절차를 재사용하도록 안내한다.
+  - [ ] `AGENTS.md`가 ad hoc parsing 대신 repo-local skill/script 사용을 지시한다.
+  - [ ] 검증 결과가 `.ai/status/active/D003-github-plan-sync-tooling.md`에 기록되어 있다.
+- Notes:
+  - 2026-06-05 user direction: future GitHub Issue bodies should render cleanly and should not include raw `IMPLEMENTATION_PLAN.md` sections in fenced code blocks.
+  - 2026-06-05 user direction: since this sync happens every planning/docs cleanup session, create a reusable skill and script instead of relying on one-off parsing.

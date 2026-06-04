@@ -73,9 +73,11 @@ Global planning documents should be updated only in dedicated documentation bran
 When updating planning documents:
 
 - Use the latest `origin/main` as the source of truth.
+- For `IMPLEMENTATION_PLAN.md` to GitHub Issue/Project sync, first use `skills/deck-storyboard-plan-sync/SKILL.md` and prefer `npm run github:sync-plan` over ad hoc parsing scripts.
 - When syncing `IMPLEMENTATION_PLAN.md` tasks to GitHub, keep the GitHub Issue body/title and the GitHub Project item fields in sync separately. Do not treat labels or issue body text as a substitute for Project fields.
 - If a task has `Status` or `Priority` in `IMPLEMENTATION_PLAN.md`, reflect those values on the GitHub Project item with `gh project item-edit` (or equivalent ProjectV2 field API), not only with issue labels. Use the repository's Project `Status` field for values such as `Backlog`, `Ready`, `In progress`, `In review`, and `Done`, and use the Project `Priority` field for `P0`/`P1`/`P2`/`P3`.
 - Map `Priority` values consistently when syncing to the GitHub Project: `Critical` -> `P0`, `High` -> `P1`, `Medium` -> `P2`, and `Low` -> `P3`.
+- When syncing GitHub Issue bodies, generate renderable Markdown sections from parsed task fields and do not paste raw `IMPLEMENTATION_PLAN.md` task blocks into fenced code blocks.
 - When a task is intentionally split into child tasks or grouped under an umbrella task, mirror that structure with GitHub sub-issues where practical, rather than only mentioning the relationship in issue text.
 - Mark tasks as Done only if their PR has been merged into `main`.
 - In planning/documentation cleanup sessions, review PR merge state and remove local git worktrees for branches whose PRs have already been merged into `main`; inspect each target worktree first, skip the current worktree, and do not remove any worktree with uncommitted changes or an unmerged PR.

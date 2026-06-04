@@ -23,3 +23,9 @@
 - Notes:
   - The implementation keeps SDK dependencies out of the repo and uses injected `fetchImpl` for deterministic provider tests.
   - OpenAI docs currently document GPT Image generation through `/v1/images/generations` with size controls; `gpt-image-2` is passed through as the configured project model.
+
+## Planning Handoff
+
+- Reflect in the final implementation plan during the next planning/docs cleanup session: improve the slide mockup result review screen so generated mockups can be clicked to open a larger preview.
+- Add multi-result review to the implementation plan: when multiple mockups are generated for a slide, show them in a carousel-style viewer so users can inspect each candidate and choose the final version.
+- Add final-selection flexibility to the implementation plan: support selecting more than one final mockup for a single slide when the workflow requires multiple accepted variants.

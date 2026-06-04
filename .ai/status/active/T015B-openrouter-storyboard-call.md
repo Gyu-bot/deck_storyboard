@@ -33,3 +33,8 @@
 
 - The external-call behavior is covered by mocked HTTP tests for request shape, structured-output schema, JSON response parsing, retry validation, and slide-breakdown fallback flow.
 - Local browser verification needs `DATA_ROOT` pointed at a writable path and a stable `NEXTAUTH_SECRET`; otherwise signup/session checks can fail before reaching the storyboard flow.
+
+## Planning Handoff
+
+- Reflect in the final implementation plan during the next planning/docs cleanup session: LLM calls should use the same provider priority policy as image generation, attempting OpenRouter first and falling back to the direct provider for the selected model when OpenRouter is unavailable or fails.
+- Add admin-configurable provider routing to the implementation plan: administrators should be able to set the priority order and fallback behavior for both LLM calls and image generation from the admin settings surface.

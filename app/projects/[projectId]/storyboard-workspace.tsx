@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   DndContext,
@@ -8,7 +9,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Image as ImageIcon, Layers3, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, GripVertical, Image as ImageIcon, Layers3, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProjectStatus } from "@/lib/db/schema";
 
@@ -495,7 +496,30 @@ export function StoryboardWorkspace({
   }
 
   if (project.status === "storyboard_generation_failed") {
-    return <section className="rounded-md border border-red-300 bg-card p-5 text-red-800">생성 실패: {project.generationError}</section>;
+    return (
+      <section
+        role="alert"
+        className="rounded-md border border-red-300 bg-red-50 p-5 text-red-900"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="size-5 shrink-0" aria-hidden="true" />
+              <h2 className="text-lg font-semibold">스토리보드 생성 실패</h2>
+            </div>
+            <p className="mt-2 max-w-3xl text-sm leading-6">
+              {project.generationError ?? "스토리보드 생성 중 오류가 발생했습니다."}
+            </p>
+            <p className="mt-1 text-xs text-red-800">
+              필요한 provider key가 할당된 뒤 다시 생성할 수 있습니다.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/projects">프로젝트 목록</Link>
+          </Button>
+        </div>
+      </section>
+    );
   }
 
   if (project.status === "storyboard_generating") {

@@ -69,6 +69,7 @@ export const users = sqliteTable(
     role: text("role").$type<UserRole>().notNull().default("member"),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
+    disabledAt: text("disabled_at"),
     deletedAt: text("deleted_at"),
   },
   (table) => ({

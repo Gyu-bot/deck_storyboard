@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
-import { getUserById, listUsers } from "@/lib/auth/users";
+import { getUserById, getUserByIdIncludingInactive, listUsers } from "@/lib/auth/users";
 import { getDatabase } from "@/lib/db/client";
 import { getUserApiKeyPresence } from "@/lib/repositories/user-api-keys";
 import { AdminMemberKeySettings } from "@/app/settings/admin-member-key-settings";
@@ -22,10 +22,10 @@ export default async function SettingsPage({
 
   const params = await searchParams;
   const query = params?.q ?? "";
-  const users = listUsers(db, { query });
+  const users = listUsers(db, { query, includeInactive: true });
   const selectedUser =
     users.find((user) => user.id === params?.userId) ??
-    (params?.userId ? getUserById(db, params.userId) : null);
+    (params?.userId ? getUserByIdIncludingInactive(db, params.userId) : null);
   const selectedPresence = selectedUser
     ? getUserApiKeyPresence(db, selectedUser.id)
     : null;

@@ -10,6 +10,7 @@ export function migrateDatabase(sqlite: Database.Database) {
       role TEXT NOT NULL DEFAULT 'member',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
+      disabled_at TEXT,
       deleted_at TEXT
     );
 
@@ -121,6 +122,9 @@ export function migrateDatabase(sqlite: Database.Database) {
     .all() as Array<{ name: string }>;
   if (!userColumns.some((column) => column.name === "role")) {
     sqlite.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'member'");
+  }
+  if (!userColumns.some((column) => column.name === "disabled_at")) {
+    sqlite.exec("ALTER TABLE users ADD COLUMN disabled_at TEXT");
   }
 
   const projectColumns = sqlite

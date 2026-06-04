@@ -1,12 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { createTestDatabase } from "@/lib/db/test-utils";
 import {
+  deactivateUser,
+  deleteUser,
   createUser,
+  getUserByIdIncludingInactive,
   getUserById,
+  grantAdminRole,
   listUsers,
   seedDevelopmentUsers,
   verifyUserPassword,
 } from "@/lib/auth/users";
+import { projects } from "@/lib/db/schema";
+import {
+  createProjectForUser,
+  getProjectForUser,
+  listProjectsForUser,
+} from "@/lib/repositories/projects";
 import {
   deleteUserApiKey,
   getUserApiKeyPresence,
@@ -91,6 +101,63 @@ describe("T008-T009C user API key management", () => {
       "admin@example.com",
       "member@example.com",
     ]);
+  });
+
+  it("soft-deactivates members while preserving project data and blocking login/project access", async () => {
+    const db = createTestDatabase();
+    const user = await createUser(db, {
+      email: "member@example.com",
+      password: "correct-horse-battery",
+    });
+    const project = createProjectForUser(db, user.id, {
+      name: "Preserved deck",
+      storyline: "story",
+    });
+
+    const deactivated = deactivateUser(db, user.id);
+
+    expect(deactivated).toMatchObject({
+      id: user.id,
+      email: "member@example.com",
+    });
+    expect(deactivated?.disabledAt).not.toBeNull();
+    expect(deactivated?.deletedAt).toBeNull();
+    expect(getUserById(db, user.id)).toBeNull();
+    expect(getUserByIdIncludingInactive(db, user.id)).toMatchObject({
+      id: user.id,
+      disabledAt: deactivated?.disabledAt,
+      deletedAt: null,
+    });
+    expect(listUsers(db).map((row) => row.email)).toEqual([]);
+    expect(listUsers(db, { includeInactive: true })).toMatchObject([
+      { email: "member@example.com", disabledAt: deactivated?.disabledAt },
+    ]);
+    await expect(
+      verifyUserPassword(db, "member@example.com", "correct-horse-battery"),
+    ).resolves.toBeNull();
+    expect(listProjectsForUser(db, user.id)).toEqual([]);
+    expect(getProjectForUser(db, project.id, user.id)).toBeNull();
+    expect(db.select().from(projects).all()).toHaveLength(1);
+  });
+
+  it("grants admin role and soft-deletes accounts separately from deactivation", async () => {
+    const db = createTestDatabase();
+    const user = await createUser(db, {
+      email: "member@example.com",
+      password: "correct-horse-battery",
+    });
+    const promoted = grantAdminRole(db, user.id);
+
+    expect(promoted).toMatchObject({ id: user.id, role: "admin" });
+    expect(getUserById(db, user.id)).toMatchObject({ role: "admin" });
+
+    const deleted = deleteUser(db, user.id);
+
+    expect(deleted).toMatchObject({ id: user.id, role: "admin" });
+    expect(deleted?.deletedAt).not.toBeNull();
+    expect(getUserById(db, user.id)).toBeNull();
+    expect(getUserByIdIncludingInactive(db, user.id)).toBeNull();
+    expect(listUsers(db, { includeInactive: true })).toEqual([]);
   });
 
   it("stores account-level provider keys encrypted, reports only masked presence, and deletes keys", async () => {

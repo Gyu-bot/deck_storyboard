@@ -5,7 +5,9 @@ import { getUserById } from "@/lib/auth/users";
 
 export async function getCurrentUserId() {
   const session = await getServerSession(authOptions);
-  return (session?.user as { id?: string } | undefined)?.id ?? null;
+  const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  if (!userId) return null;
+  return getUserById(getDatabase(), userId)?.id ?? null;
 }
 
 export async function requireCurrentUserId() {

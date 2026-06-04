@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getDatabase } from "@/lib/db/client";
 import { requireCurrentUserId } from "@/lib/auth/session";
 import { getDecryptedUserApiKey } from "@/lib/repositories/user-api-keys";
-import { getProjectForUser } from "@/lib/repositories/projects";
+import { getProjectForUser, updateProjectForUser } from "@/lib/repositories/projects";
 import { createOpenRouterProvider } from "@/lib/ai/openrouter";
 import {
   STORYBOARD_TEST_MODE_COOKIE,
@@ -17,6 +17,13 @@ import {
 import { appUrl } from "@/lib/http/redirects";
 
 export const runtime = "nodejs";
+
+const missingOpenRouterKeyMessage =
+  "OpenRouter API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.";
+
+function projectUrl(request: Request, projectId: string) {
+  return appUrl(`/projects/${projectId}`, request);
+}
 
 export async function POST(
   request: Request,
@@ -36,13 +43,21 @@ export async function POST(
     ? "dummy-openrouter-key"
     : getDecryptedUserApiKey(db, userId, "openrouter");
   if (!apiKey) {
-    return NextResponse.json({ error: "OpenRouter key is required." }, { status: 400 });
+    updateProjectForUser(db, projectId, userId, {
+      status: "storyboard_generation_failed",
+      generationError: missingOpenRouterKeyMessage,
+    });
+    return NextResponse.redirect(projectUrl(request, projectId), 303);
   }
   const provider = createOpenRouterProvider({
     apiKey,
     fetcher: sampleStoryboard ? async () => sampleStoryboard : undefined,
   });
-  const structure = await analyzeStoryStructure(db, projectId, userId, provider);
-  await createSlideBreakdown(db, projectId, userId, provider, structure);
-  return NextResponse.redirect(appUrl(`/projects/${projectId}`, request), 303);
+  try {
+    const structure = await analyzeStoryStructure(db, projectId, userId, provider);
+    await createSlideBreakdown(db, projectId, userId, provider, structure);
+  } catch {
+    return NextResponse.redirect(projectUrl(request, projectId), 303);
+  }
+  return NextResponse.redirect(projectUrl(request, projectId), 303);
 }

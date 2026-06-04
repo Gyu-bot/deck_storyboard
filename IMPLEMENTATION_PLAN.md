@@ -749,7 +749,9 @@ MVP scope:
 - Notes:
   - undo/redo UI는 MVP 범위가 아니다.
 
-### Feature F09A. MVP AI-Assisted Slide Merge
+### Feature F09A. MVP AI-Assisted Slide Structure Editing
+
+이 feature는 AI 기반 구조 편집 작업을 같은 MVP 맥락에서 다룬다. T029/T030/T031은 직접 구조 편집 action이고, T032는 해당 구조 편집 이후 deck flow를 점검하고 선택적으로 정리하는 후속 consistency 작업이다.
 
 #### Task T029. AI merge for selected slides 구현
 - Priority: High
@@ -773,6 +775,68 @@ MVP scope:
   - 2026-06-04 user direction: 여러 slide를 하나로 합치는 병합 기능은 MVP 범위 안에서 E05로 이동한다.
   - 2026-06-03 user feedback: 여러 slide를 하나로 합치는 병합 기능이 필요하다.
   - T015D prompt hardening은 MVP 이후 재사용 prompt 품질 보강 task로 유지하되, T029의 MVP 구현을 막는 의존성으로 두지 않는다.
+
+#### Task T030. AI split slide 구현
+- Priority: High
+- Status: Ready
+- Issue: #18
+- PR: None
+- Depends on: T019, T015B
+- Branch: `feature/T030-ai-split-slide`
+- Expected PR Unit: `PR-T030`
+- Acceptance Criteria:
+  - [ ] 한 slide를 AI로 2개 이상 slide로 split할 수 있다.
+  - [ ] 생성된 각 slide가 모든 required slide field를 포함한다.
+  - [ ] source slide와 generated child slides의 before/after snapshot이 operation history에 저장된다.
+  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] MVP split prompt는 T015B의 structured output/provider contract를 따르고, T015D가 merge된 이후 prompt quality baseline으로 후속 보강할 수 있게 한다.
+  - [ ] `.ai/status/active/T030-ai-split-slide.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: AI merge/split/insert/reflow 계열 구조 편집 작업은 같은 MVP E05 맥락에서 계획한다.
+  - T015D prompt hardening은 MVP 이후 재사용 prompt 품질 보강 task로 유지하되, T030의 MVP 구현을 막는 의존성으로 두지 않는다.
+
+#### Task T031. AI insert slide from natural language 구현
+- Priority: High
+- Status: Ready
+- Issue: #19
+- PR: None
+- Depends on: T019, T015B
+- Branch: `feature/T031-ai-insert-slide`
+- Expected PR Unit: `PR-T031`
+- Acceptance Criteria:
+  - [ ] 사용자가 선택 위치에 natural language instruction으로 slide를 삽입할 수 있다.
+  - [ ] inserted slide가 모든 required slide field를 포함한다.
+  - [ ] operation history에 instruction, insertion position, generated slide snapshot이 저장된다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] MVP insert prompt는 T015B의 structured output/provider contract를 따르고, T015D가 merge된 이후 prompt quality baseline으로 후속 보강할 수 있게 한다.
+  - [ ] AI reflow suggestion과 preview/diff UI는 T032에서 처리한다.
+  - [ ] `.ai/status/active/T031-ai-insert-slide.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: AI merge/split/insert/reflow 계열 구조 편집 작업은 같은 MVP E05 맥락에서 계획한다.
+  - T015D prompt hardening은 MVP 이후 재사용 prompt 품질 보강 task로 유지하되, T031의 MVP 구현을 막는 의존성으로 두지 않는다.
+
+#### Task T032. AI deck flow reflow after structural slide edits 구현
+- Priority: High
+- Status: Backlog
+- Issue: None
+- PR: None
+- Depends on: T029, T030, T031
+- Branch: `feature/T032-ai-deck-flow-reflow`
+- Expected PR Unit: `PR-T032`
+- Acceptance Criteria:
+  - [ ] 슬라이드 순서 변경, 삭제, 추가, 병합, 분할 이후 사용자가 deck flow reflow 또는 consistency check를 실행할 수 있다.
+  - [ ] MVP reflow prompt는 T015B의 structured output/provider contract를 따르고, deck narrative flow, section continuity, duplicated message, missing transition, weak slide role을 점검한다.
+  - [ ] reflow 결과는 기존 slides를 즉시 덮어쓰지 않고 preview/diff 형태로 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 변경 제안을 보여준다.
+  - [ ] userModified field는 기본적으로 보호되며, 변경 제안이 필요한 경우 이유와 함께 표시된다.
+  - [ ] 사용자가 선택적으로 적용한 변경만 저장되고, before/after snapshot이 operation history에 기록된다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] `.ai/status/active/T032-ai-deck-flow-reflow.md`에 prompt 품질 검토, preview/diff 검증, 적용/취소 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: T029/T030/T031/T032는 같은 MVP E05 구조 편집 맥락에서 작업하도록 계획한다.
+  - 2026-06-03 user direction: 슬라이드 순서 수정, 삭제/추가/병합 등 구조 변경 이후에 들어갈 LLM prompt도 T015D의 prompt quality baseline을 따라야 한다.
+  - T032는 T029/T030/T031 구조 편집 action이 구현된 뒤 같은 UX/operation-history 맥락에서 deck flow consistency를 점검하는 후속 MVP task다.
+  - T015D prompt hardening은 MVP 이후 재사용 prompt 품질 보강 task로 유지하되, T032의 MVP 구현을 막는 의존성으로 두지 않는다.
 
 ---
 
@@ -1195,70 +1259,6 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
   - [ ] `.ai/status/active/T039-provider-routing-policy.md`에 routing policy, fallback matrix, 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-04 planning handoff from merged PR #12: LLM calls should follow the image generation provider priority policy, and admins should be able to configure priority/fallback behavior for both LLM and image generation.
-
----
-
-## Epic E08. High-Priority Follow-up AI Slide Editing
-
-### Feature F14. AI-Assisted Slide Editing
-
-#### Task T030. AI split slide 구현
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T019, T015D
-- Branch: `feature/T030-ai-split-slide`
-- Expected PR Unit: `PR-T030`
-- Acceptance Criteria:
-  - [ ] 한 slide를 AI로 2개 이상 slide로 split할 수 있다.
-  - [ ] 생성된 각 slide가 모든 required slide field를 포함한다.
-  - [ ] source slide와 generated child slides의 before/after snapshot이 operation history에 저장된다.
-  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] split prompt는 T015D의 reusable prompt quality baseline을 따르고, child slide별 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 작성 품질을 검증한다.
-  - [ ] `.ai/status/active/T030-ai-split-slide.md`에 검증 결과가 기록되어 있다.
-- Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-
-#### Task T031. AI insert slide from natural language 구현
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T019, T015D
-- Branch: `feature/T031-ai-insert-slide`
-- Expected PR Unit: `PR-T031`
-- Acceptance Criteria:
-  - [ ] 사용자가 선택 위치에 natural language instruction으로 slide를 삽입할 수 있다.
-  - [ ] inserted slide가 모든 required slide field를 포함한다.
-  - [ ] operation history에 instruction, insertion position, generated slide snapshot이 저장된다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] insert prompt는 T015D의 reusable prompt quality baseline을 따르고, inserted slide의 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 작성 품질을 검증한다.
-  - [ ] AI reflow suggestion과 preview/diff UI는 구현하지 않는다.
-  - [ ] `.ai/status/active/T031-ai-insert-slide.md`에 검증 결과가 기록되어 있다.
-- Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-
-#### Task T032. AI deck flow reflow after structural slide edits 구현
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T019, T029, T030, T031, T015D
-- Branch: `feature/T032-ai-deck-flow-reflow`
-- Expected PR Unit: `PR-T032`
-- Acceptance Criteria:
-  - [ ] 슬라이드 순서 변경, 삭제, 추가, 병합, 분할 이후 사용자가 deck flow reflow 또는 consistency check를 실행할 수 있다.
-  - [ ] reflow prompt는 T015D의 reusable prompt quality baseline을 따르고, deck narrative flow, section continuity, duplicated message, missing transition, weak slide role을 점검한다.
-  - [ ] reflow 결과는 기존 slides를 즉시 덮어쓰지 않고 preview/diff 형태로 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 변경 제안을 보여준다.
-  - [ ] userModified field는 기본적으로 보호되며, 변경 제안이 필요한 경우 이유와 함께 표시된다.
-  - [ ] 사용자가 선택적으로 적용한 변경만 저장되고, before/after snapshot이 operation history에 기록된다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] `.ai/status/active/T032-ai-deck-flow-reflow.md`에 prompt 품질 검토, preview/diff 검증, 적용/취소 검증 결과가 기록되어 있다.
-- Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-  - 2026-06-03 user direction: 슬라이드 순서 수정, 삭제/추가/병합 등 구조 변경 이후에 들어갈 LLM prompt도 T015D의 prompt quality baseline을 따라야 한다.
 
 ---
 

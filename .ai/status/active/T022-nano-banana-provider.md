@@ -1,0 +1,25 @@
+# T022 Gemini/Nano Banana Provider
+
+- Status: Needs Review
+- Branch: feature/T021-T022-image-providers
+- Implemented: Gemini image provider adapter, OpenRouter-first image routing for `nano-banana`, direct Gemini fallback when OpenRouter fails or is unavailable, `nano-banana` model aliasing for both providers, aspect-ratio request config, local storage orchestration, slide image generation record creation, and per-slide mockup UI wiring.
+- Acceptance coverage:
+  - `nano-banana` resolves to the `gemini` account-level user/provider API key.
+  - Missing user key returns `provider_key_missing` and does not use a server fallback.
+  - `16:9` and `4:3` aspect ratios are sent through `generationConfig.imageConfig.aspectRatio`.
+  - Provider inline image bytes are decoded and passed to local storage.
+  - Failed provider responses are normalized through `ImageProviderError`.
+  - OpenRouter is attempted first and direct Gemini is used as the fallback provider for `nano-banana`.
+  - The storyboard workspace exposes both full-deck mockup generation and single-slide mockup generation controls.
+- Verification:
+  - `npm run test:unit -- tests/unit/image-providers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:unit`
+  - `npm run build`
+  - `npm run test:storyboard-sample`
+  - Browser verification on `http://localhost:3002/projects/ea8468c7-6640-44ea-8b39-0ce4133e45ef`: full-deck button text, per-slide mockup buttons, generated status, and rendered mockup image in the detail panel.
+  - OpenRouter real API smoke on copied DB: generated and persisted exactly one slide for the `test` account with provider `openrouter`.
+- Notes:
+  - The project-facing model remains `nano-banana`; the direct Gemini provider adapter maps it to the Gemini API model endpoint `gemini-2.5-flash-image`, while OpenRouter maps it to `google/gemini-2.5-flash-image`.
+  - Full end-to-end image API calls were left for user-supplied OpenAI/Gemini keys as requested.

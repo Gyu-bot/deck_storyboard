@@ -749,6 +749,31 @@ MVP scope:
 - Notes:
   - undo/redo UI는 MVP 범위가 아니다.
 
+### Feature F09A. MVP AI-Assisted Slide Merge
+
+#### Task T029. AI merge for selected slides 구현
+- Priority: High
+- Status: Backlog
+- Issue: None
+- PR: None
+- Depends on: T019, T015B
+- Branch: `feature/T029-ai-merge-selected-slides`
+- Expected PR Unit: `PR-T029`
+- Acceptance Criteria:
+  - [ ] 사용자가 2개 이상의 slide를 선택해 하나의 slide로 merge할 수 있다.
+  - [ ] MVP 범위에서는 우선 인접한 selected slides 병합을 지원하고, 비인접 slides 병합 지원 여부는 구현 전 확정한다.
+  - [ ] merged slide는 title, core message, content points, visual direction, image prompt, slide role을 포함한다.
+  - [ ] source slides의 순서, 선택 범위, merged result의 before/after snapshot이 operation history에 저장된다.
+  - [ ] merge 적용 후 retained slide와 soft-deleted source slides의 ordering이 안정적으로 재계산된다.
+  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] MVP merge prompt는 T015B의 structured output/provider contract를 따르고, T015D가 merge된 이후 prompt quality baseline으로 후속 보강할 수 있게 한다.
+  - [ ] `.ai/status/active/T029-ai-merge-slides.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: 여러 slide를 하나로 합치는 병합 기능은 MVP 범위 안에서 E05로 이동한다.
+  - 2026-06-03 user feedback: 여러 slide를 하나로 합치는 병합 기능이 필요하다.
+  - T015D prompt hardening은 MVP 이후 재사용 prompt 품질 보강 task로 유지하되, T029의 MVP 구현을 막는 의존성으로 두지 않는다.
+
 ---
 
 ## Epic E06. Image Generation
@@ -1176,28 +1201,6 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 ## Epic E08. High-Priority Follow-up AI Slide Editing
 
 ### Feature F14. AI-Assisted Slide Editing
-
-#### Task T029. AI merge for selected slides 구현
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T019, T015D
-- Branch: `feature/T029-ai-merge-selected-slides`
-- Expected PR Unit: `PR-T029`
-- Acceptance Criteria:
-  - [ ] 사용자가 2개 이상의 slide를 선택해 하나의 slide로 merge할 수 있다.
-  - [ ] MVP 후속 범위에서는 우선 인접한 selected slides 병합을 지원하고, 비인접 slides 병합 지원 여부는 구현 전 확정한다.
-  - [ ] merged slide는 title, core message, content points, visual direction, image prompt, slide role을 포함한다.
-  - [ ] source slides의 순서, 선택 범위, merged result의 before/after snapshot이 operation history에 저장된다.
-  - [ ] merge 적용 후 retained slide와 soft-deleted source slides의 ordering이 안정적으로 재계산된다.
-  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] merge prompt는 T015D의 reusable prompt quality baseline을 따르고, merged slide의 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 작성 품질을 검증한다.
-  - [ ] `.ai/status/active/T029-ai-merge-slides.md`에 검증 결과가 기록되어 있다.
-- Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-  - 2026-06-03 user feedback: 여러 slide를 하나로 합치는 병합 기능이 필요하다.
 
 #### Task T030. AI split slide 구현
 - Priority: Medium

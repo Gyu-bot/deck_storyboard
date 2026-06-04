@@ -74,25 +74,26 @@
 
 #### Task T003A. First screen product-purpose copy 보강
 - Priority: Low
-- Status: Ready
+- Status: Done
 - Issue: #6
-- PR: None
+- PR: #11
 - Depends on: T001
 - Branch: `fix/T003A-home-purpose-copy`
 - Expected PR Unit: `PR-T003A`
 - Acceptance Criteria:
-  - [ ] 앱 첫 화면에서 Deck Storyboard의 대상 사용자가 "전체 프리젠테이션/제안서/리포트 스토리라인을 이미 가지고 있는 사람"임을 짧게 설명한다.
-  - [ ] 첫 화면에서 산출물이 최종 납품용 완성 deck이 아니라 초기 skeleton deck 참고자료임을 짧고 명확하게 경고한다.
-  - [ ] 목적/한계 copy는 한두 줄 수준으로 간결해야 하며, `완성 deck을 만들 수 없음`과 `참고용 skeleton deck` 의미를 모두 포함한다.
-  - [ ] 첫 화면의 한계 문구는 warning icon, caution notice, 또는 equivalent visual treatment로 일반 설명과 구분된다.
-  - [ ] 첫 화면 copy가 README/README_KO의 제품 목적 설명과 의미상 일관된다.
-  - [ ] 첫 화면 copy는 한국어 UI 원칙을 따른다.
-  - [ ] 브라우저 또는 equivalent visual check로 desktop/mobile 첫 viewport에서 설명 문구가 잘 보이고 과도하게 길지 않은지 확인한다.
-  - [ ] `.ai/status/active/T003A-home-purpose-copy.md`에 copy before/after와 검증 결과가 기록되어 있다.
+  - [x] 앱 첫 화면에서 Deck Storyboard의 대상 사용자가 "전체 프리젠테이션/제안서/리포트 스토리라인을 이미 가지고 있는 사람"임을 짧게 설명한다.
+  - [x] 첫 화면에서 산출물이 최종 납품용 완성 deck이 아니라 초기 skeleton deck 참고자료임을 짧고 명확하게 경고한다.
+  - [x] 목적/한계 copy는 한두 줄 수준으로 간결해야 하며, `완성 deck을 만들 수 없음`과 `참고용 skeleton deck` 의미를 모두 포함한다.
+  - [x] 첫 화면의 한계 문구는 warning icon, caution notice, 또는 equivalent visual treatment로 일반 설명과 구분된다.
+  - [x] 첫 화면 copy가 README/README_KO의 제품 목적 설명과 의미상 일관된다.
+  - [x] 첫 화면 copy는 한국어 UI 원칙을 따른다.
+  - [x] 브라우저 또는 equivalent visual check로 desktop/mobile 첫 viewport에서 설명 문구가 잘 보이고 과도하게 길지 않은지 확인한다.
+  - [x] `.ai/status/active/T003A-home-purpose-copy.md`에 copy before/after와 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: UI 맨 처음 화면에도 이 프로젝트가 최종 deck generator가 아니라 skeleton deck 참고자료를 만드는 도구라는 점을 명확히 넣는다.
   - 2026-06-03 user direction: README와 첫 화면 모두 "완성 deck은 못 만들고 어디까지나 참고용"이라는 한계를 경고 문구/아이콘으로 명확히 보여준다.
   - 구현 시 README/README_KO의 product-purpose/caution 문구를 기준으로 짧은 first-screen copy로 압축한다.
+  - Done by merged PR #11, which closed Issue #6 and verified desktop/mobile first viewport copy.
 
 ---
 
@@ -285,8 +286,8 @@ MVP scope:
 
 #### Task T009B. Admin member and API key management page 구현
 - Priority: High
-- Status: Needs Review
-- Issue: None
+- Status: Ready
+- Issue: #13
 - PR: None
 - Depends on: T009A
 - Branch: `feature/T009B-admin-member-key-management-page`
@@ -311,7 +312,7 @@ MVP scope:
   - 회원 삭제는 hard delete와 soft delete/disabled status 중 구현 전 결정하고, 프로젝트/슬라이드 소유 데이터 처리 정책을 status에 기록한다.
   - 회원관리와 회원별 API key 관리는 별도 흩어진 화면보다 같은 admin workflow 안에서 처리한다.
   - Merged PR #1/#2 implemented admin-only member list and member-scoped provider key controls.
-  - Still Needs Review because admin account add/delete or disable, deletion policy, and browser verification for that flow are not complete.
+  - Ready follow-up scope: admin account add/delete or disable, deletion policy, and browser verification for that flow remain incomplete after merged PR #1/#2.
 
 #### Task T009C. Admin-managed user API key assignment 구현
 - Priority: High
@@ -391,29 +392,30 @@ MVP scope:
 
 #### Task T011A. Slide count range preference UI와 project contract 정리
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #7
-- PR: None
+- PR: #11
 - Depends on: T011, T015B
 - Branch: `feature/T011A-slide-count-range-preference`
 - Expected PR Unit: `PR-T011A`
 - Acceptance Criteria:
-  - [ ] 새 프로젝트 생성 form의 단일 `targetSlideCount` 숫자 입력을 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 선택으로 바꾼다.
-  - [ ] 기본 선택은 `표준`이며 기본 범위는 9-14 slides다.
-  - [ ] `간단히`는 5-8 slides, `표준`은 9-14 slides, `상세`는 15-25 slides로 저장된다.
-  - [ ] `자동`은 min/max를 강제하지 않고 storyline의 구조와 밀도를 기준으로 LLM이 적정 slide count를 정하게 한다.
-  - [ ] `직접 범위`는 사용자가 min/max slide count를 입력할 수 있고, min은 1 이상, max는 min 이상, max는 MVP 상한을 넘지 않도록 validation한다.
-  - [ ] project 저장 contract가 `slideCountMode`, `minSlideCount`, `maxSlideCount`, optional `preferredSlideCount` 또는 동등한 range preference를 표현한다.
-  - [ ] 기존 `targetSlideCount` 기반 project와 sample/test data가 migration 또는 compatibility path로 계속 생성/조회된다.
-  - [ ] storyline 안의 명시적 page/slide marker는 별도 LLM 호출 없이 regex/heuristic으로 confidence와 estimated count만 산출한다.
-  - [ ] high-confidence marker count와 사용자가 선택한 범위가 충돌하면 생성 전 non-blocking notice 또는 생성 후 rationale로 사용자가 차이를 이해할 수 있다.
-  - [ ] 브라우저 또는 equivalent visual check로 `자동`, preset range, 직접 범위 입력 UX를 확인했다.
-  - [ ] `.ai/status/active/T011A-slide-count-range-preference.md`에 range 기본값, migration/compatibility 결정, 검증 결과가 기록되어 있다.
+  - [x] 새 프로젝트 생성 form의 단일 `targetSlideCount` 숫자 입력을 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 선택으로 바꾼다.
+  - [x] 기본 선택은 `표준`이며 기본 범위는 9-14 slides다.
+  - [x] `간단히`는 5-8 slides, `표준`은 9-14 slides, `상세`는 15-25 slides로 저장된다.
+  - [x] `자동`은 min/max를 강제하지 않고 storyline의 구조와 밀도를 기준으로 LLM이 적정 slide count를 정하게 한다.
+  - [x] `직접 범위`는 사용자가 min/max slide count를 입력할 수 있고, min은 1 이상, max는 min 이상, max는 MVP 상한을 넘지 않도록 validation한다.
+  - [x] project 저장 contract가 `slideCountMode`, `minSlideCount`, `maxSlideCount`, optional `preferredSlideCount` 또는 동등한 range preference를 표현한다.
+  - [x] 기존 `targetSlideCount` 기반 project와 sample/test data가 migration 또는 compatibility path로 계속 생성/조회된다.
+  - [x] storyline 안의 명시적 page/slide marker는 별도 LLM 호출 없이 regex/heuristic으로 confidence와 estimated count만 산출한다.
+  - [x] high-confidence marker count와 사용자가 선택한 범위가 충돌하면 생성 전 non-blocking notice 또는 생성 후 rationale로 사용자가 차이를 이해할 수 있다.
+  - [x] 브라우저 또는 equivalent visual check로 `자동`, preset range, 직접 범위 입력 UX를 확인했다.
+  - [x] `.ai/status/active/T011A-slide-count-range-preference.md`에 range 기본값, migration/compatibility 결정, 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: 스토리라인은 정확한 page count보다 대략적인 범위로 잡는 경우가 많으므로, MVP 입력도 정확한 숫자보다 slide count range 중심으로 전환한다.
   - 명시적 page marker 감지는 비용 없는 heuristic으로만 처리하고, 별도 LLM preflight call은 추가하지 않는다.
   - Heuristic 예시는 `12페이지`, `12 pages`, `12 slides`, `Page 1`, `Slide 01`, `슬라이드 1`, 반복되는 markdown heading/page separator 등이다.
   - Heuristic 결과는 강제 규칙이 아니라 LLM prompt와 user-facing rationale을 보강하는 advisory signal로 취급한다.
+  - Done by merged PR #11, which closed Issue #7 and added range UI, storage compatibility, marker heuristics, and visual/equivalent checks.
 
 #### Task T012. 스타일 템플릿과 이미지 설정 구현
 - Priority: High
@@ -554,8 +556,8 @@ MVP scope:
 
 #### Task T015C. Slide count range policy generation integration
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #14
 - PR: None
 - Depends on: T011A, T015B
 - Branch: `feature/T015C-slide-count-range-policy`
@@ -688,24 +690,25 @@ MVP scope:
 
 #### Task T017B. Storyboard detail input floating panel UX 수정
 - Priority: Medium
-- Status: Ready
+- Status: Done
 - Issue: #8
-- PR: None
+- PR: #11
 - Depends on: T017A
 - Branch: `fix/T017B-floating-detail-panel`
 - Expected PR Unit: `PR-T017B`
 - Acceptance Criteria:
-  - [ ] desktop storyboard workspace에서 오른쪽 프롬프트/내용 입력 panel이 floating 또는 sticky 형태로 유지되어, 왼쪽 storyboard list를 아래로 스크롤해도 선택 slide의 입력란이 계속 보인다.
-  - [ ] Content tab과 Prompt tab의 주요 textarea, 저장/삭제 action, selected slide summary가 panel 내부에서 접근 가능하다.
-  - [ ] 긴 입력 내용이 있을 때 panel 내부 스크롤과 페이지 스크롤이 서로 충돌하지 않고, 저장 버튼이 화면 밖으로 사라지지 않는다.
-  - [ ] panel이 header, storyboard card, footer, mobile layout과 겹치지 않는다.
-  - [ ] mobile/narrow viewport에서는 floating 때문에 입력란이 좁아지지 않도록 drawer, below-list layout, 또는 non-floating fallback을 사용한다.
-  - [ ] dev sample preview(`/dev/storyboard-sample`)와 실제 project detail(`/projects/{projectId}`) 양쪽에서 동일한 layout behavior를 확인한다.
-  - [ ] 브라우저 또는 equivalent visual check로 긴 storyboard list 스크롤 중 오른쪽 입력 panel visibility를 확인했다.
-  - [ ] `.ai/status/active/T017B-floating-detail-panel.md`에 before/after 스크롤 재현과 검증 결과가 기록되어 있다.
+  - [x] desktop storyboard workspace에서 오른쪽 프롬프트/내용 입력 panel이 floating 또는 sticky 형태로 유지되어, 왼쪽 storyboard list를 아래로 스크롤해도 선택 slide의 입력란이 계속 보인다.
+  - [x] Content tab과 Prompt tab의 주요 textarea, 저장/삭제 action, selected slide summary가 panel 내부에서 접근 가능하다.
+  - [x] 긴 입력 내용이 있을 때 panel 내부 스크롤과 페이지 스크롤이 서로 충돌하지 않고, 저장 버튼이 화면 밖으로 사라지지 않는다.
+  - [x] panel이 header, storyboard card, footer, mobile layout과 겹치지 않는다.
+  - [x] mobile/narrow viewport에서는 floating 때문에 입력란이 좁아지지 않도록 drawer, below-list layout, 또는 non-floating fallback을 사용한다.
+  - [x] dev sample preview(`/dev/storyboard-sample`)와 실제 project detail(`/projects/{projectId}`) 양쪽에서 동일한 layout behavior를 확인한다.
+  - [x] 브라우저 또는 equivalent visual check로 긴 storyboard list 스크롤 중 오른쪽 입력 panel visibility를 확인했다.
+  - [x] `.ai/status/active/T017B-floating-detail-panel.md`에 before/after 스크롤 재현과 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user feedback: 현재 편집 화면은 오른쪽 프롬프트/내용 입력란이 고정 레이아웃이라, 아래쪽으로 스크롤하면 입력란들이 보이지 않는다.
   - 구현 시 `position: sticky`, panel max-height, internal overflow, tab state, selected slide state를 함께 점검한다.
+  - Done by merged PR #11, which closed Issue #8 and verified sticky editor behavior on desktop plus mobile fallback.
 
 ### Feature F09. Manual Slide Operations
 
@@ -779,49 +782,51 @@ MVP scope:
 
 #### Task T021. GPT Image / OpenAI Images provider 구현
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #9
-- PR: None
+- PR: #12
 - Depends on: T020, T009C
 - Branch: `feature/T021-openai-images-provider`
 - Expected PR Unit: `PR-T021`
 - Acceptance Criteria:
-  - [ ] `gpt-image-2`가 `openai` account-level user/provider API key를 사용한다.
-  - [ ] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
-  - [ ] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
-  - [ ] provider response의 bytes 또는 URL이 local storage로 저장된다.
-  - [ ] 실패 응답이 표준 error message로 정규화된다.
-  - [ ] `.ai/status/active/T021-openai-images-provider.md`에 검증 결과가 기록되어 있다.
+  - [x] `gpt-image-2`가 `openai` account-level user/provider API key를 사용한다.
+  - [x] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
+  - [x] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
+  - [x] provider response의 bytes 또는 URL이 local storage로 저장된다.
+  - [x] 실패 응답이 표준 error message로 정규화된다.
+  - [x] `.ai/status/active/T021-openai-images-provider.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
   - 별도 `openai_images` key가 아니라 OpenAI account key를 LLM과 이미지 생성에 함께 쓰는 방향으로 구현한다.
+  - Done by merged PR #12, which closed Issue #9, added OpenRouter-first image routing with direct OpenAI fallback, and verified a one-slide OpenRouter smoke.
 
 #### Task T022. Gemini/Nano Banana image provider 구현
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #10
-- PR: None
+- PR: #12
 - Depends on: T020, T009C
 - Branch: `feature/T022-gemini-image-provider`
 - Expected PR Unit: `PR-T022`
 - Acceptance Criteria:
-  - [ ] Gemini image generation path가 `gemini` account-level user/provider API key를 사용한다.
-  - [ ] project default image model의 `nano-banana` 선택은 Gemini provider key로 해석된다.
-  - [ ] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
-  - [ ] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
-  - [ ] provider response의 bytes 또는 URL이 local storage로 저장된다.
-  - [ ] 실패 응답이 표준 error message로 정규화된다.
-  - [ ] `.ai/status/active/T022-nano-banana-provider.md`에 검증 결과가 기록되어 있다.
+  - [x] Gemini image generation path가 `gemini` account-level user/provider API key를 사용한다.
+  - [x] project default image model의 `nano-banana` 선택은 Gemini provider key로 해석된다.
+  - [x] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
+  - [x] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
+  - [x] provider response의 bytes 또는 URL이 local storage로 저장된다.
+  - [x] 실패 응답이 표준 error message로 정규화된다.
+  - [x] `.ai/status/active/T022-nano-banana-provider.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
   - 별도 `nano_banana` key가 아니라 Gemini account key를 LLM과 이미지 생성에 함께 쓰는 방향으로 구현한다.
+  - Done by merged PR #12, which closed Issue #10, added OpenRouter-first image routing with direct Gemini fallback, and documented that direct Gemini live smoke remains pending user-supplied keys.
 
 ### Feature F11. Individual and Batch Image Generation
 
 #### Task T023. Single slide image generation, regeneration, history 구현
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #15
 - PR: None
 - Depends on: T017, T021, T022
 - Branch: `feature/T023-single-image-generation`
@@ -836,6 +841,7 @@ MVP scope:
   - [ ] `.ai/status/active/T023-single-image-generation.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Batch generation은 T024에서 처리한다.
+  - PR #12 already added per-slide mockup generation triggers and latest mockup display; this task should finish regeneration history, selected image behavior, and Images tab history UX.
 
 #### Task T023A. Image prompt cache readiness와 regeneration prompt assembly 정리
 - Priority: Low
@@ -860,6 +866,26 @@ MVP scope:
   - 2026-06-03 user direction: 내용 재생성, 페이지수 변경 재생성, 이미지 생성 단계에서도 prompt caching 활용 여지를 고려한다.
   - OpenAI Prompt Caching guidance to account for during implementation: exact shared prefixes improve cache hits, variable request-specific content should come later, and cached token metrics should be observed where available.
   - 이 task는 provider support가 있는 경우의 cache-friendly prompt assembly와 observability contract를 정리한다. 실제 batch orchestration은 T024에서 처리한다.
+
+#### Task T023B. Slide mockup result review and final selection UX 구현
+- Priority: Medium
+- Status: Backlog
+- Issue: None
+- PR: None
+- Depends on: T023
+- Branch: `feature/T023B-mockup-review-selection`
+- Expected PR Unit: `PR-T023B`
+- Acceptance Criteria:
+  - [ ] 생성된 slide mockup thumbnail 또는 preview를 클릭하면 큰 preview modal 또는 dedicated viewer가 열린다.
+  - [ ] 한 slide에 여러 mockup 후보가 있으면 carousel-style viewer로 후보를 순차 확인할 수 있다.
+  - [ ] viewer에서 provider, model, createdAt, generation status, error summary, prompt snapshot presence를 확인할 수 있다.
+  - [ ] 사용자는 한 slide의 최종 mockup을 선택할 수 있고, 선택 상태가 Images tab, export 대상, history record에 일관되게 반영된다.
+  - [ ] workflow상 여러 accepted variant가 필요하면 한 slide에 둘 이상의 final mockup을 선택할 수 있는 옵션을 제공한다.
+  - [ ] 선택 변경은 soft-deleted slide, failed image, 다른 사용자의 image record에 적용되지 않는다.
+  - [ ] 브라우저 또는 equivalent visual check로 large preview, carousel navigation, single/multiple final selection UX를 확인했다.
+  - [ ] `.ai/status/active/T023B-mockup-review-selection.md`에 preview/selection 정책과 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 planning handoff from merged PR #12: generated mockups should open in a larger preview, multi-result review should use a carousel-style viewer, and final-selection UX should support one or more accepted mockups per slide.
 
 #### Task T024. Batch image generation과 concurrency/progress 구현
 - Priority: High
@@ -1122,6 +1148,28 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Notes:
   - 2026-06-03 user direction: 에러 발생 시 사용자에게 보여줄 화면은 필요하지만 MVP 이후로 처리한다.
   - MVP 전에는 기존 generation failure text와 loading/progress state를 유지하고, 세분화된 recovery UX는 이 task에서 구현한다.
+
+#### Task T039. Admin-configurable provider routing and fallback policy 구현
+- Priority: Medium
+- Status: Backlog
+- Issue: None
+- PR: None
+- Depends on: T035, T036, T037
+- Branch: `feature/T039-provider-routing-policy`
+- Expected PR Unit: `PR-T039`
+- Acceptance Criteria:
+  - [ ] LLM calls use the same routing principle as image generation: OpenRouter first when available, then direct provider fallback for the selected model when OpenRouter is unavailable or fails.
+  - [ ] Image generation keeps OpenRouter-first routing and direct OpenAI/Gemini fallback behavior for supported image models.
+  - [ ] 관리자는 admin settings surface에서 provider priority order를 설정할 수 있다.
+  - [ ] 관리자는 provider fallback 허용/차단 정책을 LLM과 image generation에 각각 또는 공통 정책으로 설정할 수 있다.
+  - [ ] routing policy는 account-level provider key assignment 상태와 model/image model catalog availability를 함께 고려한다.
+  - [ ] 선택한 provider route가 disabled, missing key, unsupported model, rate-limited, unavailable 상태이면 다음 route로 fallback하거나 사용자에게 명확한 error를 표시한다.
+  - [ ] fallback 발생 시 generation history 또는 provider usage ledger에 attempted route, final route, failure reason을 secret 없이 기록한다.
+  - [ ] mocked provider tests가 OpenRouter success, OpenRouter failure direct fallback, fallback disabled, missing key, unsupported model case를 검증한다.
+  - [ ] 브라우저 또는 equivalent visual check로 admin routing 설정과 generation-time routing 결과 표시를 확인했다.
+  - [ ] `.ai/status/active/T039-provider-routing-policy.md`에 routing policy, fallback matrix, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 planning handoff from merged PR #12: LLM calls should follow the image generation provider priority policy, and admins should be able to configure priority/fallback behavior for both LLM and image generation.
 
 ---
 

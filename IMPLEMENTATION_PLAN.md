@@ -890,15 +890,16 @@ MVP scope:
 - Notes:
   - Batch generation은 T024에서 처리한다.
   - PR #12 already added per-slide mockup generation triggers and latest mockup display; this task should finish regeneration history, selected image behavior, and Images tab history UX.
+  - T023 implementation PR should consider including T023B immediately after the core history/selection behavior is in place, so mockup review UX can be finished without a separate context switch.
 
 #### Task T023B. Slide mockup result review and final selection UX 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #20
 - PR: None
 - Depends on: T023
-- Branch: `feature/T023B-mockup-review-selection`
-- Expected PR Unit: `PR-T023B`
+- Branch: `feature/T023-single-image-generation`
+- Expected PR Unit: `PR-T023 + PR-T023B`
 - Acceptance Criteria:
   - [ ] 생성된 slide mockup thumbnail 또는 preview를 클릭하면 큰 preview modal 또는 dedicated viewer가 열린다.
   - [ ] 한 slide에 여러 mockup 후보가 있으면 carousel-style viewer로 후보를 순차 확인할 수 있다.
@@ -910,6 +911,8 @@ MVP scope:
   - [ ] `.ai/status/active/T023B-mockup-review-selection.md`에 preview/selection 정책과 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-04 planning handoff from merged PR #12: generated mockups should open in a larger preview, multi-result review should use a carousel-style viewer, and final-selection UX should support one or more accepted mockups per slide.
+  - 2026-06-04 user direction: T023B는 Backlog 이슈로 올리되, T023 구현 직후 같은 PR에서 바로 처리할 수 있게 계획한다.
+  - T023B는 T023의 image generation history/selected image behavior 위에서 이어지는 UX 작업이므로 별도 선행 prompt quality/cache work에 의존하지 않는다.
 
 #### Task T024. Batch image generation과 concurrency/progress 구현
 - Priority: High

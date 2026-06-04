@@ -1,0 +1,70 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const routeMocks = vi.hoisted(() => ({
+  db: { id: "db" },
+  requireCurrentUserId: vi.fn(),
+  getDatabase: vi.fn(),
+  getSlidesForProject: vi.fn(),
+  generateSlideImageForProject: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/session", () => ({
+  requireCurrentUserId: routeMocks.requireCurrentUserId,
+}));
+
+vi.mock("@/lib/db/client", () => ({
+  getDatabase: routeMocks.getDatabase,
+}));
+
+vi.mock("@/lib/repositories/projects", () => ({
+  getSlidesForProject: routeMocks.getSlidesForProject,
+}));
+
+vi.mock("@/lib/images/generation", () => ({
+  generateSlideImageForProject: routeMocks.generateSlideImageForProject,
+}));
+
+import { POST } from "@/app/api/projects/[projectId]/images/generate/route";
+
+describe("T021-T022 project image generation route", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    routeMocks.requireCurrentUserId.mockResolvedValue("user-a");
+    routeMocks.getDatabase.mockReturnValue(routeMocks.db);
+    routeMocks.generateSlideImageForProject.mockResolvedValue({ status: "succeeded" });
+  });
+
+  it("generates mockups for every slide in the project", async () => {
+    routeMocks.getSlidesForProject.mockReturnValue([
+      { id: "slide-a" },
+      { id: "slide-b" },
+    ]);
+
+    const response = await POST(new Request("http://localhost/api"), {
+      params: Promise.resolve({ projectId: "project-1" }),
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      generated: 2,
+      failed: 0,
+    });
+    expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledTimes(2);
+    expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledWith(
+      routeMocks.db,
+      expect.objectContaining({
+        projectId: "project-1",
+        slideId: "slide-a",
+        userId: "user-a",
+      }),
+    );
+    expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledWith(
+      routeMocks.db,
+      expect.objectContaining({
+        projectId: "project-1",
+        slideId: "slide-b",
+        userId: "user-a",
+      }),
+    );
+  });
+});

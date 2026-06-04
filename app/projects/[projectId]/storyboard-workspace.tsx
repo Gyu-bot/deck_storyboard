@@ -343,6 +343,8 @@ export function StoryboardWorkspace({
   const [compact, setCompact] = useState(false);
   const [slides, setSlides] = useState(initialSlides);
   const [selectedId, setSelectedId] = useState(initialSlides[0]?.id ?? null);
+  const [mockupGenerationPending, setMockupGenerationPending] = useState(false);
+  const [mockupGenerationMessage, setMockupGenerationMessage] = useState<string | null>(null);
   const selectedSlide = useMemo(
     () => slides.find((slide) => slide.id === selectedId) ?? null,
     [slides, selectedId],
@@ -377,6 +379,28 @@ export function StoryboardWorkspace({
     window.location.reload();
   }
 
+  async function generateMockups() {
+    setMockupGenerationPending(true);
+    setMockupGenerationMessage(null);
+    const response = await fetch(`/api/projects/${project.id}/images/generate`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null) as { error?: string } | null;
+      setMockupGenerationMessage(payload?.error ?? "목업 생성에 실패했습니다.");
+      setMockupGenerationPending(false);
+      return;
+    }
+    setSlides((currentSlides) =>
+      currentSlides.map((slide) => ({
+        ...slide,
+        imageGenerationStatus: "generated",
+      })),
+    );
+    setMockupGenerationMessage("목업 생성이 완료되었습니다.");
+    setMockupGenerationPending(false);
+  }
+
   if (project.status === "storyboard_generation_failed") {
     return <section className="rounded-md border border-red-300 bg-card p-5 text-red-800">생성 실패: {project.generationError}</section>;
   }
@@ -406,11 +430,20 @@ export function StoryboardWorkspace({
               빈 슬라이드 추가
             </Button>
           </div>
-          <Button type="button" disabled={project.status !== "storyboard_confirmed"}>
+          <Button
+            type="button"
+            disabled={project.status !== "storyboard_confirmed" || mockupGenerationPending}
+            onClick={generateMockups}
+          >
             <ImageIcon className="size-4" aria-hidden="true" />
-            목업 생성
+            {mockupGenerationPending ? "생성 중" : "목업 생성"}
           </Button>
         </div>
+        {mockupGenerationMessage ? (
+          <p className="rounded-md border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+            {mockupGenerationMessage}
+          </p>
+        ) : null}
         {project.improvementSuggestions?.length ? (
           <details className="rounded-md border border-border bg-card p-4">
             <summary className="cursor-pointer font-semibold">스토리라인 개선 제안</summary>

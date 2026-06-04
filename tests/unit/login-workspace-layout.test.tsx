@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import LoginPage from "@/app/login/page";
 import { AdminMemberKeySettings } from "@/app/settings/admin-member-key-settings";
 import { ProjectsHeaderActions } from "@/app/projects/projects-header-actions";
@@ -9,6 +9,10 @@ import { StoryboardTestModeToggle } from "@/app/projects/[projectId]/storyboard-
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("T007A login layout", () => {
   it("keeps the login layout inside a balanced viewport spacing set", () => {
@@ -147,6 +151,56 @@ describe("T017B storyboard detail floating panel", () => {
     expect(screen.getByRole("button", { name: "목업" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "목업 생성" })).toBeInTheDocument();
     expect(screen.getAllByText("목업 없음").length).toBeGreaterThan(0);
+  });
+});
+
+describe("T021-T022 mockup generation trigger", () => {
+  it("posts to the project image generation endpoint when the confirmed storyboard mockup button is clicked", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ generated: 1, failed: 0 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_confirmed" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = [
+      {
+        id: "slide-a",
+        sectionTitle: "Section",
+        position: 1,
+        title: "Slide A",
+        coreMessage: "Core message A",
+        contentPoints: ["Point A"],
+        visualDirection: "Visual A",
+        imagePrompt: "Prompt A",
+        slideRole: "Role A",
+        fieldEditState: {
+          title: "aiGenerated",
+          coreMessage: "aiGenerated",
+          contentPoints: "aiGenerated",
+          visualDirection: "aiGenerated",
+          imagePrompt: "aiGenerated",
+          slideRole: "aiGenerated",
+        },
+        imageGenerationStatus: "not_generated",
+      },
+    ];
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+    fireEvent.click(screen.getByRole("button", { name: "목업 생성" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/projects/project-1/images/generate",
+        { method: "POST" },
+      );
+    });
   });
 });
 

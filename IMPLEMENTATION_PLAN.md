@@ -780,7 +780,7 @@ MVP scope:
 #### Task T032. AI deck flow reflow after structural slide edits 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #21
 - PR: None
 - Depends on: T029, T030, T031
 - Branch: `feature/T032-ai-deck-flow-reflow`
@@ -919,7 +919,7 @@ MVP scope:
 #### Task T024. Batch image generation과 concurrency/progress 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #22
 - PR: None
 - Depends on: T023
 - Branch: `feature/T024-batch-image-generation`
@@ -945,7 +945,7 @@ MVP scope:
 #### Task T025. Markdown export 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #23
 - PR: None
 - Depends on: T016, T019, T023
 - Branch: `feature/T025-markdown-export`
@@ -964,7 +964,7 @@ MVP scope:
 #### Task T026. Selected image ZIP export 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #24
 - PR: None
 - Depends on: T025
 - Branch: `feature/T026-selected-image-zip-export`
@@ -984,7 +984,7 @@ MVP scope:
 #### Task T027. 보안/소유권/삭제 데이터 hardening
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #25
 - PR: None
 - Depends on: T020, T026
 - Branch: `feature/T027-security-hardening`
@@ -1002,7 +1002,7 @@ MVP scope:
 #### Task T027A. Provider call progress and loading visualization 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #26
 - PR: None
 - Depends on: T015B, T023, T024
 - Branch: `feature/T027A-provider-call-progress-ui`
@@ -1024,7 +1024,7 @@ MVP scope:
 #### Task T027B. Actual provider usage ledger and admin cost dashboard 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #27
 - PR: None
 - Depends on: T009B, T015B, T021, T022, T024
 - Branch: `feature/T027B-provider-usage-ledger`
@@ -1054,7 +1054,7 @@ MVP scope:
 #### Task T028. MVP end-to-end smoke와 Docker persistence 검증
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #28
 - PR: None
 - Depends on: T002, T009C, T024, T026, T027, T027A, T027B
 - Branch: `feature/T028-mvp-e2e-smoke`
@@ -1078,7 +1078,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T035. OpenRouter, OpenAI, Claude, Gemini LLM provider adapters 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #29
 - PR: None
 - Depends on: T015B, T009C
 - Branch: `feature/T035-multi-llm-providers`
@@ -1100,7 +1100,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T036. User-selectable LLM model selection 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #30
 - PR: None
 - Depends on: T035
 - Branch: `feature/T036-llm-model-selection`
@@ -1131,7 +1131,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T037. Unified provider key migration cleanup 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #31
 - PR: None
 - Depends on: T009C, T035, T036
 - Branch: `chore/T037-unified-provider-key-cleanup`
@@ -1158,7 +1158,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T038. Post-MVP provider error and recovery UX 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #32
 - PR: None
 - Depends on: T027A, T035, T036, T037
 - Branch: `feature/T038-provider-error-recovery-ux`
@@ -1181,7 +1181,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T039. Admin-configurable provider routing and fallback policy 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #33
 - PR: None
 - Depends on: T035, T036, T037
 - Branch: `feature/T039-provider-routing-policy`
@@ -1211,7 +1211,7 @@ This epic is explicitly after MVP. Prompt hardening and prompt caching should im
 #### Task T015D. Reusable LLM prompt quality baseline and prompt-engineer review
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #34
 - PR: None
 - Depends on: T028
 - Branch: `feature/T015D-storyboard-prompt-hardening`
@@ -1252,7 +1252,7 @@ This epic is explicitly after MVP. Prompt hardening and prompt caching should im
 #### Task T023A. Image prompt cache readiness와 regeneration prompt assembly 정리
 - Priority: Low
 - Status: Backlog
-- Issue: None
+- Issue: #35
 - PR: None
 - Depends on: T023, T015D
 - Branch: `feature/T023A-image-prompt-cache-readiness`
@@ -1285,7 +1285,7 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 #### Task D001. IMPLEMENTATION_PLAN.md 상태 갱신
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #36
 - PR: None
 - Depends on: Merged PR evidence
 - Branch: `docs/update-implementation-plan`
@@ -1301,7 +1301,7 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 #### Task D002. 프로젝트 backlog/status/roadmap 문서 정리
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #37
 - PR: None
 - Depends on: Merged PR evidence or user instruction
 - Branch: `docs/update-project-status`

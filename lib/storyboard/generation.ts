@@ -14,12 +14,18 @@ function projectSlideCountPreference(project: {
   minSlideCount: number | null;
   maxSlideCount: number | null;
   preferredSlideCount: number | null;
+  storylineSlideMarkerCount: number | null;
+  storylineSlideMarkerConfidence: "none" | "low" | "medium" | "high";
+  targetSlideCountRationale: string | null;
 }) {
   return {
     mode: project.slideCountMode,
     minSlideCount: project.minSlideCount,
     maxSlideCount: project.maxSlideCount,
     preferredSlideCount: project.preferredSlideCount,
+    storylineSlideMarkerCount: project.storylineSlideMarkerCount,
+    storylineSlideMarkerConfidence: project.storylineSlideMarkerConfidence,
+    targetSlideCountRationale: project.targetSlideCountRationale,
   };
 }
 
@@ -59,8 +65,7 @@ export async function analyzeStoryStructure(
     const structure = await provider.generateStoryboard({
       task: "story_structure",
       storyline: project.storyline,
-      targetSlideCount: project.targetSlideCount,
-      slideCountPreference: projectSlideCountPreference(project),
+      slideCountPolicy: projectSlideCountPreference(project),
       includeSuggestions: project.improvementSuggestionsEnabled,
     });
     const generatedCount = structure.slides?.length ?? null;
@@ -96,19 +101,16 @@ export async function createSlideBreakdown(
   const project = getProjectForUser(db, projectId, userId);
   if (!project) throw new Error("project not found");
   try {
-    const breakdown =
-      structure.slides ??
-      (
-        await provider.generateStoryboard({
+    const breakdownResponse = structure.slides
+      ? structure
+      : await provider.generateStoryboard({
           task: "slide_breakdown",
           storyline: project.storyline,
-          targetSlideCount: project.targetSlideCount,
-          slideCountPreference: projectSlideCountPreference(project),
+          slideCountPolicy: projectSlideCountPreference(project),
           includeSuggestions: project.improvementSuggestionsEnabled,
           previousStructure: structure,
-        })
-      ).slides ??
-      [];
+        });
+    const breakdown = breakdownResponse.slides ?? [];
 
     const generated = breakdown.map((slide, index) =>
       createSlideForProject(db, projectId, userId, {
@@ -125,6 +127,12 @@ export async function createSlideBreakdown(
     );
     updateProjectForUser(db, projectId, userId, {
       status: "storyboard_review",
+      targetSlideCountRationale:
+        breakdownResponse.targetSlideCountRationale ??
+        (breakdown.length > 0
+          ? rangeMismatchRationale(project, breakdown.length)
+          : null) ??
+        project.targetSlideCountRationale,
       generationError: null,
     });
     return generated;

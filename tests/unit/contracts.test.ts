@@ -174,12 +174,14 @@ describe("T013-T015 storyboard generation contracts", () => {
         apiKey: "sk-or-user-secret",
         task: "story_structure",
         storyline: "We need a launch strategy deck for enterprise teams.",
-        targetSlideCount: 1,
-        slideCountPreference: {
+        slideCountPolicy: {
           mode: "standard",
           minSlideCount: 9,
           maxSlideCount: 14,
           preferredSlideCount: 12,
+          storylineSlideMarkerCount: null,
+          storylineSlideMarkerConfidence: "none",
+          targetSlideCountRationale: null,
         },
         includeSuggestions: false,
       }),
@@ -224,9 +226,80 @@ describe("T013-T015 storyboard generation contracts", () => {
       "system",
       "user",
     ]);
+    expect(body.messages[1]?.content).toContain('"mode": "standard"');
+    expect(body.messages[1]?.content).toContain('"minSlideCount": 9');
+    expect(body.messages[1]?.content).toContain('"maxSlideCount": 14');
+    expect(body.messages[1]?.content).toContain('"preferredSlideCount": 12');
+  });
+
+  it("sends the full slide count range policy and marker context to OpenRouter", async () => {
+    const requests: Array<{ url: string; init: RequestInit }> = [];
+    const fetcher = createOpenRouterChatCompletionFetcher({
+      model: "openai/gpt-4o",
+      fetchImpl: async (url, init) => {
+        requests.push({ url: String(url), init: init ?? {} });
+        return new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    documentPurpose: "Proposal",
+                    overallThesis: "Let the model choose the right depth",
+                    sections: [
+                      {
+                        id: "s1",
+                        title: "Strategy",
+                        role: "Recommendation",
+                        coreMessage: "Match storyline complexity",
+                        sourceSummary: "User storyline",
+                        suggestedSlideCount: 3,
+                      },
+                    ],
+                    improvementSuggestions: null,
+                    targetSlideCountRationale:
+                      "Auto mode selected 16 slides from section count and page-like markers.",
+                    slides: null,
+                  }),
+                },
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      },
+    });
+
+    await fetcher({
+      provider: "openrouter",
+      apiKey: "sk-or-user-secret",
+      task: "story_structure",
+      storyline: "Slide 01: Context\nSlide 16: Recommendation",
+      slideCountPolicy: {
+        mode: "auto",
+        minSlideCount: null,
+        maxSlideCount: null,
+        preferredSlideCount: null,
+        storylineSlideMarkerCount: 16,
+        storylineSlideMarkerConfidence: "high",
+        targetSlideCountRationale: null,
+      },
+      includeSuggestions: true,
+    });
+
+    const body = JSON.parse(String(requests[0]?.init.body)) as {
+      messages: Array<{ role: string; content: string }>;
+    };
+    expect(body.messages[1]?.content).toContain('"mode": "auto"');
+    expect(body.messages[1]?.content).toContain('"userSelectedRange": null');
+    expect(body.messages[1]?.content).toContain('"preferredSlideCount": null');
     expect(body.messages[1]?.content).toContain(
-      "slideCountPreference: standard range 9-14 slides, preferred 12",
+      '"heuristicMarker": {\n    "estimatedCount": 16,\n    "confidence": "high"\n  }',
     );
+    expect(body.messages[1]?.content).toContain(
+      "storyline complexity, section count, page-like markers, and content density",
+    );
+    expect(body.messages[1]?.content).toContain("targetSlideCountRationale");
   });
 
   it("validates storyboard output, retries invalid provider output, and persists slides", async () => {
@@ -237,55 +310,56 @@ describe("T013-T015 storyboard generation contracts", () => {
       targetSlideCount: 2,
       improvementSuggestionsEnabled: true,
     });
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce({ invalid: true })
+      .mockResolvedValueOnce({
+        documentPurpose: "Proposal",
+        overallThesis: "Enter selectively",
+        sections: [
+          {
+            id: "s1",
+            title: "Market",
+            role: "Context",
+            coreMessage: "The market is attractive",
+            sourceSummary: "User storyline",
+            suggestedSlideCount: 2,
+          },
+        ],
+        improvementSuggestions: [
+          {
+            id: "i1",
+            title: "Clarify risks",
+            rationale: "Risk story is thin",
+          },
+        ],
+        targetSlideCountRationale: "Matches requested count",
+        slides: [
+          {
+            sectionId: "s1",
+            sectionTitle: "Market",
+            title: "Market momentum",
+            coreMessage: "Demand is rising",
+            contentPoints: ["Demand", "Competition"],
+            visualDirection: "2x2 chart",
+            imagePrompt: "Executive chart",
+            slideRole: "Evidence",
+          },
+          {
+            sectionId: "s1",
+            sectionTitle: "Market",
+            title: "Entry thesis",
+            coreMessage: "Select segment A",
+            contentPoints: ["Segment", "Timing"],
+            visualDirection: "Roadmap",
+            imagePrompt: "Roadmap visual",
+            slideRole: "Recommendation",
+          },
+        ],
+      });
     const provider = createOpenRouterProvider({
       apiKey: "openrouter-key",
-      fetcher: vi
-        .fn()
-        .mockResolvedValueOnce({ invalid: true })
-        .mockResolvedValueOnce({
-          documentPurpose: "Proposal",
-          overallThesis: "Enter selectively",
-          sections: [
-            {
-              id: "s1",
-              title: "Market",
-              role: "Context",
-              coreMessage: "The market is attractive",
-              sourceSummary: "User storyline",
-              suggestedSlideCount: 2,
-            },
-          ],
-          improvementSuggestions: [
-            {
-              id: "i1",
-              title: "Clarify risks",
-              rationale: "Risk story is thin",
-            },
-          ],
-          targetSlideCountRationale: "Matches requested count",
-          slides: [
-            {
-              sectionId: "s1",
-              sectionTitle: "Market",
-              title: "Market momentum",
-              coreMessage: "Demand is rising",
-              contentPoints: ["Demand", "Competition"],
-              visualDirection: "2x2 chart",
-              imagePrompt: "Executive chart",
-              slideRole: "Evidence",
-            },
-            {
-              sectionId: "s1",
-              sectionTitle: "Market",
-              title: "Entry thesis",
-              coreMessage: "Select segment A",
-              contentPoints: ["Segment", "Timing"],
-              visualDirection: "Roadmap",
-              imagePrompt: "Roadmap visual",
-              slideRole: "Recommendation",
-            },
-          ],
-        }),
+      fetcher,
     });
 
     const structure = await analyzeStoryStructure(db, project.id, "user-a", provider);
@@ -306,6 +380,76 @@ describe("T013-T015 storyboard generation contracts", () => {
     });
     expect(getProjectForUser(db, project.id, "user-a")?.status).toBe(
       "storyboard_review",
+    );
+    expect(getProjectForUser(db, project.id, "user-a")?.targetSlideCountRationale).toBe(
+      "Matches requested count",
+    );
+    expect(fetcher).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slideCountPolicy: {
+          mode: "custom_range",
+          minSlideCount: 2,
+          maxSlideCount: 2,
+          preferredSlideCount: 2,
+          storylineSlideMarkerCount: null,
+          storylineSlideMarkerConfidence: "none",
+          targetSlideCountRationale: null,
+        },
+      }),
+    );
+  });
+
+  it("persists auto-mode slide count rationale from story structure", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Auto deck",
+      storyline: "Strategy context with several sections and dense evidence",
+      slideCountMode: "auto",
+      minSlideCount: null,
+      maxSlideCount: null,
+      preferredSlideCount: null,
+      storylineSlideMarkerCount: null,
+      storylineSlideMarkerConfidence: "none",
+      improvementSuggestionsEnabled: false,
+    });
+    const provider = createOpenRouterProvider({
+      apiKey: "openrouter-key",
+      fetcher: vi.fn().mockResolvedValue({
+        documentPurpose: "Proposal",
+        overallThesis: "Use enough depth for the storyline",
+        sections: [
+          {
+            id: "s1",
+            title: "Strategy",
+            role: "Recommendation",
+            coreMessage: "The input needs a standard-depth story",
+            sourceSummary: "User storyline",
+            suggestedSlideCount: 10,
+          },
+        ],
+        improvementSuggestions: null,
+        targetSlideCountRationale:
+          "Auto mode selected 10 slides from storyline complexity and content density.",
+        slides: [
+          {
+            sectionId: "s1",
+            sectionTitle: "Strategy",
+            title: "Strategic framing",
+            coreMessage: "The input needs a standard-depth story",
+            contentPoints: ["Context", "Recommendation"],
+            visualDirection: "Executive narrative",
+            imagePrompt: "Executive strategy slide",
+            slideRole: "Recommendation",
+          },
+        ],
+      }),
+    });
+
+    const structure = await analyzeStoryStructure(db, project.id, "user-a", provider);
+    await createSlideBreakdown(db, project.id, "user-a", provider, structure);
+
+    expect(getProjectForUser(db, project.id, "user-a")?.targetSlideCountRationale).toBe(
+      "Auto mode selected 10 slides from storyline complexity and content density.",
     );
   });
 
@@ -374,6 +518,115 @@ describe("T013-T015 storyboard generation contracts", () => {
       expect.objectContaining({ task: "slide_breakdown" }),
     );
     expect(getSlidesForProject(db, project.id, "user-a")).toHaveLength(1);
+  });
+
+  it("passes range policy to both storyboard tasks and persists conflict rationale", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Range deck",
+      storyline: "Slide 01: Problem\nSlide 12: Recommendation",
+      slideCountMode: "brief",
+      minSlideCount: 5,
+      maxSlideCount: 8,
+      preferredSlideCount: 7,
+      storylineSlideMarkerCount: 12,
+      storylineSlideMarkerConfidence: "high",
+      targetSlideCountRationale:
+        "스토리라인 marker 12장이 선택 범위 5-8장과 충돌합니다.",
+      improvementSuggestionsEnabled: false,
+    });
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce({
+        documentPurpose: "Proposal",
+        overallThesis: "Compress the source into an executive brief",
+        sections: [
+          {
+            id: "s1",
+            title: "Market",
+            role: "Context",
+            coreMessage: "Market is attractive",
+            sourceSummary: "User storyline",
+            suggestedSlideCount: 2,
+          },
+        ],
+        improvementSuggestions: null,
+        targetSlideCountRationale:
+          "High-confidence 12-slide marker conflicts with brief range, so the structure compresses to 8 slides.",
+        slides: null,
+      })
+      .mockResolvedValueOnce({
+        documentPurpose: "Proposal",
+        overallThesis: "Compress the source into an executive brief",
+        sections: [
+          {
+            id: "s1",
+            title: "Market",
+            role: "Context",
+            coreMessage: "Market is attractive",
+            sourceSummary: "User storyline",
+            suggestedSlideCount: 2,
+          },
+        ],
+        improvementSuggestions: null,
+        targetSlideCountRationale:
+          "Generated 9 slides because the explicit 12-slide source markers needed one extra transition beyond the brief range.",
+        slides: Array.from({ length: 9 }, (_, index) => ({
+          sectionId: "s1",
+          sectionTitle: "Market",
+          title: `Slide ${index + 1}`,
+          coreMessage: "Market is attractive",
+          contentPoints: ["Demand", "Timing"],
+          visualDirection: "Executive chart",
+          imagePrompt: "Executive chart",
+          slideRole: "Evidence",
+        })),
+      });
+    const provider = createOpenRouterProvider({
+      apiKey: "openrouter-key",
+      fetcher,
+    });
+
+    const structure = await analyzeStoryStructure(db, project.id, "user-a", provider);
+    const generated = await createSlideBreakdown(
+      db,
+      project.id,
+      "user-a",
+      provider,
+      structure,
+    );
+
+    expect(fetcher).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        task: "story_structure",
+        slideCountPolicy: {
+          mode: "brief",
+          minSlideCount: 5,
+          maxSlideCount: 8,
+          preferredSlideCount: 7,
+          storylineSlideMarkerCount: 12,
+          storylineSlideMarkerConfidence: "high",
+          targetSlideCountRationale:
+            "스토리라인 marker 12장이 선택 범위 5-8장과 충돌합니다.",
+        },
+      }),
+    );
+    expect(fetcher).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        task: "slide_breakdown",
+        slideCountPolicy: expect.objectContaining({
+          mode: "brief",
+          storylineSlideMarkerCount: 12,
+          storylineSlideMarkerConfidence: "high",
+        }),
+      }),
+    );
+    expect(generated).toHaveLength(9);
+    expect(getProjectForUser(db, project.id, "user-a")?.targetSlideCountRationale).toBe(
+      "Generated 9 slides because the explicit 12-slide source markers needed one extra transition beyond the brief range.",
+    );
   });
 });
 

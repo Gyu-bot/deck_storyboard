@@ -1,0 +1,40 @@
+# T023 Single Slide Image Generation
+
+- Status: In Progress
+- Branch: feature/T023-single-image-generation
+- Issue: #15
+- PR: None
+- Implemented: single-slide image generation history fields, history-safe storage filenames, first-success selected image policy, regeneration history append without auto-selecting a new image, completed-image selection/deselection API, project detail selected-image loading, and Images tab history/selection UI.
+- Acceptance coverage:
+  - confirmed storyboard에서 single slide image generation을 실행할 수 있도록 기존 per-slide mockup trigger와 generation route를 유지했다.
+  - resolved prompt snapshot, common prompt snapshot, slide prompt snapshot을 `slide_image_generations`에 저장한다.
+  - generation history에 model, aspect ratio, status, error, created/updated timestamps, selected flag를 저장한다.
+  - regeneration 성공 시 새 image는 history에 추가되지만 기존 selected image가 있으면 자동 selected가 되지 않는다.
+  - 사용자는 completed previous image를 selected image로 선택할 수 있다.
+  - 사용자는 selected image를 선택 해제할 수 있고, 명시적으로 해제된 상태에서는 최신 성공 이미지를 자동 fallback으로 보여주지 않는다.
+  - Images tab에서 selected thumbnail과 generation history를 볼 수 있다.
+- Verification:
+  - RED 확인: `npm run test:unit -- tests/unit/image-providers.test.ts`
+  - RED 확인: `npm run test:unit -- tests/unit/login-workspace-layout.test.tsx`
+  - RED 확인: `npm run test:unit -- tests/unit/image-generation-route.test.ts`
+  - GREEN 확인: `npm run test:unit -- tests/unit/image-generation-route.test.ts tests/unit/login-workspace-layout.test.tsx tests/unit/image-providers.test.ts`
+  - GREEN 확인: `npm run typecheck`
+  - GREEN 확인: `npm run test:unit` (14 files, 62 tests)
+  - GREEN 확인: `npm run lint`
+  - GREEN 확인: `npm run build`
+  - GREEN 확인: `npm run test:storyboard-sample` (`slides=12`, `status=storyboard_review`, `image_generation=not_started`)
+  - Reviewer pass: fixed legacy successful-image selection behavior, restored production-only guard for `/dev/storyboard-sample`, and restored the original Next generated typecheck coverage.
+  - Browser 확인: `http://localhost:3002/dev/storyboard-sample` sample page loaded on the running dev server with slide 1 `생성 완료` and the `목업` tab available for user review. Automated tab click succeeded after reload; slide 1 `목업` tab showed selected image plus two history thumbnails, and the detail scroll area reported `overflow-y: auto`, `scrollHeight=1088`, `clientHeight=1060`, so overflowing history remains reachable inside the panel. In-app browser screenshot capture still hit a CDP timeout.
+  - Review comment fix: the selected-slide detail panel now uses a desktop viewport-height grid with `minmax(0,1fr)` body row and `overscroll-contain` internal scrolling so longer mockup histories do not get clipped by the sticky panel.
+  - Review comment fix: `/dev/storyboard-sample` uses fixture-only data URL images, so the server selection API has no backing DB row for those IDs; the sample now falls back to local state updates for selection/deselection when the PATCH API returns 404, while persisted project images continue to use the API.
+  - GREEN 확인: `npm run test:unit -- tests/unit/image-generation-route.test.ts` (14 files, 66 tests)
+  - GREEN 확인: `npm run test:unit -- tests/unit/image-providers.test.ts` (14 files, 66 tests)
+  - GREEN 확인: `npm run test:unit -- tests/unit/login-workspace-layout.test.tsx` (14 files, 66 tests)
+  - GREEN 확인: `npm run typecheck`
+  - GREEN 확인: `npm run lint`
+  - GREEN 확인: `npm run build`
+  - GREEN 확인: `npm run test:storyboard-sample`
+- Notes:
+  - User requested review before PR creation, so this branch should not open a PR until the local review pass is complete.
+  - Initial local dev watcher hit `EMFILE`; the running review server uses `next dev --webpack --port 3002` with polling watcher env to avoid the file watcher limit.
+  - Batch generation remains T024 scope; the existing route still supports all-slide generation for previously shipped UI, but T023 changes focus on single-slide history and selection behavior.

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { eq } from "drizzle-orm";
 
 import { slideImageGenerations } from "@/lib/db/schema";
 import { createTestDatabase } from "@/lib/db/test-utils";
@@ -6,6 +7,8 @@ import {
   createProjectForUser,
   createSlideForProject,
   getSlidesForProject,
+  listLatestSuccessfulSlideImagesForProject,
+  setSlideImageGenerationSelectionForProject,
 } from "@/lib/repositories/projects";
 import { saveUserApiKey } from "@/lib/repositories/user-api-keys";
 import {
@@ -283,7 +286,7 @@ describe("T021-T022 slide image generation orchestration", () => {
       expect.objectContaining({
         projectId: project.id,
         ownerUserId: "user-a",
-        fileName: `${slide.id}.png`,
+        fileName: `${slide.id}-${result.id}.png`,
         bytes: Buffer.from("openrouter-png"),
       }),
     );
@@ -300,9 +303,205 @@ describe("T021-T022 slide image generation orchestration", () => {
       slideId: slide.id,
       provider: "openrouter",
       model: "nano-banana",
+      aspectRatio: "4:3",
       status: "succeeded",
       imageUrl: `/api/projects/${project.id}/images/slide-1.png`,
+      selected: true,
     });
+    expect(records[0]?.promptSnapshot).toContain("Use the corporate blue visual system.");
+    expect(records[0]?.commonPromptSnapshot).toBe("Use the corporate blue visual system.");
+    expect(records[0]?.slidePromptSnapshot).toBe("Generate a clean slide mockup");
+    expect(records[0]?.updatedAt).toBeTruthy();
+  });
+
+  it("keeps the existing selected image when a slide is regenerated and appends a new history record", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+      resolvedCommonPrompt: "Use executive consulting layout rules.",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi
+        .fn()
+        .mockImplementation(
+          ({
+            fileName,
+          }: {
+            fileName: string;
+          }) => Promise.resolve({
+            storageKey: `projects/${project.id}/images/${fileName}`,
+            filePath: `/app/data/storage/projects/${project.id}/images/${fileName}`,
+            url: `/api/projects/${project.id}/images/${fileName}`,
+            contentType: "image/png",
+          }),
+        ),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openrouter-png"),
+        contentType: "image/png",
+      }),
+    };
+
+    const first = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider },
+    });
+    const second = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider },
+    });
+
+    expect(first.id).not.toBe(second.id);
+    expect(first.imageUrl).not.toBe(second.imageUrl);
+    const records = db
+      .select()
+      .from(slideImageGenerations)
+      .orderBy(slideImageGenerations.createdAt)
+      .all();
+    expect(records).toHaveLength(2);
+    expect(records.map((record) => record.selected)).toEqual([true, false]);
+    expect(
+      listLatestSuccessfulSlideImagesForProject(db, project.id, "user-a"),
+    ).toMatchObject([
+      {
+        id: first.id,
+        imageUrl: first.imageUrl,
+        selected: true,
+      },
+    ]);
+  });
+
+  it("does not auto-select regeneration when a legacy successful image exists without a selected flag", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi
+        .fn()
+        .mockImplementation(
+          ({
+            fileName,
+          }: {
+            fileName: string;
+          }) => Promise.resolve({
+            storageKey: `projects/${project.id}/images/${fileName}`,
+            filePath: `/app/data/storage/projects/${project.id}/images/${fileName}`,
+            url: `/api/projects/${project.id}/images/${fileName}`,
+            contentType: "image/png",
+          }),
+        ),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openrouter-png"),
+        contentType: "image/png",
+      }),
+    };
+    const first = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider },
+    });
+    db.update(slideImageGenerations)
+      .set({ selected: false })
+      .where(eq(slideImageGenerations.id, first.id))
+      .run();
+
+    const regenerated = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider },
+    });
+
+    expect(regenerated.selected).toBe(false);
+    const records = db.select().from(slideImageGenerations).all();
+    expect(records.map((record) => record.selected)).toEqual([false, false]);
+  });
+
+  it("allows a selected slide image to be explicitly deselected", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi.fn().mockResolvedValue({
+        storageKey: `projects/${project.id}/images/slide-1.png`,
+        filePath: `/app/data/storage/projects/${project.id}/images/slide-1.png`,
+        url: `/api/projects/${project.id}/images/slide-1.png`,
+        contentType: "image/png",
+      }),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openrouter-png"),
+        contentType: "image/png",
+      }),
+    };
+    const selectedImage = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider },
+    });
+
+    const deselected = setSlideImageGenerationSelectionForProject(
+      db,
+      project.id,
+      "user-a",
+      selectedImage.id,
+      false,
+    );
+
+    expect(deselected).toMatchObject({
+      id: selectedImage.id,
+      selected: false,
+    });
+    expect(listLatestSuccessfulSlideImagesForProject(db, project.id, "user-a")).toEqual([]);
   });
 
   it("falls back to the direct model provider when OpenRouter image generation fails", async () => {

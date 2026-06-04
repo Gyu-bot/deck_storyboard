@@ -10,6 +10,7 @@ import {
   getProjectForUser,
   getSlidesForProject,
   listLatestSuccessfulSlideImagesForProject,
+  listSlideImageGenerationsForProject,
 } from "@/lib/repositories/projects";
 import { StoryboardWorkspace } from "@/app/projects/[projectId]/storyboard-workspace";
 import { StoryboardTestModeToggle } from "@/app/projects/[projectId]/storyboard-test-mode-toggle";
@@ -41,12 +42,22 @@ export default async function ProjectDetailPage({
   if (!project) redirect("/projects");
   const slides = getSlidesForProject(db, projectId, userId);
   const latestImages = listLatestSuccessfulSlideImagesForProject(db, projectId, userId);
+  const imageHistory = listSlideImageGenerationsForProject(db, projectId, userId);
   const latestImageBySlideId = new Map(
     latestImages.map((image) => [image.slideId, image.imageUrl]),
   );
+  const imagesBySlideId = new Map<string, typeof imageHistory>();
+  for (const image of imageHistory) {
+    if (!image.slideId) continue;
+    imagesBySlideId.set(image.slideId, [
+      ...(imagesBySlideId.get(image.slideId) ?? []),
+      image,
+    ]);
+  }
   const slidesWithImages = slides.map((slide) => ({
     ...slide,
     imageUrl: latestImageBySlideId.get(slide.id) ?? null,
+    images: imagesBySlideId.get(slide.id) ?? [],
   }));
   const cookieStore = await cookies();
   const testModeEnabled = isStoryboardTestModeEnabled({

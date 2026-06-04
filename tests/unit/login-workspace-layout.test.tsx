@@ -143,10 +143,13 @@ describe("T017B storyboard detail floating panel", () => {
     const panel = screen.getByLabelText("선택 슬라이드 상세 편집 패널");
     expect(panel).toHaveClass("lg:sticky");
     expect(panel).toHaveClass("lg:top-6");
+    expect(panel).toHaveClass("lg:h-[calc(100vh-3rem)]");
     expect(panel).toHaveClass("lg:max-h-[calc(100vh-3rem)]");
+    expect(panel).toHaveClass("lg:grid-rows-[auto_auto_minmax(0,1fr)]");
     expect(panel).toHaveClass("overflow-hidden");
 
     expect(screen.getByTestId("storyboard-detail-scroll-area")).toHaveClass("overflow-y-auto");
+    expect(screen.getByTestId("storyboard-detail-scroll-area")).toHaveClass("overscroll-contain");
     expect(screen.getByRole("button", { name: /삭제/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "목업" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "전체 슬라이드 목업 생성" })).toBeInTheDocument();
@@ -265,11 +268,220 @@ describe("T021-T022 mockup generation trigger", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "목업" }));
     await waitFor(() => {
-      expect(screen.getByRole("img", { name: "Slide A 목업" })).toHaveAttribute(
+      expect(screen.getByRole("img", { name: "Slide A 선택 목업" })).toHaveAttribute(
         "src",
         "/api/projects/project-1/images/slide-a.png",
       );
     });
+  });
+});
+
+describe("T023 image generation history", () => {
+  it("shows the selected thumbnail, renders generation history, and posts selected image changes", async () => {
+    const fetchMock = vi.fn().mockImplementation(async (_url: string, init?: RequestInit) => {
+      const selected = init?.body ? (JSON.parse(String(init.body)) as { selected?: boolean }).selected : true;
+      return {
+        ok: true,
+        json: async () => ({
+          id: "image-2",
+          slideId: "slide-a",
+          imageUrl: "/api/projects/project-1/images/slide-a-image-2.png",
+          provider: "openrouter",
+          model: "gpt-image-2",
+          aspectRatio: "16:9",
+          status: "succeeded",
+          selected,
+          errorMessage: null,
+          createdAt: "2026-06-04T09:30:00.000Z",
+          updatedAt: "2026-06-04T09:30:00.000Z",
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_confirmed" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = [
+      {
+        id: "slide-a",
+        sectionTitle: "Section",
+        position: 1,
+        title: "Slide A",
+        coreMessage: "Core message A",
+        contentPoints: ["Point A"],
+        visualDirection: "Visual A",
+        imagePrompt: "Prompt A",
+        slideRole: "Role A",
+        fieldEditState: {
+          title: "aiGenerated",
+          coreMessage: "aiGenerated",
+          contentPoints: "aiGenerated",
+          visualDirection: "aiGenerated",
+          imagePrompt: "aiGenerated",
+          slideRole: "aiGenerated",
+        },
+        imageGenerationStatus: "generated",
+        imageUrl: "/api/projects/project-1/images/slide-a-image-1.png",
+        images: [
+          {
+            id: "image-1",
+            imageUrl: "/api/projects/project-1/images/slide-a-image-1.png",
+            provider: "openrouter",
+            model: "gpt-image-2",
+            aspectRatio: "16:9" as const,
+            status: "succeeded" as const,
+            selected: true,
+            errorMessage: null,
+            createdAt: "2026-06-04T09:00:00.000Z",
+            updatedAt: "2026-06-04T09:00:00.000Z",
+          },
+          {
+            id: "image-2",
+            imageUrl: "/api/projects/project-1/images/slide-a-image-2.png",
+            provider: "openrouter",
+            model: "gpt-image-2",
+            aspectRatio: "16:9" as const,
+            status: "succeeded" as const,
+            selected: false,
+            errorMessage: null,
+            createdAt: "2026-06-04T09:30:00.000Z",
+            updatedAt: "2026-06-04T09:30:00.000Z",
+          },
+        ],
+      },
+    ];
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+    fireEvent.click(screen.getByRole("button", { name: "목업" }));
+
+    expect(screen.getByRole("heading", { name: "선택된 목업" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Slide A 선택 목업" })).toHaveAttribute(
+      "src",
+      "/api/projects/project-1/images/slide-a-image-1.png",
+    );
+    expect(screen.getByRole("heading", { name: "생성 이력" })).toBeInTheDocument();
+    expect(screen.getAllByText("openrouter · gpt-image-2 · 16:9")).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole("button", { name: "목업 image-2 선택" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/projects/project-1/images/image-2",
+        expect.objectContaining({ method: "PATCH" }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("img", { name: "Slide A 선택 목업" })).toHaveAttribute(
+        "src",
+        "/api/projects/project-1/images/slide-a-image-2.png",
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "목업 image-2 선택 해제" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        "/api/projects/project-1/images/image-2",
+        expect.objectContaining({
+          body: JSON.stringify({ selected: false }),
+          headers: { "Content-Type": "application/json" },
+          method: "PATCH",
+        }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole("img", { name: "Slide A 선택 목업" })).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("선택된 목업 이미지가 아직 없습니다.")).toBeInTheDocument();
+  });
+
+  it("updates fixture-only sample image selection locally when the API has no backing row", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ error: "선택할 수 있는 완료된 목업이 없습니다." }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const project = {
+      id: "dev-storyboard-sample",
+      name: "Sample",
+      status: "storyboard_review" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = [
+      {
+        id: "slide-a",
+        sectionTitle: "Section",
+        position: 1,
+        title: "Slide A",
+        coreMessage: "Core message A",
+        contentPoints: ["Point A"],
+        visualDirection: "Visual A",
+        imagePrompt: "Prompt A",
+        slideRole: "Role A",
+        fieldEditState: {
+          title: "aiGenerated",
+          coreMessage: "aiGenerated",
+          contentPoints: "aiGenerated",
+          visualDirection: "aiGenerated",
+          imagePrompt: "aiGenerated",
+          slideRole: "aiGenerated",
+        },
+        imageGenerationStatus: "generated",
+        imageUrl: "data:image/svg+xml,selected",
+        images: [
+          {
+            id: "dev-sample-image-selected",
+            imageUrl: "data:image/svg+xml,selected",
+            provider: "openrouter",
+            model: "gpt-image-2",
+            aspectRatio: "16:9" as const,
+            status: "succeeded" as const,
+            selected: true,
+            errorMessage: null,
+            createdAt: "2026-06-04T09:00:00.000Z",
+            updatedAt: "2026-06-04T09:00:00.000Z",
+          },
+          {
+            id: "dev-sample-image-previous",
+            imageUrl: "data:image/svg+xml,previous",
+            provider: "openrouter",
+            model: "gpt-image-2",
+            aspectRatio: "16:9" as const,
+            status: "succeeded" as const,
+            selected: false,
+            errorMessage: null,
+            createdAt: "2026-06-04T09:30:00.000Z",
+            updatedAt: "2026-06-04T09:30:00.000Z",
+          },
+        ],
+      },
+    ];
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+    fireEvent.click(screen.getByRole("button", { name: "목업" }));
+    fireEvent.click(screen.getByRole("button", { name: "목업 dev-sample-image-previous 선택" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("img", { name: "Slide A 선택 목업" })).toHaveAttribute(
+        "src",
+        "data:image/svg+xml,previous",
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "목업 dev-sample-image-previous 선택 해제" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("img", { name: "Slide A 선택 목업" })).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("선택된 목업 이미지가 아직 없습니다.")).toBeInTheDocument();
   });
 });
 

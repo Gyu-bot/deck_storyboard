@@ -185,11 +185,14 @@ export const slideImageGenerations = sqliteTable("slide_image_generations", {
   promptSnapshot: text("prompt_snapshot").notNull(),
   commonPromptSnapshot: text("common_prompt_snapshot").notNull().default(""),
   slidePromptSnapshot: text("slide_prompt_snapshot").notNull().default(""),
+  aspectRatio: text("aspect_ratio").$type<"16:9" | "4:3">().notNull().default("16:9"),
   storageKey: text("storage_key").notNull(),
   imageUrl: text("image_url").notNull(),
   status: text("status").$type<"succeeded" | "failed">().notNull(),
   errorMessage: text("error_message"),
+  selected: integer("selected", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
   deletedAt: text("deleted_at"),
 });
 

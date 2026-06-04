@@ -753,8 +753,8 @@ MVP scope:
 
 #### Task T029. AI merge for selected slides 구현
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #17
 - PR: None
 - Depends on: T019, T015B
 - Branch: `feature/T029-ai-merge-selected-slides`

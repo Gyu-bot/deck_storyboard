@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   DndContext,
@@ -128,6 +129,19 @@ type SlideView = {
   slideRole: string;
   fieldEditState: Record<string, string>;
   imageGenerationStatus: string;
+  imageUrl?: string | null;
+};
+
+type ImageGenerationResponse = {
+  generated: number;
+  failed: number;
+  error: string | null;
+  images?: Array<{
+    slideId: string | null;
+    imageUrl: string;
+    provider: string;
+    model: string;
+  }>;
 };
 
 function SortableSlideCard({
@@ -135,11 +149,17 @@ function SortableSlideCard({
   compact,
   selected,
   onSelect,
+  canGenerateMockup,
+  generatingMockup,
+  onGenerateMockup,
 }: {
   slide: SlideView;
   compact: boolean;
   selected: boolean;
   onSelect: () => void;
+  canGenerateMockup: boolean;
+  generatingMockup: boolean;
+  onGenerateMockup: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: slide.id });
@@ -169,6 +189,19 @@ function SortableSlideCard({
           {slide.contentPoints.map((point) => <li key={point}>{localizeGeneratedText(point)}</li>)}
         </ul>
       ) : null}
+      <div className="ml-7 flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!canGenerateMockup || generatingMockup}
+          aria-label={`슬라이드 ${slide.position} 목업 생성`}
+          onClick={onGenerateMockup}
+        >
+          <ImageIcon className="size-4" aria-hidden="true" />
+          {generatingMockup ? "생성 중" : "목업 생성"}
+        </Button>
+      </div>
     </article>
   );
 }
@@ -178,11 +211,17 @@ function StaticSlideCard({
   compact,
   selected,
   onSelect,
+  canGenerateMockup,
+  generatingMockup,
+  onGenerateMockup,
 }: {
   slide: SlideView;
   compact: boolean;
   selected: boolean;
   onSelect: () => void;
+  canGenerateMockup: boolean;
+  generatingMockup: boolean;
+  onGenerateMockup: () => void;
 }) {
   return (
     <article
@@ -208,6 +247,19 @@ function StaticSlideCard({
           {slide.contentPoints.map((point) => <li key={point}>{localizeGeneratedText(point)}</li>)}
         </ul>
       ) : null}
+      <div className="ml-7 flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!canGenerateMockup || generatingMockup}
+          aria-label={`슬라이드 ${slide.position} 목업 생성`}
+          onClick={onGenerateMockup}
+        >
+          <ImageIcon className="size-4" aria-hidden="true" />
+          {generatingMockup ? "생성 중" : "목업 생성"}
+        </Button>
+      </div>
     </article>
   );
 }
@@ -323,8 +375,26 @@ function DetailPanel({ projectId, slide }: { projectId: string; slide: SlideView
           </label>
         ) : null}
         {tab === "images" ? (
-          <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-            목업 생성 이력은 생성 후 표시됩니다. 현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+          <div className="grid gap-3">
+            {slide.imageUrl ? (
+              <div className="overflow-hidden rounded-md border border-border bg-background">
+                <Image
+                  src={slide.imageUrl}
+                  alt={`${localizeGeneratedText(slide.title)} 목업`}
+                  width={960}
+                  height={540}
+                  unoptimized
+                  className="aspect-video w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+                생성된 목업 이미지가 아직 없습니다.
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground">
+              현재 상태: {imageStatusLabels[slide.imageGenerationStatus] ?? slide.imageGenerationStatus}
+            </p>
           </div>
         ) : null}
       </div>
@@ -344,6 +414,7 @@ export function StoryboardWorkspace({
   const [slides, setSlides] = useState(initialSlides);
   const [selectedId, setSelectedId] = useState(initialSlides[0]?.id ?? null);
   const [mockupGenerationPending, setMockupGenerationPending] = useState(false);
+  const [generatingSlideIds, setGeneratingSlideIds] = useState<string[]>([]);
   const [mockupGenerationMessage, setMockupGenerationMessage] = useState<string | null>(null);
   const selectedSlide = useMemo(
     () => slides.find((slide) => slide.id === selectedId) ?? null,
@@ -379,26 +450,48 @@ export function StoryboardWorkspace({
     window.location.reload();
   }
 
-  async function generateMockups() {
+  async function generateMockups(slideId?: string) {
     setMockupGenerationPending(true);
+    if (slideId) setGeneratingSlideIds((ids) => [...new Set([...ids, slideId])]);
     setMockupGenerationMessage(null);
+    const form = new FormData();
+    if (slideId) form.set("slideId", slideId);
     const response = await fetch(`/api/projects/${project.id}/images/generate`, {
       method: "POST",
+      ...(slideId ? { body: form } : {}),
     });
     if (!response.ok) {
       const payload = await response.json().catch(() => null) as { error?: string } | null;
       setMockupGenerationMessage(payload?.error ?? "목업 생성에 실패했습니다.");
       setMockupGenerationPending(false);
+      if (slideId) setGeneratingSlideIds((ids) => ids.filter((id) => id !== slideId));
       return;
     }
-    setSlides((currentSlides) =>
-      currentSlides.map((slide) => ({
-        ...slide,
-        imageGenerationStatus: "generated",
-      })),
+    const payload = (await response.json().catch(() => null)) as ImageGenerationResponse | null;
+    const imageUrlBySlideId = new Map(
+      (payload?.images ?? [])
+        .filter((image) => image.slideId)
+        .map((image) => [image.slideId as string, image.imageUrl]),
     );
-    setMockupGenerationMessage("목업 생성이 완료되었습니다.");
+    setSlides((currentSlides) =>
+      currentSlides.map((slide) => {
+        const generatedImageUrl = imageUrlBySlideId.get(slide.id);
+        const wasRequested = !slideId || slide.id === slideId;
+        return {
+          ...slide,
+          imageGenerationStatus:
+            generatedImageUrl || (wasRequested && !payload?.images?.length)
+              ? "generated"
+              : slide.imageGenerationStatus,
+          imageUrl: generatedImageUrl ?? slide.imageUrl,
+        };
+      }),
+    );
+    setMockupGenerationMessage(
+      slideId ? "선택한 슬라이드 목업 생성이 완료되었습니다." : "전체 슬라이드 목업 생성이 완료되었습니다.",
+    );
     setMockupGenerationPending(false);
+    if (slideId) setGeneratingSlideIds((ids) => ids.filter((id) => id !== slideId));
   }
 
   if (project.status === "storyboard_generation_failed") {
@@ -433,10 +526,10 @@ export function StoryboardWorkspace({
           <Button
             type="button"
             disabled={project.status !== "storyboard_confirmed" || mockupGenerationPending}
-            onClick={generateMockups}
+            onClick={() => generateMockups()}
           >
             <ImageIcon className="size-4" aria-hidden="true" />
-            {mockupGenerationPending ? "생성 중" : "목업 생성"}
+            {mockupGenerationPending ? "생성 중" : "전체 슬라이드 목업 생성"}
           </Button>
         </div>
         {mockupGenerationMessage ? (
@@ -479,6 +572,9 @@ export function StoryboardWorkspace({
                         compact={compact}
                         selected={slide.id === selectedId}
                         onSelect={() => setSelectedId(slide.id)}
+                        canGenerateMockup={project.status === "storyboard_confirmed"}
+                        generatingMockup={generatingSlideIds.includes(slide.id)}
+                        onGenerateMockup={() => generateMockups(slide.id)}
                       />
                     ))}
                   </section>
@@ -498,6 +594,9 @@ export function StoryboardWorkspace({
                     compact={compact}
                     selected={slide.id === selectedId}
                     onSelect={() => setSelectedId(slide.id)}
+                    canGenerateMockup={project.status === "storyboard_confirmed"}
+                    generatingMockup={generatingSlideIds.includes(slide.id)}
+                    onGenerateMockup={() => generateMockups(slide.id)}
                   />
                 ))}
               </section>

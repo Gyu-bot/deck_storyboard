@@ -6,7 +6,11 @@ import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { getDatabase } from "@/lib/db/client";
-import { getProjectForUser, getSlidesForProject } from "@/lib/repositories/projects";
+import {
+  getProjectForUser,
+  getSlidesForProject,
+  listLatestSuccessfulSlideImagesForProject,
+} from "@/lib/repositories/projects";
 import { StoryboardWorkspace } from "@/app/projects/[projectId]/storyboard-workspace";
 import { StoryboardTestModeToggle } from "@/app/projects/[projectId]/storyboard-test-mode-toggle";
 import type { ProjectStatus } from "@/lib/db/schema";
@@ -36,6 +40,14 @@ export default async function ProjectDetailPage({
   const project = getProjectForUser(db, projectId, userId);
   if (!project) redirect("/projects");
   const slides = getSlidesForProject(db, projectId, userId);
+  const latestImages = listLatestSuccessfulSlideImagesForProject(db, projectId, userId);
+  const latestImageBySlideId = new Map(
+    latestImages.map((image) => [image.slideId, image.imageUrl]),
+  );
+  const slidesWithImages = slides.map((slide) => ({
+    ...slide,
+    imageUrl: latestImageBySlideId.get(slide.id) ?? null,
+  }));
   const cookieStore = await cookies();
   const testModeEnabled = isStoryboardTestModeEnabled({
     cookieValue: cookieStore.get(STORYBOARD_TEST_MODE_COOKIE)?.value,
@@ -68,7 +80,7 @@ export default async function ProjectDetailPage({
           </form>
         </div>
       </header>
-      <StoryboardWorkspace project={project} initialSlides={slides} />
+      <StoryboardWorkspace project={project} initialSlides={slidesWithImages} />
     </main>
   );
 }

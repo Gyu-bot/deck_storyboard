@@ -31,7 +31,15 @@ describe("T021-T022 project image generation route", () => {
     vi.clearAllMocks();
     routeMocks.requireCurrentUserId.mockResolvedValue("user-a");
     routeMocks.getDatabase.mockReturnValue(routeMocks.db);
-    routeMocks.generateSlideImageForProject.mockResolvedValue({ status: "succeeded" });
+    routeMocks.generateSlideImageForProject.mockImplementation(
+      (_db: unknown, input: { slideId: string }) => ({
+        slideId: input.slideId,
+        imageUrl: `/api/projects/project-1/images/${input.slideId}.png`,
+        provider: "openrouter",
+        model: "gpt-image-2",
+        status: "succeeded",
+      }),
+    );
   });
 
   it("generates mockups for every slide in the project", async () => {
@@ -48,6 +56,18 @@ describe("T021-T022 project image generation route", () => {
     await expect(response.json()).resolves.toMatchObject({
       generated: 2,
       failed: 0,
+      images: [
+        {
+          slideId: "slide-a",
+          imageUrl: "/api/projects/project-1/images/slide-a.png",
+          provider: "openrouter",
+        },
+        {
+          slideId: "slide-b",
+          imageUrl: "/api/projects/project-1/images/slide-b.png",
+          provider: "openrouter",
+        },
+      ],
     });
     expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledTimes(2);
     expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledWith(
@@ -58,6 +78,47 @@ describe("T021-T022 project image generation route", () => {
         userId: "user-a",
       }),
     );
+    expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledWith(
+      routeMocks.db,
+      expect.objectContaining({
+        projectId: "project-1",
+        slideId: "slide-b",
+        userId: "user-a",
+      }),
+    );
+  });
+
+  it("generates a mockup for only the requested slide id", async () => {
+    routeMocks.getSlidesForProject.mockReturnValue([
+      { id: "slide-a" },
+      { id: "slide-b" },
+    ]);
+    const form = new FormData();
+    form.set("slideId", "slide-b");
+
+    const response = await POST(
+      new Request("http://localhost/api", {
+        method: "POST",
+        body: form,
+      }),
+      {
+        params: Promise.resolve({ projectId: "project-1" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      generated: 1,
+      failed: 0,
+      images: [
+        {
+          slideId: "slide-b",
+          imageUrl: "/api/projects/project-1/images/slide-b.png",
+          provider: "openrouter",
+        },
+      ],
+    });
+    expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledTimes(1);
     expect(routeMocks.generateSlideImageForProject).toHaveBeenCalledWith(
       routeMocks.db,
       expect.objectContaining({

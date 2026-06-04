@@ -16,7 +16,7 @@ export interface ImageGenerationProvider {
   generateImage(input: ImageGenerationInput): Promise<ImageGenerationOutput>;
 }
 
-export type ImageGenerationProviderKey = Extract<ProviderKey, "openai" | "gemini">;
+export type ImageGenerationProviderKey = Extract<ProviderKey, "openrouter" | "openai" | "gemini">;
 
 export class ImageProviderError extends Error {
   constructor(
@@ -50,7 +50,7 @@ export function missingImageProviderKey(provider: ImageGenerationProviderKey) {
 
 export function resolveProviderForImageModel(
   model: string,
-): ImageGenerationProviderKey {
+): Exclude<ImageGenerationProviderKey, "openrouter"> {
   return model === "nano-banana" ? "gemini" : "openai";
 }
 

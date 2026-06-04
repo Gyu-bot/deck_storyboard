@@ -4,6 +4,7 @@ import type { createTestDatabase } from "@/lib/db/test-utils";
 import {
   defaultSlideFieldEditState,
   projects,
+  slideImageGenerations,
   slideEditOperations,
   slides,
   users,
@@ -209,6 +210,33 @@ export function getSlidesForProject(db: Db, projectId: string, userId: string) {
     .where(and(eq(slides.projectId, projectId), isNull(slides.deletedAt)))
     .orderBy(asc(slides.position))
     .all();
+}
+
+export function listLatestSuccessfulSlideImagesForProject(
+  db: Db,
+  projectId: string,
+  userId: string,
+) {
+  if (!getProjectForUser(db, projectId, userId)) return [];
+  const records = db
+    .select()
+    .from(slideImageGenerations)
+    .where(
+      and(
+        eq(slideImageGenerations.projectId, projectId),
+        eq(slideImageGenerations.status, "succeeded"),
+        isNull(slideImageGenerations.deletedAt),
+      ),
+    )
+    .orderBy(desc(slideImageGenerations.createdAt))
+    .all();
+  const latestBySlideId = new Map<string, (typeof records)[number]>();
+  for (const record of records) {
+    if (record.slideId && !latestBySlideId.has(record.slideId)) {
+      latestBySlideId.set(record.slideId, record);
+    }
+  }
+  return [...latestBySlideId.values()];
 }
 
 export function updateSlideForProject(

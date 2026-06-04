@@ -149,7 +149,7 @@ describe("T017B storyboard detail floating panel", () => {
     expect(screen.getByTestId("storyboard-detail-scroll-area")).toHaveClass("overflow-y-auto");
     expect(screen.getByRole("button", { name: /삭제/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "목업" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "목업 생성" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "전체 슬라이드 목업 생성" })).toBeInTheDocument();
     expect(screen.getAllByText("목업 없음").length).toBeGreaterThan(0);
   });
 });
@@ -193,12 +193,81 @@ describe("T021-T022 mockup generation trigger", () => {
     ];
 
     render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
-    fireEvent.click(screen.getByRole("button", { name: "목업 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: "전체 슬라이드 목업 생성" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/projects/project-1/images/generate",
         { method: "POST" },
+      );
+    });
+  });
+
+  it("posts the selected slide id when a slide card mockup button is clicked", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        generated: 1,
+        failed: 0,
+        images: [
+          {
+            slideId: "slide-a",
+            imageUrl: "/api/projects/project-1/images/slide-a.png",
+            provider: "openrouter",
+            model: "gpt-image-2",
+          },
+        ],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_confirmed" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError: null,
+    };
+    const initialSlides = [
+      {
+        id: "slide-a",
+        sectionTitle: "Section",
+        position: 1,
+        title: "Slide A",
+        coreMessage: "Core message A",
+        contentPoints: ["Point A"],
+        visualDirection: "Visual A",
+        imagePrompt: "Prompt A",
+        slideRole: "Role A",
+        fieldEditState: {
+          title: "aiGenerated",
+          coreMessage: "aiGenerated",
+          contentPoints: "aiGenerated",
+          visualDirection: "aiGenerated",
+          imagePrompt: "aiGenerated",
+          slideRole: "aiGenerated",
+        },
+        imageGenerationStatus: "not_generated",
+      },
+    ];
+
+    render(<StoryboardWorkspace project={project} initialSlides={initialSlides} />);
+    fireEvent.click(screen.getByRole("button", { name: "슬라이드 1 목업 생성" }));
+
+    await waitFor(() => {
+      const requestBody = fetchMock.mock.calls[0]?.[1]?.body as FormData;
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/projects/project-1/images/generate",
+        expect.objectContaining({ method: "POST" }),
+      );
+      expect(requestBody.get("slideId")).toBe("slide-a");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "목업" }));
+    await waitFor(() => {
+      expect(screen.getByRole("img", { name: "Slide A 목업" })).toHaveAttribute(
+        "src",
+        "/api/projects/project-1/images/slide-a.png",
       );
     });
   });

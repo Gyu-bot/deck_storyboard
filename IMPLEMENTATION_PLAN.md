@@ -291,7 +291,7 @@ MVP scope:
 - PR: None
 - Depends on: T009A
 - Branch: `feature/T009B-admin-member-key-management-page`
-- Expected PR Unit: `PR-T009B`
+- Expected PR Unit: `PR-T009B + PR-T009C`
 - Acceptance Criteria:
   - [x] 관리자 전용 `/admin` 또는 `/admin/users` 회원관리 화면이 있다.
   - [x] 관리자 화면에서 회원 목록, 이메일, 가입일, 최근 수정일, 계정 상태, provider key 할당 상태를 한 화면에서 볼 수 있다.
@@ -313,15 +313,16 @@ MVP scope:
   - 회원관리와 회원별 API key 관리는 별도 흩어진 화면보다 같은 admin workflow 안에서 처리한다.
   - Merged PR #1/#2 implemented admin-only member list and member-scoped provider key controls.
   - Ready follow-up scope: admin account add/delete or disable, deletion policy, and browser verification for that flow remain incomplete after merged PR #1/#2.
+  - 2026-06-04 user direction: T009C is tracked in the same GitHub issue (#13) and should be handled immediately after T009B in one PR.
 
 #### Task T009C. Admin-managed user API key assignment 구현
 - Priority: High
 - Status: Needs Review
-- Issue: None
+- Issue: #13
 - PR: None
 - Depends on: T009B, T008
-- Branch: `feature/T009C-admin-api-key-assignment`
-- Expected PR Unit: `PR-T009C`
+- Branch: `feature/T009B-admin-member-key-management-page`
+- Expected PR Unit: `PR-T009B + PR-T009C`
 - Acceptance Criteria:
   - [x] 관리자는 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini account-level provider key를 추가/교체/삭제할 수 있다.
   - [x] 회원별 API key 설정은 admin user/account management workflow 안에서 수행되며, 일반 사용자 Settings 메뉴로 분리하지 않는다.
@@ -342,6 +343,7 @@ MVP scope:
   - MVP key policy: 이미지 전용 API key를 별도로 받지 않고 provider account key를 LLM과 이미지 생성에 공통 사용한다.
   - Merged PR #2 completed the OpenRouter path for storyboard generation with admin-assigned user keys.
   - Still Needs Review because OpenAI/Gemini provider reuse and missing-key behavior across image generation paths remain downstream of T021/T022/T023.
+  - 2026-06-04 user direction: track T009C with T009B in Issue #13 and implement it immediately after T009B in the same PR/workflow.
 
 ---
 

@@ -200,6 +200,24 @@
   - 2026-06-03 user feedback: 현재 `/login` 화면은 세로 방향 여백이 너무 크다.
   - Done by merged PR #1, with unit/layout checks and in-app browser DOM verification recorded in the task status file.
 
+#### Task T007B. Auth form compact input sizing UI polish
+- Priority: Low
+- Status: Backlog
+- Issue: #41
+- PR: None
+- Depends on: T007, T007A
+- Branch: `fix/T007B-auth-form-compact-inputs`
+- Expected PR Unit: `PR-T007B`
+- Acceptance Criteria:
+  - [ ] `/signup` 화면의 이메일, 비밀번호, 비밀번호 확인 입력 박스가 과도하게 큰 세로 높이로 렌더링되지 않고 로그인 화면과 일관된 compact input height를 사용한다.
+  - [ ] `/signup` form card, label, input, button spacing이 desktop/mobile viewport에서 자연스럽고 첫 화면에서 불필요하게 늘어나지 않는다.
+  - [ ] `/login` 화면의 기존 spacing 개선을 깨지 않고 auth form rhythm이 두 화면에서 일관된다.
+  - [ ] 브라우저 또는 equivalent visual check로 `/signup`과 `/login`의 주요 viewport를 확인했다.
+  - [ ] `.ai/status/active/T007B-auth-form-compact-inputs.md`에 before/after 화면 확인과 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user feedback: `/signup` 페이지에서 이메일/비밀번호 입력 박스의 세로 길이가 과도하게 길어 보이며, 굳이 길 필요가 없다.
+  - This is a low-priority UI polish item and can be bundled with other minor UI improvement work in a single polish PR if practical.
+
 ### Feature F03. User API Key Management
 
 #### Task T008. API key AES-GCM 암호화 저장 구현
@@ -286,18 +304,18 @@ MVP scope:
 
 #### Task T009B. Admin member and API key management page 구현
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #13
-- PR: None
+- PR: #38
 - Depends on: T009A
 - Branch: `feature/T009B-admin-member-key-management-page`
 - Expected PR Unit: `PR-T009B + PR-T009C`
 - Acceptance Criteria:
   - [x] 관리자 전용 `/admin` 또는 `/admin/users` 회원관리 화면이 있다.
   - [x] 관리자 화면에서 회원 목록, 이메일, 가입일, 최근 수정일, 계정 상태, provider key 할당 상태를 한 화면에서 볼 수 있다.
-  - [ ] 관리자는 admin workflow에서 신규 회원 계정을 추가할 수 있다.
-  - [ ] 관리자는 admin workflow에서 회원 계정을 삭제 또는 비활성화할 수 있으며, 삭제/비활성화된 계정은 일반 로그인과 프로젝트 접근이 차단된다.
-  - [ ] 회원 삭제/비활성화는 기존 프로젝트/슬라이드 데이터 보존 정책을 명확히 따른다.
+  - [x] 관리자는 admin workflow에서 신규 회원 계정을 추가할 수 있다.
+  - [x] 관리자는 admin workflow에서 회원 계정을 삭제 또는 비활성화할 수 있으며, 삭제/비활성화된 계정은 일반 로그인과 프로젝트 접근이 차단된다.
+  - [x] 회원 삭제/비활성화는 기존 프로젝트/슬라이드 데이터 보존 정책을 명확히 따른다.
   - [x] 회원 검색 또는 최소한 이메일 기준 filtering이 가능하다.
   - [x] 회원 상세 또는 expandable row에서 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini API key 할당 상태를 확인할 수 있다.
   - [x] 회원별 API key 추가/교체/삭제 action으로 이동하거나 같은 화면에서 inline으로 실행할 수 있다.
@@ -305,20 +323,20 @@ MVP scope:
   - [x] 회원별 generation 가능 여부를 provider key assignment 상태 기준으로 판단할 수 있다.
   - [x] 관리자 화면은 일반 프로젝트 작업 화면과 명확히 분리된다.
   - [x] 관리자 권한이 없는 접근은 login 또는 forbidden 상태로 차단된다.
-  - [ ] 브라우저 또는 equivalent visual check로 admin access control, 회원 추가/삭제, 회원 목록, 회원별 API key 관리 UI를 확인했다.
+  - [x] 브라우저 또는 equivalent visual check로 admin access control, 회원 추가/삭제, 회원 목록, 회원별 API key 관리 UI를 확인했다.
   - [x] `.ai/status/active/T009B-admin-member-key-management-page.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: 관리자는 회원 계정 추가/삭제와 회원별 API key setting을 모두 수행할 수 있어야 한다.
   - 회원 삭제는 hard delete와 soft delete/disabled status 중 구현 전 결정하고, 프로젝트/슬라이드 소유 데이터 처리 정책을 status에 기록한다.
   - 회원관리와 회원별 API key 관리는 별도 흩어진 화면보다 같은 admin workflow 안에서 처리한다.
   - Merged PR #1/#2 implemented admin-only member list and member-scoped provider key controls.
-  - Ready follow-up scope: admin account add/delete or disable, deletion policy, and browser verification for that flow remain incomplete after merged PR #1/#2.
-  - 2026-06-04 user direction: T009C is tracked in the same GitHub issue (#13) and should be handled immediately after T009B in one PR.
+  - Done by merged PR #38, which closed Issue #13 and added admin member creation, grant-admin, soft-disable, soft-delete, data preservation policy, provider key controls, and browser verification.
+  - Follow-up: 계정 삭제는 soft-delete이며, 기존 프로젝트/슬라이드 데이터 정리나 복구 UI는 별도 후속 범위다.
 
 #### Task T009C. Admin-managed user API key assignment 구현
 - Priority: High
 - Status: Needs Review
-- Issue: #13
+- Issue: #42
 - PR: None
 - Depends on: T009B, T008
 - Branch: `feature/T009B-admin-member-key-management-page`
@@ -332,7 +350,7 @@ MVP scope:
   - [ ] Gemini key는 Gemini LLM과 Gemini/Nano Banana image generation에 함께 사용할 수 있다.
   - [x] OpenRouter key는 MVP storyboard generation 기본 LLM provider key로 사용할 수 있다.
   - [x] Claude는 Anthropic account key로 저장/관리하되 LLM 호출 연결은 MVP 이후 T035에서 처리한다.
-  - [ ] key 미할당 회원이 storyboard/image generation을 실행하면 provider-key error가 명확히 표시된다.
+  - [x] key 미할당 회원이 storyboard/image generation을 실행하면 provider-key error가 명확히 표시된다.
   - [x] 관리자 key 변경/삭제 후 해당 회원의 신규 provider 호출 정책이 즉시 반영된다.
   - [x] key assignment audit metadata 또는 operation history를 남길지 구현 전 결정하고, 결정 내용을 status에 기록한다.
   - [x] admin API negative test와 encryption round-trip regression test가 있다.
@@ -342,8 +360,31 @@ MVP scope:
   - 일반 사용자 `/settings` API key menu는 T009C 이후 제거한다.
   - MVP key policy: 이미지 전용 API key를 별도로 받지 않고 provider account key를 LLM과 이미지 생성에 공통 사용한다.
   - Merged PR #2 completed the OpenRouter path for storyboard generation with admin-assigned user keys.
-  - Still Needs Review because OpenAI/Gemini provider reuse and missing-key behavior across image generation paths remain downstream of T021/T022/T023.
-  - 2026-06-04 user direction: track T009C with T009B in Issue #13 and implement it immediately after T009B in the same PR/workflow.
+  - Merged PR #38 closed Issue #13 and moved provider key assignment into the admin-managed account-level workflow.
+  - Needs Review because OpenAI/Gemini image generation uses account-level keys, but direct OpenAI/Gemini LLM adapter calls remain deferred to T035; a planning follow-up should decide whether to split the original LLM+image reuse criteria into T035 or reopen/link a dedicated issue.
+  - Follow-up: key operation audit trail remains outside MVP until there is a product requirement for compliance-grade key history.
+
+#### Task T009D. Master admin and admin role revocation 구현
+- Priority: Low
+- Status: Backlog
+- Issue: #43
+- PR: None
+- Depends on: T009B
+- Branch: `feature/T009D-master-admin-role-management`
+- Expected PR Unit: `PR-T009D`
+- Acceptance Criteria:
+  - [ ] 관리자 화면에서 기존 관리자 회원을 일반 회원 권한으로 되돌릴 수 있다.
+  - [ ] 관리자 권한 부여와 권한 회수 action이 같은 member management workflow 안에서 일관된 UI로 제공된다.
+  - [ ] 최소 한 명의 master admin 또는 equivalent protected super-admin role이 존재해 모든 관리자가 실수로 권한을 잃는 상태를 방지한다.
+  - [ ] master admin은 일반 관리자에게 관리자 권한을 부여/회수할 수 있지만, 일반 관리자는 master admin 권한을 회수하거나 master admin을 비활성화/삭제할 수 없다.
+  - [ ] 현재 로그인한 관리자가 자기 자신의 마지막 admin/master-admin 권한을 제거하려는 경우 명확하게 차단된다.
+  - [ ] 권한 변경 후 session/admin route access가 즉시 또는 다음 요청부터 일관되게 반영된다.
+  - [ ] 권한 부여/회수/차단 케이스에 대한 admin API negative tests와 browser/equivalent UI check가 있다.
+  - [ ] `.ai/status/active/T009D-master-admin-role-management.md`에 role model, protected account policy, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: 현재는 관리자 권한 부여만 있으므로, 관리자 권한을 다시 일반 권한으로 바꾸는 기능도 필요하다.
+  - 2026-06-04 user direction: master admin은 별도로 있어야 한다.
+  - This is post-MVP low-priority admin hardening and should not block MVP provider key assignment work.
 
 ---
 
@@ -369,6 +410,32 @@ MVP scope:
 - Notes:
   - 새 프로젝트 상세 생성 form은 T011에서 처리한다.
   - 2026-06-03 user-directed Korean UI pass localized project list status labels and project actions.
+
+#### Task T010A. Public/read-only shared project browsing 구현
+- Priority: Low
+- Status: Backlog
+- Issue: #44
+- PR: None
+- Depends on: T010, T011, T016
+- Branch: `feature/T010A-public-readonly-project-sharing`
+- Expected PR Unit: `PR-T010A`
+- Acceptance Criteria:
+  - [ ] 프로젝트 생성 시 공개/비공개 visibility를 선택할 수 있고 기본값은 비공개다.
+  - [ ] 프로젝트 visibility는 DB와 API response에 저장되며, 기존 프로젝트는 migration/compatibility path로 비공개 처리된다.
+  - [ ] 공개 프로젝트라도 storyboard가 확정되기 전에는 다른 회원의 프로젝트 목록에 노출되지 않는다.
+  - [ ] 프로젝트 목록은 내 프로젝트와 공유된 공개 프로젝트를 함께 보여주되, 각 카드에 `내 프로젝트`/`공유 프로젝트` 구분이 명확히 표시된다.
+  - [ ] 공유 프로젝트는 소유자가 아니어도 읽기전용으로 project detail을 열 수 있다.
+  - [ ] 소유자가 아닌 공유 프로젝트에서는 이름 변경, 삭제, 스토리보드 생성/확정, 슬라이드 편집, reorder/add/delete, 목업 생성/선택, export 상태 변경 등 mutation action이 노출되지 않거나 서버에서 차단된다.
+  - [ ] 공유 프로젝트 detail은 slide content, visual direction, image prompt, selected/generated image history 등 검토용 정보는 볼 수 있지만 편집 가능한 input으로 표시하지 않는다.
+  - [ ] 소유자가 공개 프로젝트를 비공개로 바꾸면 이후 다른 회원 목록/detail 접근에서 사라지거나 forbidden 처리된다.
+  - [ ] ownership/read-only authorization tests cover private project isolation, public confirmed read-only access, non-owner mutation rejection, and owner-only editing.
+  - [ ] Browser or equivalent workflow check confirms project list ownership labels and read-only shared project detail behavior.
+  - [ ] `.ai/status/active/T010A-public-readonly-project-sharing.md`에 visibility model, read-only permission matrix, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: 스토리라인/스토리보드가 확정된 공개 프로젝트는 다른 회원 프로젝트 목록에도 공유되어 보여야 한다.
+  - 2026-06-04 user direction: 프로젝트 생성 시 공개/비공개 여부를 선택하고, 공개인 경우만 공유한다.
+  - 2026-06-04 user direction: 내 프로젝트가 아닌 공유 프로젝트는 읽기전용으로 보기만 가능해야 한다.
+  - This is post-MVP low-priority collaboration/sharing work and should not weaken the current owner-only mutation guarantees.
 
 ### Feature F05. New Project Creation
 
@@ -418,6 +485,75 @@ MVP scope:
   - Heuristic 예시는 `12페이지`, `12 pages`, `12 slides`, `Page 1`, `Slide 01`, `슬라이드 1`, 반복되는 markdown heading/page separator 등이다.
   - Heuristic 결과는 강제 규칙이 아니라 LLM prompt와 user-facing rationale을 보강하는 advisory signal로 취급한다.
   - Done by merged PR #11, which closed Issue #7 and added range UI, storage compatibility, marker heuristics, and visual/equivalent checks.
+
+#### Task T011B. Intermittent project creation redirect-to-login investigation
+- Priority: High
+- Status: Needs Review
+- Issue: #45
+- PR: None
+- Depends on: T006, T007, T011, T011A
+- Branch: `fix/T011B-project-create-login-redirect`
+- Expected PR Unit: `PR-T011B`
+- Acceptance Criteria:
+  - [ ] 실제 브라우저 workflow에서 project name, storyline, slide count `상세` 선택 후 `프로젝트 만들기`를 눌렀을 때 login 화면으로 튕기는 현상을 재현하거나, 재현 실패 시 시도 조건과 관측 로그를 status file에 기록한다.
+  - [ ] `/api/projects` create route, Auth.js session/JWT cookie, redirect target, request origin/host(`localhost` vs `127.0.0.1`), and dev `NEXTAUTH_URL` alignment를 조사한다.
+  - [ ] slide count mode가 `detailed`인 경우에도 session이 유지되고 project가 생성/저장/redirect 되는지 확인한다.
+  - [ ] 인증 만료, CSRF/origin mismatch, route error, validation error, DB write failure, host mismatch 중 어느 boundary에서 `/login`으로 이동하는지 evidence를 남긴다.
+  - [ ] root cause가 확인되기 전에는 symptom-only fix를 적용하지 않는다.
+  - [ ] fix가 필요한 경우 project creation regression test 또는 browser/equivalent check로 `표준`, `상세`, `직접 범위` 생성 후 로그인 유지와 project detail redirect를 검증한다.
+  - [ ] `.ai/status/active/T011B-project-create-login-redirect.md`에 재현 조건, 로그, 원인, 검증 결과를 기록한다.
+- Notes:
+  - 2026-06-04 real-use report: 새 프로젝트에서 project name과 storyline을 입력하고 slide count를 `표준`이 아닌 `상세`로 선택한 뒤 `프로젝트 만들기`를 누르자 초기 로그인 화면으로 튕겼다.
+  - User noted the issue is not consistently reproducible, so treat this as investigation-first bugfix work.
+  - Current local testing has used both `localhost:3000` and `127.0.0.1:3000`; include host/cookie/session alignment in the investigation.
+
+#### Task T011C. Project creation and metadata display minor UX improvements
+- Priority: Low
+- Status: Backlog
+- Issue: #46
+- PR: None
+- Depends on: T011, T011A
+- Branch: `feature/T011C-project-metadata-minor-ux`
+- Expected PR Unit: `PR-T011C`
+- Acceptance Criteria:
+  - [ ] 프로젝트 생성 화면의 storyline 입력란이 현재 입력 글자수와 최대 글자수 60,000자를 함께 표시한다.
+  - [ ] 글자수 카운터는 입력 중 실시간으로 갱신되고, 제한에 가까워질 때 사용자가 상태를 쉽게 인지할 수 있다.
+  - [ ] 60,000자 초과 입력에 대한 기존 validation/error behavior와 카운터 표시가 서로 충돌하지 않는다.
+  - [ ] 모바일/좁은 화면에서도 카운터가 입력란, helper text, error text와 겹치지 않는다.
+  - [ ] 프로젝트 목록 카드에서 프로젝트 생성 시 선택한 slide count mode/range, style template, aspect ratio, default image model/mockup setting이 제목/상태와 함께 작게 표시된다.
+  - [ ] 프로젝트 상세 화면 header에서도 현재 단계 아래 또는 인접한 metadata row로 slide count mode/range, style template, aspect ratio, default image model/mockup setting이 작게 표시된다.
+  - [ ] 표시 label은 한국어 UI 원칙을 따르고, `auto`, `brief`, `standard`, `detailed`, `custom_range`, `gpt-image-2`, `nano-banana` 같은 내부 값은 사용자에게 이해 가능한 한국어/제품명으로 매핑한다.
+  - [ ] metadata display는 긴 project title, 좁은 화면, action button 영역과 겹치지 않고 wrap 가능한 compact chip/text 형태로 표시된다.
+  - [ ] 같은 프로젝트 생성/목록/상세 metadata 관련 minor UI 개선사항이 생기면 이 task 범위에 함께 묶을 수 있다.
+  - [ ] 브라우저 또는 equivalent visual check로 빈 입력, 일반 입력, 제한 근접/초과 상태와 프로젝트 목록/상세 metadata 표시를 확인했다.
+  - [ ] `.ai/status/active/T011C-project-metadata-minor-ux.md`에 반영 UI 개선사항과 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: storyline 입력에 60,000자 제한이 있으므로 실제 입력된 글자수가 카운팅되면 좋겠다.
+  - 2026-06-04 user direction: 프로젝트 목록과 프로젝트 상세 header에서 생성 시 선택한 슬라이드 수, 스타일 설정, 목업 설정을 볼 수 있어야 한다.
+  - 이 task는 minor UX 개선 묶음이며, 프로젝트 생성/목록/상세의 blocking bugfix와 분리해 낮은 우선순위로 처리한다.
+
+#### Task T011D. Pre-confirm project generation settings editing 구현
+- Priority: Low
+- Status: Backlog
+- Issue: #47
+- PR: None
+- Depends on: T011A, T012, T016
+- Branch: `feature/T011D-preconfirm-project-settings-edit`
+- Expected PR Unit: `PR-T011D`
+- Acceptance Criteria:
+  - [ ] 스토리보드 확정 전 project detail 또는 project settings surface에서 slide count mode/range를 수정할 수 있다.
+  - [ ] 스토리보드 확정 전 style template, custom common style prompt, aspect ratio, default image/mockup model을 수정할 수 있다.
+  - [ ] 이미 생성된 storyboard가 확정 전 상태에서 존재할 때 생성 설정을 변경하면 기존 storyboard/slide/image prompt 결과를 유지할지 폐기/재생성 필요 상태로 표시할지 명확한 확인 UX를 제공한다.
+  - [ ] 설정 변경 후 새 storyboard generation은 변경된 slide count/style/mockup model settings를 사용한다.
+  - [ ] 스토리보드 확정 이후에는 해당 생성 설정을 기본적으로 잠그고, 후속 수정이 필요하면 별도 재생성 workflow 또는 명확한 destructive confirmation을 요구한다.
+  - [ ] 프로젝트 목록/상세 metadata display(T011C)와 설정 편집 화면의 label/value mapping이 일관된다.
+  - [ ] 권한 없는 사용자와 공유 read-only 프로젝트에서는 설정 수정 action이 노출되지 않거나 서버에서 차단된다.
+  - [ ] Unit/API tests cover editable statuses, locked confirmed status, changed slide count/style/mockup persistence, and unauthorized edit rejection.
+  - [ ] Browser or equivalent workflow check confirms settings can be edited before storyboard confirmation and are locked after confirmation.
+  - [ ] `.ai/status/active/T011D-preconfirm-project-settings-edit.md`에 editable status policy, regeneration/reset decision, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: 스토리보드 확정 전에는 프로젝트 선택사항(슬라이드 수, 스타일, 목업 모델)을 수정할 수 있어야 한다.
+  - This is a post-MVP low-priority feature; MVP can continue treating project generation settings as create-time settings.
 
 #### Task T012. 스타일 템플릿과 이미지 설정 구현
 - Priority: High
@@ -558,25 +694,69 @@ MVP scope:
 
 #### Task T015C. Slide count range policy generation integration
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #14
-- PR: None
+- PR: #39
 - Depends on: T011A, T015B
 - Branch: `feature/T015C-slide-count-range-policy`
 - Expected PR Unit: `PR-T015C`
 - Acceptance Criteria:
-  - [ ] OpenRouter storyboard generation input이 single `targetSlideCount` 대신 slide count policy를 전달한다: `auto`, `brief(5-8)`, `standard(9-14)`, `detailed(15-25)`, `custom_range(min-max)`.
-  - [ ] `story_structure`와 `slide_breakdown` 요청 payload 모두 user-selected range, optional preferred count, heuristic page/slide marker count, marker confidence를 받는다.
-  - [ ] 명시적 page/slide marker가 high confidence이면 입력 구조를 존중하되, 선택한 range와 크게 다르면 압축/확장 rationale을 반환하도록 LLM request contract에 반영한다.
-  - [ ] `자동` 모드에서는 LLM이 storyline complexity, section count, page-like marker, content density를 기준으로 적정 slide count를 정하고 rationale을 반환할 수 있다.
-  - [ ] `직접 범위` 모드에서는 가능한 한 min/max 범위 안에서 slide breakdown을 생성하고, 범위를 벗어나는 경우 `targetSlideCountRationale` 또는 renamed rationale field에 이유를 저장한다.
-  - [ ] exact-count fixture, range fixture, auto fixture, marker-count-conflict fixture가 provider request payload와 persisted rationale behavior를 검증한다.
-  - [ ] 기존 `targetSlideCount` project/test data가 compatibility path를 통해 range policy로 해석된다.
-  - [ ] `.ai/status/active/T015C-slide-count-range-policy.md`에 range policy mapping, compatibility decision, 검증 결과가 기록되어 있다.
+  - [x] OpenRouter storyboard generation input이 single `targetSlideCount` 대신 slide count policy를 전달한다: `auto`, `brief(5-8)`, `standard(9-14)`, `detailed(15-25)`, `custom_range(min-max)`.
+  - [x] `story_structure`와 `slide_breakdown` 요청 payload 모두 user-selected range, optional preferred count, heuristic page/slide marker count, marker confidence를 받는다.
+  - [x] 명시적 page/slide marker가 high confidence이면 입력 구조를 존중하되, 선택한 range와 크게 다르면 압축/확장 rationale을 반환하도록 LLM request contract에 반영한다.
+  - [x] `자동` 모드에서는 LLM이 storyline complexity, section count, page-like marker, content density를 기준으로 적정 slide count를 정하고 rationale을 반환할 수 있다.
+  - [x] `직접 범위` 모드에서는 가능한 한 min/max 범위 안에서 slide breakdown을 생성하고, 범위를 벗어나는 경우 `targetSlideCountRationale` 또는 renamed rationale field에 이유를 저장한다.
+  - [x] exact-count fixture, range fixture, auto fixture, marker-count-conflict fixture가 provider request payload와 persisted rationale behavior를 검증한다.
+  - [x] 기존 `targetSlideCount` project/test data가 compatibility path를 통해 range policy로 해석된다.
+  - [x] `.ai/status/active/T015C-slide-count-range-policy.md`에 range policy mapping, compatibility decision, 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: 정확한 slide count보다 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 기반 range preference를 우선한다.
   - 이 task는 slide count range policy의 data flow, provider input contract, rationale persistence만 다룬다.
   - 프롬프트 구조/내용 품질 보강은 Post-MVP prompt quality/cache epic의 T015D에서 별도로 처리하며, T015C 구현을 막지 않는다.
+  - Done by merged PR #39, which closed Issue #14. Live OpenRouter smoke was intentionally not run; provider request contract and persistence are covered by unit/sample verification.
+
+#### Task T015E. Korean storyboard output prompt contract bugfix
+- Priority: High
+- Status: Ready
+- Issue: #48
+- PR: None
+- Depends on: T015B, T015C
+- Branch: `fix/T015E-korean-storyboard-output`
+- Expected PR Unit: `PR-T015E`
+- Acceptance Criteria:
+  - [ ] Storyboard generation prompt explicitly requires Korean output for user-visible slide fields: `sectionTitle`, `title`, `coreMessage`, `contentPoints`, `visualDirection`, and `imagePrompt`.
+  - [ ] `documentPurpose`, `overallThesis`, `sections[].title`, `sections[].role`, `sections[].coreMessage`, `sections[].sourceSummary`, `improvementSuggestions`, and `targetSlideCountRationale` use Korean unless the user-provided source text explicitly requires preserving a quoted English term.
+  - [ ] Stable machine identifiers such as `sectionId`/`sections[].id` may remain ASCII/slug-like, and controlled internal values may remain English where required by schema or code.
+  - [ ] Prompt guidance tells the model to preserve product names, company names, formulas, quoted source phrases, and official English terminology when translating would be misleading.
+  - [ ] Prompt payload/unit tests verify the Korean-output instruction is present for both `story_structure` and `slide_breakdown` requests.
+  - [ ] Sample or mocked generation verification confirms slide card-visible text is Korean after generation.
+  - [ ] `.ai/status/active/T015E-korean-storyboard-output.md` records before/after prompt wording and verification results.
+- Notes:
+  - 2026-06-04 real-use bug: generated slide card content is currently written in English, even though the product UI and expected storyboard review workflow are Korean-first.
+  - This is a prompt contract bugfix, not a broad prompt-quality rewrite; T015D still owns deeper prompt baseline/cache work.
+  - Image generation should follow the same Korean-first language policy in T023A/T023 image prompt assembly so future generated mockups do not default to English visible text.
+
+#### Task T015F. Slide count range enforcement and retry bugfix
+- Priority: High
+- Status: Ready
+- Issue: #49
+- PR: None
+- Depends on: T015B, T015C
+- Branch: `fix/T015F-slide-count-range-enforcement`
+- Expected PR Unit: `PR-T015F`
+- Acceptance Criteria:
+  - [ ] Non-auto slide count modes(`brief`, `standard`, `detailed`, `custom_range`) validate the actual persisted slide count against the selected min/max range after `story_structure` and `slide_breakdown`.
+  - [ ] If provider output is outside the selected range, generation retries with an explicit corrective prompt before accepting the result.
+  - [ ] If retry still returns an out-of-range result, the app does not silently persist it as a valid storyboard; it surfaces a clear generation failure or user-visible range mismatch state.
+  - [ ] Provider-provided `targetSlideCountRationale` is not treated as authoritative when the actual slide count contradicts the selected range.
+  - [ ] `자동` mode remains flexible and is not forced into a preset range.
+  - [ ] Unit or mocked provider tests cover `detailed(15-25)` returning 11 slides, retry behavior, and final failure/acceptance boundaries.
+  - [ ] Browser or equivalent workflow check confirms a `상세` project cannot silently end with fewer than 15 slides.
+  - [ ] `.ai/status/active/T015F-slide-count-range-enforcement.md` records the observed bug, chosen enforcement policy, and verification results.
+- Notes:
+  - 2026-06-04 real-use bug: project `ed37c8d9-778e-4d30-91c4-b8db23a66c7a` stored `slide_count_mode=detailed` with range 15-25/preferred 20, but generation persisted only 11 slides.
+  - The selected range was stored correctly, so this is not a project creation UI/storage bug. It is provider output non-compliance plus missing post-generation enforcement in the app.
+  - This task should keep T015C's range-policy data flow intact and add the missing validation/retry boundary around accepted storyboard output.
 
 ### Feature F07. Storyboard Review UI
 
@@ -670,6 +850,29 @@ MVP scope:
   - 2026-06-03 user feedback: 현재 편집 화면은 오른쪽 프롬프트/내용 입력란이 고정 레이아웃이라, 아래쪽으로 스크롤하면 입력란들이 보이지 않는다.
   - 구현 시 `position: sticky`, panel max-height, internal overflow, tab state, selected slide state를 함께 점검한다.
   - Done by merged PR #11, which closed Issue #8 and verified sticky editor behavior on desktop plus mobile fallback.
+
+#### Task T017C. Slide detail unchanged blur edit-state bugfix
+- Priority: High
+- Status: Ready
+- Issue: #50
+- PR: None
+- Depends on: T017
+- Branch: `fix/T017C-unchanged-field-blur-state`
+- Expected PR Unit: `PR-T017C`
+- Acceptance Criteria:
+  - [ ] 슬라이드 상세 패널의 textarea/input을 클릭한 뒤 값을 바꾸지 않고 focus를 해제해도 field label이 `AI 생성`에서 `사용자 수정`으로 바뀌지 않는다.
+  - [ ] 서버 PATCH route 또는 repository update boundary에서 기존 field value와 submitted value를 비교하고, 값이 동일하면 slide field, `fieldEditState`, `imageGenerationStatus`, operation history를 변경하지 않는다.
+  - [ ] 클라이언트 `onBlur` handler는 값이 변경되지 않은 경우 불필요한 PATCH 요청과 `window.location.reload()`를 피하거나, 서버 no-op 응답을 받아 UI를 그대로 유지한다.
+  - [ ] `contentPoints`처럼 textarea 문자열과 DB 배열 표현이 다른 field는 줄바꿈/trim 정책을 명확히 적용해 의미 없는 포맷 차이로 userModified가 되지 않게 한다.
+  - [ ] 이미 `userModified`인 field는 동일 값 blur 후에도 그대로 `userModified`를 유지하고, 값이 실제로 달라졌을 때만 저장 timestamp/state가 갱신된다.
+  - [ ] 기존 generated image가 있는 slide에서 값이 바뀌지 않은 blur만으로 `regeneration_recommended`가 되지 않는다.
+  - [ ] Unit/component tests cover unchanged blur for content fields and prompt field, changed value save, contentPoints normalization, and generated-image regeneration recommendation boundaries.
+  - [ ] Browser or equivalent workflow check confirms `AI 생성` label remains unchanged after focus/blur with no edit.
+  - [ ] `.ai/status/active/T017C-unchanged-field-blur-state.md` records the observed bug, no-op comparison policy, and verification results.
+- Notes:
+  - 2026-06-04 real-use bug: clicking into a slide detail input and blurring without edits changes the label from `AI 생성` to `사용자 수정`.
+  - Current client calls `saveField` on every textarea `onBlur`, and the repository marks the field as `userModified` without first checking whether the value actually changed.
+  - This bug can also create false regeneration recommendations for slides with generated images, so the fix should cover both edit-state and image-regeneration state boundaries.
 
 ### Feature F09. Manual Slide Operations
 
@@ -875,33 +1078,34 @@ MVP scope:
 
 #### Task T023. Single slide image generation, regeneration, history 구현
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #15
-- PR: None
+- PR: #40
 - Depends on: T017, T021, T022
 - Branch: `feature/T023-single-image-generation`
 - Expected PR Unit: `PR-T023`
 - Acceptance Criteria:
-  - [ ] confirmed storyboard에서 single slide image generation을 실행할 수 있다.
-  - [ ] resolved prompt snapshot, common prompt snapshot, slide prompt snapshot이 저장된다.
-  - [ ] generation history에 model, aspect ratio, status, error, timestamps, selected flag가 저장된다.
-  - [ ] regeneration 성공 시 새 image는 history에 추가되지만 자동 selected가 되지 않는다.
-  - [ ] 사용자가 completed previous image를 selected image로 선택할 수 있다.
-  - [ ] Images tab에서 history와 selected thumbnail을 볼 수 있다.
-  - [ ] `.ai/status/active/T023-single-image-generation.md`에 검증 결과가 기록되어 있다.
+  - [x] confirmed storyboard에서 single slide image generation을 실행할 수 있다.
+  - [x] resolved prompt snapshot, common prompt snapshot, slide prompt snapshot이 저장된다.
+  - [x] generation history에 model, aspect ratio, status, error, timestamps, selected flag가 저장된다.
+  - [x] regeneration 성공 시 새 image는 history에 추가되지만 자동 selected가 되지 않는다.
+  - [x] 사용자가 completed previous image를 selected image로 선택할 수 있다.
+  - [x] Images tab에서 history와 selected thumbnail을 볼 수 있다.
+  - [x] `.ai/status/active/T023-single-image-generation.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Batch generation은 T024에서 처리한다.
   - PR #12 already added per-slide mockup generation triggers and latest mockup display; this task should finish regeneration history, selected image behavior, and Images tab history UX.
-  - T023 implementation PR should consider including T023B immediately after the core history/selection behavior is in place, so mockup review UX can be finished without a separate context switch.
+  - Done by merged PR #40, which closed Issue #15 and added single-slide generation history, prompt snapshots, selected-image selection/deselection, and Images tab history UX.
+  - Actual provider smoke remains environment-dependent on assigned account-level provider keys.
 
 #### Task T023B. Slide mockup result review and final selection UX 구현
 - Priority: Medium
-- Status: Backlog
+- Status: Ready
 - Issue: #20
 - PR: None
 - Depends on: T023
-- Branch: `feature/T023-single-image-generation`
-- Expected PR Unit: `PR-T023 + PR-T023B`
+- Branch: `feature/T023B-mockup-review-selection`
+- Expected PR Unit: `PR-T023B`
 - Acceptance Criteria:
   - [ ] 생성된 slide mockup thumbnail 또는 preview를 클릭하면 큰 preview modal 또는 dedicated viewer가 열린다.
   - [ ] 한 slide에 여러 mockup 후보가 있으면 carousel-style viewer로 후보를 순차 확인할 수 있다.
@@ -914,11 +1118,58 @@ MVP scope:
 - Notes:
   - 2026-06-04 planning handoff from merged PR #12: generated mockups should open in a larger preview, multi-result review should use a carousel-style viewer, and final-selection UX should support one or more accepted mockups per slide.
   - 2026-06-04 user direction: T023B는 Backlog 이슈로 올리되, T023 구현 직후 같은 PR에서 바로 처리할 수 있게 계획한다.
+  - T023 was completed by merged PR #40, so T023B is now a Ready follow-up task rather than part of the already-merged T023 PR.
   - T023B는 T023의 image generation history/selected image behavior 위에서 이어지는 UX 작업이므로 별도 선행 prompt quality/cache work에 의존하지 않는다.
+
+#### Task T023C. Single image generation immediate status refresh bugfix
+- Priority: High
+- Status: Ready
+- Issue: #51
+- PR: None
+- Depends on: T023
+- Branch: `fix/T023C-image-generation-status-refresh`
+- Expected PR Unit: `PR-T023C`
+- Acceptance Criteria:
+  - [ ] 슬라이드 카드의 `목업 생성` 버튼을 누르면 해당 slide의 UI 상태가 즉시 `생성 중`으로 바뀌고 중복 클릭이 방지된다.
+  - [ ] 이미지 생성 API가 성공하면 페이지 새로고침 없이 해당 slide의 thumbnail, selected image, Images tab history, card status가 즉시 갱신된다.
+  - [ ] 이미지 생성 API가 실패하면 페이지 새로고침 없이 해당 slide의 card status가 `실패`로 바뀌고, 실패 메시지와 failed generation history가 같은 화면에서 확인된다.
+  - [ ] 실패 응답에서 DB에 저장된 failed image generation record를 클라이언트가 갱신할 수 있도록 API response가 failed image record를 반환하거나, 클라이언트가 안전하게 최신 slide/image state를 refetch한다.
+  - [ ] 성공 image가 없는데도 클라이언트가 slide status를 `generated`로 표시하지 않는다.
+  - [ ] pending state가 오래 지속되거나 요청이 중단된 경우에도 `generating` 상태가 화면과 DB에 고아 상태로 남지 않도록 복구/재시도 UX를 제공한다.
+  - [ ] Unit/component tests or mocked route tests cover success, failure, partial failure, and no-image response state transitions.
+  - [ ] Browser or equivalent workflow check confirms status changes from `목업 없음` -> `생성 중` -> `완료/실패` without manual refresh.
+  - [ ] `.ai/status/active/T023C-image-generation-status-refresh.md` records the observed bug, state transition policy, and verification results.
+- Notes:
+  - 2026-06-04 real-use bug: after clicking slide-card `목업 생성`, the UI changed to generating, then appeared to return to the initial state with no mockup; only after refresh did the title-side state change from `목업 없음` to `실패`.
+  - Current code returns only `{ error, generated, failed }` on all-failed image generation, while the failed generation record is written to DB. The client therefore cannot update failed history/status immediately from the response.
+  - Current client success-state logic can mark a requested slide as `generated` when there are no returned images; this should be corrected while fixing the refresh behavior.
+
+#### Task T023D. OpenRouter-first image fallback error masking bugfix
+- Priority: High
+- Status: Ready
+- Issue: #52
+- PR: None
+- Depends on: T021, T022, T023
+- Branch: `fix/T023D-openrouter-image-fallback-error`
+- Expected PR Unit: `PR-T023D`
+- Acceptance Criteria:
+  - [ ] If a user has an OpenRouter key and no direct OpenAI/Gemini key, image generation first attempts OpenRouter and does not fail solely because the direct provider key is missing.
+  - [ ] If OpenRouter succeeds, no direct OpenAI/Gemini key is required for `gpt-image-2` or `nano-banana` image generation.
+  - [ ] If OpenRouter is attempted and fails, a later missing direct-provider key does not mask the actual OpenRouter provider failure in the final user-facing error or stored failed history.
+  - [ ] If OpenRouter key is missing and the direct provider key exists, the existing direct OpenAI/Gemini fallback path still works.
+  - [ ] If both OpenRouter and the required direct provider key are missing, the missing-key message clearly lists the usable key options instead of implying only one provider can satisfy the request.
+  - [ ] Failed image generation records store the provider/error that best explains the attempted route, including OpenRouter provider errors when OpenRouter was actually called.
+  - [ ] Mocked provider tests cover OpenRouter success with no OpenAI key, OpenRouter provider failure with no OpenAI key, OpenRouter missing with OpenAI success, and both keys missing.
+  - [ ] Browser or equivalent real-use check verifies an OpenRouter-only member can start image generation and receives an OpenRouter-specific result/error rather than an OpenAI-key-missing message.
+  - [ ] `.ai/status/active/T023D-openrouter-image-fallback-error.md` records provider selection order, error precedence, and verification results.
+- Notes:
+  - 2026-06-04 real-use bug: an OpenRouter-only account saw an `OpenAI API key가 없습니다` failure after image generation, even though T021/T022 documented OpenRouter-first image routing with direct provider fallback.
+  - Current image generation code tries OpenRouter first, then the direct provider for the selected model. If OpenRouter fails and the direct provider key is missing, the final normalized error can be the missing direct-provider key, hiding the OpenRouter attempt/failure.
+  - This task should keep direct-provider fallback available, but make fallback/error precedence match the product intent and debugging needs.
 
 #### Task T024. Batch image generation과 concurrency/progress 구현
 - Priority: High
-- Status: Backlog
+- Status: Ready
 - Issue: #22
 - PR: None
 - Depends on: T023
@@ -935,6 +1186,7 @@ MVP scope:
   - [ ] `.ai/status/active/T024-batch-image-generation.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - provider rate limit에 따른 실패는 retry/failure state로 남긴다.
+  - T023 was completed by merged PR #40, so this task is now unblocked.
 
 ---
 
@@ -944,7 +1196,7 @@ MVP scope:
 
 #### Task T025. Markdown export 구현
 - Priority: High
-- Status: Backlog
+- Status: Ready
 - Issue: #23
 - PR: None
 - Depends on: T016, T019, T023
@@ -960,6 +1212,7 @@ MVP scope:
   - [ ] `.ai/status/active/T025-markdown-export.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - ZIP export는 T026에서 처리한다.
+  - T023 was completed by merged PR #40, so this task is now unblocked.
 
 #### Task T026. Selected image ZIP export 구현
 - Priority: High
@@ -999,27 +1252,86 @@ MVP scope:
 - Notes:
   - 외부 provider key는 user-scoped key만 사용한다.
 
-#### Task T027A. Provider call progress and loading visualization 구현
+#### Task T027A. Provider call progress and loading visualization umbrella
 - Priority: High
 - Status: Backlog
 - Issue: #26
 - PR: None
 - Depends on: T015B, T023, T024
 - Branch: `feature/T027A-provider-call-progress-ui`
-- Expected PR Unit: `PR-T027A`
+- Expected PR Unit: Parent issue only; implementation should use T027A1/T027A2/T027A3 sub-issues.
 - Acceptance Criteria:
-  - [ ] storyboard generation 시작부터 provider request, schema validation, slide persistence, review-ready transition까지 사용자가 볼 수 있는 loading/progress state가 표시된다.
-  - [ ] single image generation과 batch image generation에서 provider 호출 시작, retry, storage 저장, 완료/부분 실패까지 시각적 진행 상태가 표시된다.
-  - [ ] loading UI는 버튼 disable만으로 끝나지 않고, 현재 단계 label, elapsed time 또는 spinner/progress indicator, 처리 중인 slide count를 보여준다.
-  - [ ] provider response가 오래 걸려도 사용자는 앱이 멈춘 것으로 느끼지 않으며, 새로고침 후에도 가능한 범위에서 generation 상태를 복구하거나 안내한다.
-  - [ ] batch generation은 total/completed/failed/remaining count와 현재 처리 중인 slide title 또는 position을 표시한다.
-  - [ ] retry가 발생하면 retry 중임을 사용자에게 명확히 보여주고, 최종 성공/부분 실패/실패 상태로 전환한다.
-  - [ ] loading state가 project status, image generation batch status, slide image generation status와 일관된다.
-  - [ ] 브라우저 또는 equivalent visual check로 LLM generation, single image generation, batch image generation loading UX를 확인했다.
-  - [ ] `.ai/status/active/T027A-provider-call-progress-ui.md`에 각 provider call flow의 loading 단계와 검증 결과가 기록되어 있다.
+  - [ ] T027A1, T027A2, and T027A3 are implemented or explicitly deferred with user approval.
+  - [ ] GitHub issue tracking keeps T027A1/T027A2/T027A3 as sub-issues under parent Issue #26 when those sub-issues are created.
+  - [ ] The parent issue summarizes cross-flow progress state consistency for storyboard LLM, single image, and batch image generation.
+- Notes:
+  - 2026-06-04 user direction: T027A1/T027A2 should be tracked as sub-issues of T027A, including when GitHub Issues are created later.
+  - T027A3 belongs to the same provider-progress umbrella and should also be created as a sub-issue of T027A unless the user decides to keep batch progress separate.
+  - Use child task status for actual implementation readiness; do not block T027A1 on T024 just because the umbrella includes batch image progress.
+
+#### Task T027A1. Storyboard LLM generation loading/progress UX 구현
+- Priority: High
+- Status: Ready
+- Issue: #53
+- PR: None
+- Depends on: T015B
+- Branch: `feature/T027A1-storyboard-generation-progress`
+- Expected PR Unit: `PR-T027A1`
+- Acceptance Criteria:
+  - [ ] 사용자가 `스토리보드 생성` 버튼을 누르면 즉시 pending/loading 상태가 표시되고 버튼이 중복 제출되지 않는다.
+  - [ ] loading UI는 버튼 disable만으로 끝나지 않고, 현재 단계 label, elapsed time 또는 spinner/progress indicator를 보여준다.
+  - [ ] Storyboard LLM flow 단계가 사용자에게 구분되어 보인다: request started, `story_structure` 호출 대기, schema validation, `slide_breakdown` 호출 대기, slide persistence, review-ready transition.
+  - [ ] provider response가 오래 걸려도 사용자는 앱이 멈춘 것으로 느끼지 않으며, 현재 OpenRouter 응답 대기 중인지 실패했는지 구분할 수 있다.
+  - [ ] provider-key missing, schema validation failure, provider/network failure는 기존 `storyboard_generation_failed` 상태와 충돌하지 않고 명확한 실패 메시지로 돌아온다.
+  - [ ] 새로고침 후에도 가능한 범위에서 `storyboard_generating` 또는 마지막 실패 상태를 복구하거나 안내한다.
+  - [ ] 브라우저 또는 equivalent visual check로 storyboard generation pending, success redirect, failure state를 확인했다.
+  - [ ] `.ai/status/active/T027A1-storyboard-generation-progress.md`에 단계 정의, 구현 방식, 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: LLM 및 이미지 provider 호출부터 답변까지 로딩을 시각적으로 보여줄 수 있어야 한다.
+  - 2026-06-04 user finding: 실제 사용 중 `스토리보드 생성` 클릭 후 OpenRouter 응답 대기 시간 동안 아무 피드백이 없어, 버튼이 동작하지 않는지 provider 응답을 기다리는지 구분하기 어렵다.
+  - 기존 T027A의 broad provider progress scope에서 즉시 구현 가능한 storyboard LLM generation progress를 분리했다.
+  - GitHub Issue 생성 시 parent T027A Issue #26의 sub-issue로 등록한다.
   - 스트리밍이 없어도 polling, persisted status, optimistic step indicator 중 구현 가능한 방식을 선택한다.
+
+#### Task T027A2. Single image generation loading/progress UX 구현
+- Priority: High
+- Status: Backlog
+- Issue: #54
+- PR: None
+- Depends on: T023
+- Branch: `feature/T027A2-single-image-progress`
+- Expected PR Unit: `PR-T027A2`
+- Acceptance Criteria:
+  - [ ] single slide image generation과 regeneration에서 provider 호출 시작, retry, storage 저장, 완료/실패까지 시각적 진행 상태가 표시된다.
+  - [ ] loading UI는 버튼 disable만으로 끝나지 않고, 현재 단계 label, elapsed time 또는 spinner/progress indicator를 보여준다.
+  - [ ] retry가 발생하면 retry 중임을 사용자에게 명확히 보여주고, 최종 성공/실패 상태로 전환한다.
+  - [ ] loading state가 slide image generation status, selected image state, image history UI와 일관된다.
+  - [ ] 브라우저 또는 equivalent visual check로 single image generation pending, success, failure UX를 확인했다.
+  - [ ] `.ai/status/active/T027A2-single-image-progress.md`에 각 provider call flow의 loading 단계와 검증 결과가 기록되어 있다.
+- Notes:
+  - 기존 T027A에서 single image progress scope를 분리했다.
+  - GitHub Issue 생성 시 parent T027A Issue #26의 sub-issue로 등록한다.
+  - T023 is complete, so this task can be promoted once a dedicated Issue is created or the user prioritizes it.
+
+#### Task T027A3. Batch image generation progress UX 구현
+- Priority: High
+- Status: Backlog
+- Issue: #55
+- PR: None
+- Depends on: T024
+- Branch: `feature/T027A3-batch-image-progress`
+- Expected PR Unit: `PR-T027A3`
+- Acceptance Criteria:
+  - [ ] batch generation은 total/completed/failed/remaining count와 현재 처리 중인 slide title 또는 position을 표시한다.
+  - [ ] batch image generation에서 provider 호출 시작, retry, storage 저장, 완료/부분 실패/실패까지 시각적 진행 상태가 표시된다.
+  - [ ] retry가 발생하면 retry 중임을 사용자에게 명확히 보여주고, 최종 성공/부분 실패/실패 상태로 전환한다.
+  - [ ] loading state가 image generation batch status와 slide image generation status와 일관된다.
+  - [ ] 브라우저 또는 equivalent visual check로 batch image generation loading/progress UX를 확인했다.
+  - [ ] `.ai/status/active/T027A3-batch-image-progress.md`에 batch progress contract와 검증 결과가 기록되어 있다.
+- Notes:
+  - 기존 T027A에서 batch image progress scope를 분리했다.
+  - GitHub Issue 생성 시 parent T027A Issue #26의 sub-issue로 등록한다.
+  - This task remains blocked by T024 because batch orchestration/progress state does not exist yet.
 
 #### Task T027B. Actual provider usage ledger and admin cost dashboard 구현
 - Priority: High
@@ -1051,12 +1363,41 @@ MVP scope:
   - MVP usage page는 순수 비용 추정용이다. 결제, 청구, 사용자별 과금 확정, quota enforcement는 범위 밖이다.
   - Text LLM usage와 image generation usage는 단위가 다를 수 있으므로 ledger schema는 token fields와 image unit fields를 함께 표현할 수 있어야 한다.
 
+#### Task T027C. Provider call debug log storage and viewer 구현
+- Priority: Critical
+- Status: Ready
+- Issue: #56
+- PR: None
+- Depends on: T015B, T021, T022, T023
+- Branch: `feature/T027C-provider-debug-logs`
+- Expected PR Unit: `PR-T027C`
+- Acceptance Criteria:
+  - [ ] LLM provider calls record a debug log entry for each `story_structure` and `slide_breakdown` attempt, including projectId, userId, operationType, provider, model, attempt number, startedAt, completedAt, durationMs, status, HTTP status when available, requestId when available, and normalized error when failed.
+  - [ ] Image provider calls record a debug log entry for each single-image generation attempt, including projectId, slideId, userId, operationType, provider, model, aspectRatio, attempt/fallback order, startedAt, completedAt, durationMs, status, HTTP status when available, requestId when available, storage result summary, and normalized error when failed.
+  - [ ] Debug logs store request/response previews or structured snapshots needed for diagnosis, but never store provider API keys, Authorization headers, decrypted secrets, raw binary image bytes, or full sensitive payloads.
+  - [ ] Request/response snapshots are redacted and size-limited, with explicit truncation metadata so large prompts/responses do not bloat SQLite or expose private data unnecessarily.
+  - [ ] LLM logs capture enough structured response metadata to diagnose schema validation failures, language mismatch, slide count mismatch, missing usage metadata, and provider JSON parse failures.
+  - [ ] Image logs capture enough structured response metadata to diagnose provider fallback, missing image URL/bytes, storage save failures, model/aspect-ratio mapping, and provider error bodies.
+  - [ ] A project-scoped debug log viewer or admin-only provider debug page can filter by project, slide, operationType, provider, status, and createdAt.
+  - [ ] Normal members can only see logs for their own projects if project-scoped viewing is exposed; admin views can inspect all logs. Sensitive snapshots remain redacted in both cases.
+  - [ ] Debug log persistence failure does not fail the successful provider operation, but the failure is surfaced to server logs or a fallback diagnostic path.
+  - [ ] Retention/deletion policy is documented: deleted projects/slides should not expose logs in default UI, and long-term retention can be capped or cleanup-ready.
+  - [ ] Tests cover successful LLM log, failed LLM validation log, successful image log, provider fallback/missing-key log, redaction, ownership/admin access, and log persistence failure behavior.
+  - [ ] Browser or equivalent visual check confirms recent LLM and image provider logs can be queried after a real or mocked generation workflow.
+  - [ ] `.ai/status/active/T027C-provider-debug-logs.md` records the schema, redaction policy, viewer route, and verification results.
+- Notes:
+  - 2026-06-04 user direction: debugging needs separate logs for LLM/image provider calls and response results that can be queried later.
+  - 2026-06-04 priority update: this is the highest-priority implementation item because LLM correctness and provider behavior cannot be verified well without queryable request/response logs.
+  - Current state: image generation history stores provider/model/status/error and prompt snapshots in `slide_image_generations`, and the Images tab shows a limited history. It does not store raw provider response bodies, HTTP status, request id, latency, or structured debug snapshots.
+  - Current state: LLM storyboard generation stores only project-level `storyStructure`, `targetSlideCountRationale`, and `generationError`; there is no dedicated LLM request/response debug log table or viewer.
+  - This task is separate from T027B because T027B is a cost/usage ledger and intentionally avoids prompt 전문 or sensitive response bodies.
+
 #### Task T028. MVP end-to-end smoke와 Docker persistence 검증
 - Priority: High
 - Status: Backlog
 - Issue: #28
 - PR: None
-- Depends on: T002, T009C, T024, T026, T027, T027A, T027B
+- Depends on: T002, T009C, T023C, T023D, T024, T026, T027, T027A1, T027A2, T027A3, T027B, T027C
 - Branch: `feature/T028-mvp-e2e-smoke`
 - Expected PR Unit: `PR-T028`
 - Acceptance Criteria:
@@ -1069,18 +1410,41 @@ MVP scope:
 - Notes:
   - 이 Task가 merge된 뒤 초기 MVP를 실사용 후보로 판단한다.
 
-## Epic E07B. Post-MVP Multi-LLM Providers and Model Selection
+## Epic E07B. Multi-LLM Providers and Model Selection
 
-This epic is explicitly after MVP. MVP should keep the primary storyboard generation path simple and use the fixed provider path defined in E04/E02A.
+Most model selection and admin-configurable routing work is after MVP. However, direct-provider fallback from assigned account-level keys is a real-use bugfix once members can be assigned OpenAI/Anthropic/Gemini keys without an OpenRouter key.
 
 ### Feature F13B. Multi-Provider LLM Generation
+
+#### Task T035A. Storyboard LLM direct-provider fallback bugfix
+- Priority: High
+- Status: Ready
+- Issue: #57
+- PR: None
+- Depends on: T015B, T009B
+- Branch: `fix/T035A-storyboard-llm-provider-fallback`
+- Expected PR Unit: `PR-T035A`
+- Acceptance Criteria:
+  - [ ] Storyboard generation does not fail solely because the member has no OpenRouter key when another supported account-level LLM key is assigned.
+  - [ ] If an OpenRouter key is present, storyboard generation continues to prefer the existing OpenRouter path.
+  - [ ] If no OpenRouter key is present but an OpenAI account-level key is assigned, storyboard generation falls back to a direct OpenAI LLM adapter for `story_structure` and `slide_breakdown`.
+  - [ ] Direct provider fallback uses the same `storyboardResponseSchema` / `slideBreakdownSchema` validation before accepting generated storyboard data.
+  - [ ] Missing-key errors list the supported account-level keys that can satisfy storyboard generation instead of saying only OpenRouter is required.
+  - [ ] Fallback selection is deterministic and recorded in status/test evidence: initial default order is OpenRouter -> OpenAI, with Anthropic/Gemini direct fallback left to T035 unless implemented in this bugfix.
+  - [ ] Mocked provider tests cover OpenRouter present, OpenRouter missing with OpenAI present, all supported keys missing, and invalid direct-provider schema output.
+  - [ ] Browser or equivalent real-use check verifies a member with only an OpenAI key can start storyboard generation without the current missing-OpenRouter failure.
+  - [ ] `.ai/status/active/T035A-storyboard-llm-provider-fallback.md` records provider selection rules, verified key combinations, and any direct-provider API limitations.
+- Notes:
+  - 2026-06-04 real-use bug: a member assigned only an OpenAI API key gets a storyboard generation error because `app/api/projects/[projectId]/storyboard/generate/route.ts` checks only the `openrouter` key and fails before looking for other assigned account-level keys.
+  - This task is Ready because PR #38 already provides the account-level key storage/admin assignment surface needed for the immediate bugfix; this bugfix resolves one of the remaining T009C key-reuse gaps.
+  - Admin-configurable routing, fallback toggles, and full provider priority UI remain T039 scope.
 
 #### Task T035. OpenRouter, OpenAI, Claude, Gemini LLM provider adapters 구현
 - Priority: Medium
 - Status: Backlog
 - Issue: #29
 - PR: None
-- Depends on: T015B, T009C
+- Depends on: T035A, T009C
 - Branch: `feature/T035-multi-llm-providers`
 - Expected PR Unit: `PR-T035`
 - Acceptance Criteria:
@@ -1096,6 +1460,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Notes:
   - "Claude"는 provider implementation에서 Anthropic account/API key로 취급한다.
   - 실제 provider별 최신 API shape와 model id는 구현 시점에 공식 문서로 확인한다.
+  - T035A handles the immediate OpenRouter-missing/OpenAI-assigned storyboard generation bugfix; this task completes the broader direct OpenAI/Anthropic/Gemini LLM provider surface.
 
 #### Task T036. User-selectable LLM model selection 구현
 - Priority: Medium
@@ -1160,7 +1525,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 - Status: Backlog
 - Issue: #32
 - PR: None
-- Depends on: T027A, T035, T036, T037
+- Depends on: T027A1, T027A2, T027A3, T035, T036, T037
 - Branch: `feature/T038-provider-error-recovery-ux`
 - Expected PR Unit: `PR-T038`
 - Acceptance Criteria:
@@ -1199,6 +1564,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
   - [ ] `.ai/status/active/T039-provider-routing-policy.md`에 routing policy, fallback matrix, 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-04 planning handoff from merged PR #12: LLM calls should follow the image generation provider priority policy, and admins should be able to configure priority/fallback behavior for both LLM and image generation.
+  - T035A provides the fixed default storyboard fallback needed before admin-configurable routing exists; T039 should build on that behavior rather than reintroducing an OpenRouter-only hard requirement.
 
 ---
 
@@ -1228,6 +1594,7 @@ This epic is explicitly after MVP. Prompt hardening and prompt caching should im
   - [ ] slide `contentPoints` 작성 지침이 포함된다: 3-5개 bullet을 기본으로 하고, 각 bullet은 evidence, implication, action 중 하나를 담당하며, storyline에 없는 수치/사실은 지어내지 않는다.
   - [ ] slide `visualDirection` 작성 지침이 포함된다: chart/table/diagram/timeline/process map/comparison matrix 등 구체적 시각 형식, 주요 구성요소, 강조해야 할 관계를 설명하고, "clean modern slide" 같은 일반 표현만 쓰지 않는다.
   - [ ] slide `imagePrompt` 작성 지침이 포함된다: 이미지 생성용 visual prompt로 쓰일 수 있게 layout, composition, subject, style, color/contrast, aspect ratio intent를 포함하되, 작은 본문 텍스트나 읽기 어려운 세부 라벨 생성을 요구하지 않는다.
+  - [ ] storyboard와 slide card에 노출되는 모든 user-visible textual fields는 기본적으로 한국어로 작성하도록 language policy를 포함하고, 영문 고유명사/공식 용어/인용문만 필요한 경우 보존한다.
   - [ ] slide `slideRole` 작성 지침이 포함된다: `Context`, `Problem`, `Insight`, `Evidence`, `Recommendation`, `Roadmap`, `Risk`, `Appendix` 같은 consultant workflow role을 일관되게 사용하거나 동등한 controlled vocabulary를 정의한다.
   - [ ] section field 작성 지침이 포함된다: `sectionTitle`은 deck chapter label, `sectionId`는 stable machine id, `sourceSummary`는 storyline 근거 요약, `suggestedSlideCount`는 해당 section의 권장 분량으로 작성한다.
   - [ ] slide 수정/재생성 prompt 지침이 포함된다: 기존 userModified field를 보호하고, 변경 instruction이 요구한 field만 바꾸며, 바뀐 field와 유지된 field를 구분할 수 있어야 한다.
@@ -1260,6 +1627,7 @@ This epic is explicitly after MVP. Prompt hardening and prompt caching should im
 - Acceptance Criteria:
   - [ ] image generation prompt builder가 static common style/instruction prefix와 slide-specific variable content를 분리한다.
   - [ ] image generation prompt builder가 T015D의 reusable prompt quality baseline을 따라 slide field guidance, image prompt guidance, cache-friendly structure를 반영한다.
+  - [ ] image generation prompt builder가 T015E의 Korean-first storyboard language policy를 반영해, generated mockup에 visible text가 포함될 경우 기본적으로 한국어가 되도록 지시한다.
   - [ ] single generation, regeneration, batch generation이 동일한 static prompt prefix를 최대한 공유하고 slide title/core message/content points/visual direction/imagePrompt만 뒤쪽 variable block으로 배치한다.
   - [ ] provider/API가 prompt caching 또는 prompt cache key를 지원하는 경우 stable cache key 또는 equivalent routing hint를 사용할 수 있는 provider input field를 정의한다.
   - [ ] OpenAI Images, Gemini/Nano Banana provider별 prompt caching 지원 여부와 usage metadata 노출 여부를 구현 시점 공식 문서로 확인하고 status file에 기록한다.
@@ -1271,6 +1639,7 @@ This epic is explicitly after MVP. Prompt hardening and prompt caching should im
   - 2026-06-03 user direction: prompt quality/cache readiness work should not block core MVP image generation and should happen after MVP functionality works correctly.
   - 2026-06-03 user direction: 내용 재생성, 페이지수 변경 재생성, 이미지 생성 단계에서도 prompt caching 활용 여지를 고려한다.
   - 2026-06-04 user direction: prompt caching/quality work should be grouped after MVP so it does not push down feature work such as T023B.
+  - 2026-06-04 real-use finding: image generation calls should not default to English visible text; use Korean for any generated slide/mockup text unless source terms must remain in English.
   - OpenAI Prompt Caching guidance to account for during implementation: exact shared prefixes improve cache hits, variable request-specific content should come later, and cached token metrics should be observed where available.
   - 이 task는 provider support가 있는 경우의 cache-friendly prompt assembly와 observability contract를 정리한다. 실제 batch orchestration은 T024에서 처리한다.
 
@@ -1284,32 +1653,18 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 
 #### Task D001. IMPLEMENTATION_PLAN.md 상태 갱신
 - Priority: High
-- Status: Backlog
-- Issue: #36
+- Status: In Progress
+- Issue: #58
 - PR: None
 - Depends on: Merged PR evidence
-- Branch: `docs/update-implementation-plan`
+- Branch: `docs/fix-global-dev-docs-and-bugs`
 - Expected PR Unit: `PR-D001`
 - Acceptance Criteria:
-  - [ ] merged PR 기준으로 task status를 갱신한다.
-  - [ ] merged되지 않은 task는 `Done`으로 표시하지 않는다.
-  - [ ] PR notes와 `.ai/status/active/` 기록에서 follow-up을 수집한다.
-  - [ ] 근거가 불명확한 항목은 `Needs Review`로 표시한다.
+  - [x] merged PR 기준으로 task status를 갱신한다.
+  - [x] merged되지 않은 task는 `Done`으로 표시하지 않는다.
+  - [x] PR notes와 `.ai/status/active/` 기록에서 follow-up을 수집한다.
+  - [x] 근거가 불명확한 항목은 `Needs Review`로 표시한다.
 - Notes:
   - 이 Task는 코드 파일을 수정하지 않는다.
-
-#### Task D002. 프로젝트 backlog/status/roadmap 문서 정리
-- Priority: Medium
-- Status: Backlog
-- Issue: #37
-- PR: None
-- Depends on: Merged PR evidence or user instruction
-- Branch: `docs/update-project-status`
-- Expected PR Unit: `PR-D002`
-- Acceptance Criteria:
-  - [ ] PR notes, task status files, user instruction에 근거한 항목만 정리한다.
-  - [ ] 새로운 follow-up task는 근거가 있을 때만 추가한다.
-  - [ ] 불확실한 항목은 `Needs Review`로 표시한다.
-  - [ ] 코드 파일은 수정하지 않는다.
-- Notes:
-  - `PROJECT_BACKLOG.md`, `PROJECT_STATUS.md`, `ROADMAP.md`, `DECISIONS.md`가 생긴 뒤 적용한다.
+  - 2026-06-04 sync checked remote PRs through #40 and Issues #6-#35. No open PRs were present at sync time.
+  - Issue #36 does not exist in the remote repository as of the 2026-06-04 sync, so this planning task is tracked without a GitHub Issue until one is explicitly created.

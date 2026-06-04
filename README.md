@@ -56,6 +56,142 @@ type StoryboardResponse = {
 
 The LLM never writes directly to the database. Its output is first validated against the structured schema. Only validated slide objects are persisted as slide records.
 
+## LLM Calls and Prompt Structure
+
+The current implementation has two possible storyboard LLM calls and one image generation call per requested slide.
+
+### 1. `story_structure` LLM call
+
+This call receives the project storyline and slide count policy.
+
+The OpenRouter Chat Completions request uses:
+
+- System message: a senior presentation strategist instruction.
+- User message assembled by `buildStoryboardPrompt`.
+- Strict JSON schema response format: `storyboardResponseJsonSchema`.
+- Task value: `story_structure`.
+
+The user prompt body currently includes:
+
+```text
+task: story_structure
+slideCountPolicy:
+{
+  "mode": "auto | brief | standard | detailed | custom_range",
+  "userSelectedRange": { "minSlideCount": number, "maxSlideCount": number } | null,
+  "preferredSlideCount": number | null,
+  "heuristicMarker": {
+    "estimatedCount": number | null,
+    "confidence": "none | low | medium | high"
+  },
+  "existingRationale": string | null
+}
+includeSuggestions: true | false
+
+<task guidance>
+<slide count policy rules>
+<JSON-only / language / consulting-storyboard instructions>
+
+User storyline:
+<raw project storyline>
+```
+
+The expected structured output is a `StoryboardResponse`:
+
+```json
+{
+  "documentPurpose": "...",
+  "overallThesis": "...",
+  "sections": [
+    {
+      "id": "...",
+      "title": "...",
+      "role": "...",
+      "coreMessage": "...",
+      "sourceSummary": "...",
+      "suggestedSlideCount": 3
+    }
+  ],
+  "improvementSuggestions": null,
+  "targetSlideCountRationale": null,
+  "slides": null
+}
+```
+
+If this response includes schema-valid `slides[]`, the app can skip the second LLM call and persist those slides directly. Otherwise, the app stores the story structure on the project and uses it as context for `slide_breakdown`.
+
+### 2. `slide_breakdown` LLM call
+
+This call is used when `story_structure` did not return complete slide objects.
+
+The request uses the same strict `StoryboardResponse` schema, the same storyline, and the same slide count policy. It also appends:
+
+```text
+Previous story structure JSON:
+<validated StoryboardResponse from story_structure>
+```
+
+The expected response is still a `StoryboardResponse`, but this time `slides[]` should be populated:
+
+```json
+{
+  "documentPurpose": "...",
+  "overallThesis": "...",
+  "sections": [{ "...": "..." }],
+  "improvementSuggestions": null,
+  "targetSlideCountRationale": "Generated slides to match the selected range.",
+  "slides": [
+    {
+      "sectionId": "...",
+      "sectionTitle": "...",
+      "title": "...",
+      "coreMessage": "...",
+      "contentPoints": ["...", "..."],
+      "visualDirection": "...",
+      "imagePrompt": "...",
+      "slideRole": "..."
+    }
+  ]
+}
+```
+
+After schema validation, each `slides[]` item is persisted as a slide record. The persisted fields become the storyboard review UI fields: title, core message, content points, visual direction, image prompt, and slide role.
+
+### 3. Image generation prompt assembly
+
+When a confirmed slide requests an image, the app currently builds the provider prompt from:
+
+```text
+<project.resolvedCommonPrompt>
+
+Slide title: <slide.title>
+
+<slide.imagePrompt>
+```
+
+`project.resolvedCommonPrompt` is created when the project is created:
+
+```text
+<selected style template prompt>
+
+Custom common style prompt: <custom project style prompt>
+```
+
+The image provider input then includes:
+
+```ts
+{
+  apiKey,
+  model: project.defaultImageModel,
+  aspectRatio: project.aspectRatio,
+  prompt: resolvedPrompt
+}
+```
+
+The generated image result is stored in local storage, and a `slide_image_generations` history record stores the provider, model, aspect ratio, status, selected flag, error message, and prompt snapshots.
+
+Current implementation note: `visualDirection`, `coreMessage`, and `contentPoints` are not directly included in the final image prompt unless the LLM already folded that information into `slide.imagePrompt`. Follow-up prompt assembly work should make this relationship explicit.
+
 ## LLM and Image Generation Workflow
 
 The production-oriented design uses a hybrid LLM flow. It prefers a two-step path for messy real-world input, while allowing the second LLM call to be skipped when the first result already contains valid slide objects.
@@ -84,7 +220,7 @@ flowchart TD
   N -- "No" --> M
   N -- "Yes" --> O["Confirmed storyboard"]
 
-  O --> P["Build resolved image prompt<br/>project style prompt<br/>+ slide imagePrompt<br/>+ title/message/points/visual direction"]
+  O --> P["Build resolved image prompt<br/>project style prompt<br/>+ slide title<br/>+ slide imagePrompt"]
   P --> Q["Image model call<br/>OpenAI Images or Nano Banana"]
   Q --> R["Store image output<br/>local storage + generation history"]
   R --> S["User selects, regenerates,<br/>or exports storyboard assets"]

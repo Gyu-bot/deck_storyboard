@@ -56,6 +56,142 @@ type StoryboardResponse = {
 
 LLM은 DB에 직접 쓰지 않습니다. LLM 출력은 먼저 구조화된 스키마로 검증되고, 검증을 통과한 슬라이드 객체만 slide record로 저장됩니다.
 
+## LLM 호출 및 프롬프트 구조
+
+현재 구현에는 스토리보드 생성을 위한 최대 두 번의 LLM 호출과, 요청된 슬라이드마다 한 번의 이미지 생성 호출이 있습니다.
+
+### 1. `story_structure` LLM 호출
+
+이 호출은 프로젝트 스토리라인과 슬라이드 수 정책을 입력으로 받습니다.
+
+OpenRouter Chat Completions 요청은 다음 구조를 사용합니다.
+
+- System message: senior presentation strategist 역할 지시.
+- User message: `buildStoryboardPrompt`로 조립한 프롬프트.
+- Strict JSON schema response format: `storyboardResponseJsonSchema`.
+- Task value: `story_structure`.
+
+현재 user prompt body에는 다음 내용이 들어갑니다.
+
+```text
+task: story_structure
+slideCountPolicy:
+{
+  "mode": "auto | brief | standard | detailed | custom_range",
+  "userSelectedRange": { "minSlideCount": number, "maxSlideCount": number } | null,
+  "preferredSlideCount": number | null,
+  "heuristicMarker": {
+    "estimatedCount": number | null,
+    "confidence": "none | low | medium | high"
+  },
+  "existingRationale": string | null
+}
+includeSuggestions: true | false
+
+<task guidance>
+<slide count policy rules>
+<JSON-only / language / consulting-storyboard instructions>
+
+User storyline:
+<raw project storyline>
+```
+
+기대하는 structured output은 `StoryboardResponse`입니다.
+
+```json
+{
+  "documentPurpose": "...",
+  "overallThesis": "...",
+  "sections": [
+    {
+      "id": "...",
+      "title": "...",
+      "role": "...",
+      "coreMessage": "...",
+      "sourceSummary": "...",
+      "suggestedSlideCount": 3
+    }
+  ],
+  "improvementSuggestions": null,
+  "targetSlideCountRationale": null,
+  "slides": null
+}
+```
+
+이 응답에 schema-valid `slides[]`가 포함되어 있으면 앱은 두 번째 LLM 호출을 생략하고 해당 slide를 바로 저장할 수 있습니다. 그렇지 않으면 story structure를 project에 저장하고, 이 결과를 다음 `slide_breakdown` 호출의 context로 사용합니다.
+
+### 2. `slide_breakdown` LLM 호출
+
+이 호출은 `story_structure`가 완성된 slide 객체를 반환하지 않았을 때 사용됩니다.
+
+요청은 동일한 strict `StoryboardResponse` schema, 동일한 storyline, 동일한 slide count policy를 사용합니다. 여기에 다음 context를 추가합니다.
+
+```text
+Previous story structure JSON:
+<validated StoryboardResponse from story_structure>
+```
+
+기대 응답은 여전히 `StoryboardResponse`이지만, 이 단계에서는 `slides[]`가 채워져 있어야 합니다.
+
+```json
+{
+  "documentPurpose": "...",
+  "overallThesis": "...",
+  "sections": [{ "...": "..." }],
+  "improvementSuggestions": null,
+  "targetSlideCountRationale": "Generated slides to match the selected range.",
+  "slides": [
+    {
+      "sectionId": "...",
+      "sectionTitle": "...",
+      "title": "...",
+      "coreMessage": "...",
+      "contentPoints": ["...", "..."],
+      "visualDirection": "...",
+      "imagePrompt": "...",
+      "slideRole": "..."
+    }
+  ]
+}
+```
+
+스키마 검증을 통과하면 `slides[]`의 각 항목이 slide record로 저장됩니다. 저장된 필드는 스토리보드 검토 UI의 제목, 핵심 메시지, 내용 포인트, 시각화 방향, 이미지 프롬프트, 슬라이드 역할 필드가 됩니다.
+
+### 3. 이미지 생성 프롬프트 조립
+
+확정된 슬라이드에서 이미지를 생성할 때, 현재 앱은 provider prompt를 다음 조각으로 만듭니다.
+
+```text
+<project.resolvedCommonPrompt>
+
+Slide title: <slide.title>
+
+<slide.imagePrompt>
+```
+
+`project.resolvedCommonPrompt`는 프로젝트 생성 시점에 다음처럼 만들어집니다.
+
+```text
+<selected style template prompt>
+
+Custom common style prompt: <custom project style prompt>
+```
+
+이후 이미지 provider 입력은 다음 형태가 됩니다.
+
+```ts
+{
+  apiKey,
+  model: project.defaultImageModel,
+  aspectRatio: project.aspectRatio,
+  prompt: resolvedPrompt
+}
+```
+
+생성된 이미지는 local storage에 저장되고, `slide_image_generations` history record에는 provider, model, aspect ratio, status, selected flag, error message, prompt snapshots가 저장됩니다.
+
+현재 구현 참고: `visualDirection`, `coreMessage`, `contentPoints`는 LLM이 이미 `slide.imagePrompt` 안에 반영해 둔 경우가 아니면 최종 이미지 프롬프트에 직접 포함되지 않습니다. 후속 prompt assembly 작업에서는 이 관계를 명시적으로 정리해야 합니다.
+
 ## LLM 및 이미지 생성 워크플로우
 
 실제 제품 설계는 hybrid LLM 흐름을 사용합니다. 현실적인 사용자 입력이 정돈되어 있지 않을 가능성을 감안해 기본적으로 2단계 흐름을 선호하되, 첫 번째 LLM 결과에 이미 유효한 슬라이드 객체가 포함되어 있으면 두 번째 LLM 호출을 생략할 수 있습니다.
@@ -84,7 +220,7 @@ flowchart TD
   N -- "No" --> M
   N -- "Yes" --> O["확정된 스토리보드"]
 
-  O --> P["이미지 프롬프트 조합<br/>프로젝트 스타일 프롬프트<br/>+ 슬라이드 imagePrompt<br/>+ 제목/메시지/내용/시각화 방향"]
+  O --> P["이미지 프롬프트 조합<br/>프로젝트 스타일 프롬프트<br/>+ 슬라이드 제목<br/>+ 슬라이드 imagePrompt"]
   P --> Q["이미지 모델 호출<br/>OpenAI Images 또는 Nano Banana"]
   Q --> R["이미지 결과 저장<br/>local storage + generation history"]
   R --> S["사용자가 선택, 재생성,<br/>또는 스토리보드 asset export"]

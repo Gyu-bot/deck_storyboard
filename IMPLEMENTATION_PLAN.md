@@ -74,25 +74,26 @@
 
 #### Task T003A. First screen product-purpose copy 보강
 - Priority: Low
-- Status: Ready
+- Status: Done
 - Issue: #6
-- PR: None
+- PR: #11
 - Depends on: T001
 - Branch: `fix/T003A-home-purpose-copy`
 - Expected PR Unit: `PR-T003A`
 - Acceptance Criteria:
-  - [ ] 앱 첫 화면에서 Deck Storyboard의 대상 사용자가 "전체 프리젠테이션/제안서/리포트 스토리라인을 이미 가지고 있는 사람"임을 짧게 설명한다.
-  - [ ] 첫 화면에서 산출물이 최종 납품용 완성 deck이 아니라 초기 skeleton deck 참고자료임을 짧고 명확하게 경고한다.
-  - [ ] 목적/한계 copy는 한두 줄 수준으로 간결해야 하며, `완성 deck을 만들 수 없음`과 `참고용 skeleton deck` 의미를 모두 포함한다.
-  - [ ] 첫 화면의 한계 문구는 warning icon, caution notice, 또는 equivalent visual treatment로 일반 설명과 구분된다.
-  - [ ] 첫 화면 copy가 README/README_KO의 제품 목적 설명과 의미상 일관된다.
-  - [ ] 첫 화면 copy는 한국어 UI 원칙을 따른다.
-  - [ ] 브라우저 또는 equivalent visual check로 desktop/mobile 첫 viewport에서 설명 문구가 잘 보이고 과도하게 길지 않은지 확인한다.
-  - [ ] `.ai/status/active/T003A-home-purpose-copy.md`에 copy before/after와 검증 결과가 기록되어 있다.
+  - [x] 앱 첫 화면에서 Deck Storyboard의 대상 사용자가 "전체 프리젠테이션/제안서/리포트 스토리라인을 이미 가지고 있는 사람"임을 짧게 설명한다.
+  - [x] 첫 화면에서 산출물이 최종 납품용 완성 deck이 아니라 초기 skeleton deck 참고자료임을 짧고 명확하게 경고한다.
+  - [x] 목적/한계 copy는 한두 줄 수준으로 간결해야 하며, `완성 deck을 만들 수 없음`과 `참고용 skeleton deck` 의미를 모두 포함한다.
+  - [x] 첫 화면의 한계 문구는 warning icon, caution notice, 또는 equivalent visual treatment로 일반 설명과 구분된다.
+  - [x] 첫 화면 copy가 README/README_KO의 제품 목적 설명과 의미상 일관된다.
+  - [x] 첫 화면 copy는 한국어 UI 원칙을 따른다.
+  - [x] 브라우저 또는 equivalent visual check로 desktop/mobile 첫 viewport에서 설명 문구가 잘 보이고 과도하게 길지 않은지 확인한다.
+  - [x] `.ai/status/active/T003A-home-purpose-copy.md`에 copy before/after와 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: UI 맨 처음 화면에도 이 프로젝트가 최종 deck generator가 아니라 skeleton deck 참고자료를 만드는 도구라는 점을 명확히 넣는다.
   - 2026-06-03 user direction: README와 첫 화면 모두 "완성 deck은 못 만들고 어디까지나 참고용"이라는 한계를 경고 문구/아이콘으로 명확히 보여준다.
   - 구현 시 README/README_KO의 product-purpose/caution 문구를 기준으로 짧은 first-screen copy로 압축한다.
+  - Done by merged PR #11, which closed Issue #6 and verified desktop/mobile first viewport copy.
 
 ---
 
@@ -285,12 +286,12 @@ MVP scope:
 
 #### Task T009B. Admin member and API key management page 구현
 - Priority: High
-- Status: Needs Review
-- Issue: None
+- Status: Ready
+- Issue: #13
 - PR: None
 - Depends on: T009A
 - Branch: `feature/T009B-admin-member-key-management-page`
-- Expected PR Unit: `PR-T009B`
+- Expected PR Unit: `PR-T009B + PR-T009C`
 - Acceptance Criteria:
   - [x] 관리자 전용 `/admin` 또는 `/admin/users` 회원관리 화면이 있다.
   - [x] 관리자 화면에서 회원 목록, 이메일, 가입일, 최근 수정일, 계정 상태, provider key 할당 상태를 한 화면에서 볼 수 있다.
@@ -311,16 +312,17 @@ MVP scope:
   - 회원 삭제는 hard delete와 soft delete/disabled status 중 구현 전 결정하고, 프로젝트/슬라이드 소유 데이터 처리 정책을 status에 기록한다.
   - 회원관리와 회원별 API key 관리는 별도 흩어진 화면보다 같은 admin workflow 안에서 처리한다.
   - Merged PR #1/#2 implemented admin-only member list and member-scoped provider key controls.
-  - Still Needs Review because admin account add/delete or disable, deletion policy, and browser verification for that flow are not complete.
+  - Ready follow-up scope: admin account add/delete or disable, deletion policy, and browser verification for that flow remain incomplete after merged PR #1/#2.
+  - 2026-06-04 user direction: T009C is tracked in the same GitHub issue (#13) and should be handled immediately after T009B in one PR.
 
 #### Task T009C. Admin-managed user API key assignment 구현
 - Priority: High
 - Status: Needs Review
-- Issue: None
+- Issue: #13
 - PR: None
 - Depends on: T009B, T008
-- Branch: `feature/T009C-admin-api-key-assignment`
-- Expected PR Unit: `PR-T009C`
+- Branch: `feature/T009B-admin-member-key-management-page`
+- Expected PR Unit: `PR-T009B + PR-T009C`
 - Acceptance Criteria:
   - [x] 관리자는 회원별 OpenRouter, OpenAI, Anthropic/Claude, Gemini account-level provider key를 추가/교체/삭제할 수 있다.
   - [x] 회원별 API key 설정은 admin user/account management workflow 안에서 수행되며, 일반 사용자 Settings 메뉴로 분리하지 않는다.
@@ -341,6 +343,7 @@ MVP scope:
   - MVP key policy: 이미지 전용 API key를 별도로 받지 않고 provider account key를 LLM과 이미지 생성에 공통 사용한다.
   - Merged PR #2 completed the OpenRouter path for storyboard generation with admin-assigned user keys.
   - Still Needs Review because OpenAI/Gemini provider reuse and missing-key behavior across image generation paths remain downstream of T021/T022/T023.
+  - 2026-06-04 user direction: track T009C with T009B in Issue #13 and implement it immediately after T009B in the same PR/workflow.
 
 ---
 
@@ -391,29 +394,30 @@ MVP scope:
 
 #### Task T011A. Slide count range preference UI와 project contract 정리
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #7
-- PR: None
-- Depends on: T011, T015B
+- PR: #11
+- Depends on: T011
 - Branch: `feature/T011A-slide-count-range-preference`
 - Expected PR Unit: `PR-T011A`
 - Acceptance Criteria:
-  - [ ] 새 프로젝트 생성 form의 단일 `targetSlideCount` 숫자 입력을 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 선택으로 바꾼다.
-  - [ ] 기본 선택은 `표준`이며 기본 범위는 9-14 slides다.
-  - [ ] `간단히`는 5-8 slides, `표준`은 9-14 slides, `상세`는 15-25 slides로 저장된다.
-  - [ ] `자동`은 min/max를 강제하지 않고 storyline의 구조와 밀도를 기준으로 LLM이 적정 slide count를 정하게 한다.
-  - [ ] `직접 범위`는 사용자가 min/max slide count를 입력할 수 있고, min은 1 이상, max는 min 이상, max는 MVP 상한을 넘지 않도록 validation한다.
-  - [ ] project 저장 contract가 `slideCountMode`, `minSlideCount`, `maxSlideCount`, optional `preferredSlideCount` 또는 동등한 range preference를 표현한다.
-  - [ ] 기존 `targetSlideCount` 기반 project와 sample/test data가 migration 또는 compatibility path로 계속 생성/조회된다.
-  - [ ] storyline 안의 명시적 page/slide marker는 별도 LLM 호출 없이 regex/heuristic으로 confidence와 estimated count만 산출한다.
-  - [ ] high-confidence marker count와 사용자가 선택한 범위가 충돌하면 생성 전 non-blocking notice 또는 생성 후 rationale로 사용자가 차이를 이해할 수 있다.
-  - [ ] 브라우저 또는 equivalent visual check로 `자동`, preset range, 직접 범위 입력 UX를 확인했다.
-  - [ ] `.ai/status/active/T011A-slide-count-range-preference.md`에 range 기본값, migration/compatibility 결정, 검증 결과가 기록되어 있다.
+  - [x] 새 프로젝트 생성 form의 단일 `targetSlideCount` 숫자 입력을 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 선택으로 바꾼다.
+  - [x] 기본 선택은 `표준`이며 기본 범위는 9-14 slides다.
+  - [x] `간단히`는 5-8 slides, `표준`은 9-14 slides, `상세`는 15-25 slides로 저장된다.
+  - [x] `자동`은 min/max를 강제하지 않고 storyline의 구조와 밀도를 기준으로 LLM이 적정 slide count를 정하게 한다.
+  - [x] `직접 범위`는 사용자가 min/max slide count를 입력할 수 있고, min은 1 이상, max는 min 이상, max는 MVP 상한을 넘지 않도록 validation한다.
+  - [x] project 저장 contract가 `slideCountMode`, `minSlideCount`, `maxSlideCount`, optional `preferredSlideCount` 또는 동등한 range preference를 표현한다.
+  - [x] 기존 `targetSlideCount` 기반 project와 sample/test data가 migration 또는 compatibility path로 계속 생성/조회된다.
+  - [x] storyline 안의 명시적 page/slide marker는 별도 LLM 호출 없이 regex/heuristic으로 confidence와 estimated count만 산출한다.
+  - [x] high-confidence marker count와 사용자가 선택한 범위가 충돌하면 생성 전 non-blocking notice 또는 생성 후 rationale로 사용자가 차이를 이해할 수 있다.
+  - [x] 브라우저 또는 equivalent visual check로 `자동`, preset range, 직접 범위 입력 UX를 확인했다.
+  - [x] `.ai/status/active/T011A-slide-count-range-preference.md`에 range 기본값, migration/compatibility 결정, 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user direction: 스토리라인은 정확한 page count보다 대략적인 범위로 잡는 경우가 많으므로, MVP 입력도 정확한 숫자보다 slide count range 중심으로 전환한다.
   - 명시적 page marker 감지는 비용 없는 heuristic으로만 처리하고, 별도 LLM preflight call은 추가하지 않는다.
   - Heuristic 예시는 `12페이지`, `12 pages`, `12 slides`, `Page 1`, `Slide 01`, `슬라이드 1`, 반복되는 markdown heading/page separator 등이다.
   - Heuristic 결과는 강제 규칙이 아니라 LLM prompt와 user-facing rationale을 보강하는 advisory signal로 취급한다.
+  - Done by merged PR #11, which closed Issue #7 and added range UI, storage compatibility, marker heuristics, and visual/equivalent checks.
 
 #### Task T012. 스타일 템플릿과 이미지 설정 구현
 - Priority: High
@@ -530,7 +534,7 @@ MVP scope:
 - Status: Done
 - Issue: None
 - PR: None
-- Depends on: T015A, T009C
+- Depends on: T015A, T008, T009A
 - Branch: `feature/T015B-openrouter-storyboard-call`
 - Expected PR Unit: `PR-T015B`
 - Acceptance Criteria:
@@ -554,8 +558,8 @@ MVP scope:
 
 #### Task T015C. Slide count range policy generation integration
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #14
 - PR: None
 - Depends on: T011A, T015B
 - Branch: `feature/T015C-slide-count-range-policy`
@@ -572,48 +576,7 @@ MVP scope:
 - Notes:
   - 2026-06-03 user direction: 정확한 slide count보다 `자동`, `간단히`, `표준`, `상세`, `직접 범위` 기반 range preference를 우선한다.
   - 이 task는 slide count range policy의 data flow, provider input contract, rationale persistence만 다룬다.
-  - 프롬프트 구조/내용 품질 보강은 T015D에서 별도로 처리한다.
-
-#### Task T015D. Reusable LLM prompt quality baseline and prompt-engineer review
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T028
-- Branch: `feature/T015D-storyboard-prompt-hardening`
-- Expected PR Unit: `PR-T015D`
-- Acceptance Criteria:
-  - [ ] Storyboard generation, slide count regeneration, slide content regeneration, AI merge/split/insert/reflow, and image prompt generation에서 재사용할 prompt quality baseline을 정의한다.
-  - [ ] 이 task 구현 시 prompt-engineering focused subagent 또는 prompt-engineer review pass를 사용해 prompt wording, field guidance, examples, cache-friendly structure를 검토한다.
-  - [ ] 프롬프트는 static developer/system instruction과 variable user input을 분리하고, Markdown section headings 또는 XML-style delimiters로 storyline, count policy, previous structure JSON의 경계를 명확히 구분한다.
-  - [ ] 반복되는 static instruction과 examples는 prompt 앞쪽에 두고, 사용자 storyline 같은 request-specific content는 뒤쪽에 둔다.
-  - [ ] Structured Outputs schema와 app-side Zod type이 divergence되지 않도록 prompt/schema 관련 테스트 또는 review guard를 둔다.
-  - [ ] 사용자 입력이 storyboard task에 부적합하거나 너무 모호한 경우 hallucinated slides를 억지로 만들지 않고, sections/improvement suggestions/rationale/error로 처리하는 지침이 prompt에 포함된다.
-  - [ ] slide `title` 작성 지침이 포함된다: 4-10단어 내외, executive deck headline처럼 구체적이고 action-oriented이며, 서로 중복되지 않고 해당 slide의 핵심 메시지를 예고해야 한다.
-  - [ ] slide `coreMessage` 작성 지침이 포함된다: 한 문장으로 consultant-style takeaway를 제시하고, 단순 주제명이나 제목 반복이 아니라 의사결정자가 기억해야 할 결론을 담아야 한다.
-  - [ ] slide `contentPoints` 작성 지침이 포함된다: 3-5개 bullet을 기본으로 하고, 각 bullet은 evidence, implication, action 중 하나를 담당하며, storyline에 없는 수치/사실은 지어내지 않는다.
-  - [ ] slide `visualDirection` 작성 지침이 포함된다: chart/table/diagram/timeline/process map/comparison matrix 등 구체적 시각 형식, 주요 구성요소, 강조해야 할 관계를 설명하고, "clean modern slide" 같은 일반 표현만 쓰지 않는다.
-  - [ ] slide `imagePrompt` 작성 지침이 포함된다: 이미지 생성용 visual prompt로 쓰일 수 있게 layout, composition, subject, style, color/contrast, aspect ratio intent를 포함하되, 작은 본문 텍스트나 읽기 어려운 세부 라벨 생성을 요구하지 않는다.
-  - [ ] slide `slideRole` 작성 지침이 포함된다: `Context`, `Problem`, `Insight`, `Evidence`, `Recommendation`, `Roadmap`, `Risk`, `Appendix` 같은 consultant workflow role을 일관되게 사용하거나 동등한 controlled vocabulary를 정의한다.
-  - [ ] section field 작성 지침이 포함된다: `sectionTitle`은 deck chapter label, `sectionId`는 stable machine id, `sourceSummary`는 storyline 근거 요약, `suggestedSlideCount`는 해당 section의 권장 분량으로 작성한다.
-  - [ ] slide 수정/재생성 prompt 지침이 포함된다: 기존 userModified field를 보호하고, 변경 instruction이 요구한 field만 바꾸며, 바뀐 field와 유지된 field를 구분할 수 있어야 한다.
-  - [ ] 구조 변경 prompt 지침이 포함된다: reorder/delete/add/merge/split 이후 deck flow, section continuity, duplicated message 제거, transition slide 필요 여부를 점검하도록 한다.
-  - [ ] image generation prompt 지침이 포함된다: storyboard field를 이미지 prompt로 변환할 때 text-heavy slide rendering을 피하고, reference image가 아닌 consultant slide visual composition을 우선한다.
-  - [ ] prompt examples 또는 fixture 설명이 최소 1개 이상 포함되어, 좋은 slide object와 나쁜 generic slide object의 차이를 검증할 수 있다.
-  - [ ] story_structure, slide_breakdown, regenerate-with-instruction, slide-count-change regeneration 요청이 static prompt prefix를 최대한 공유하도록 prompt builder를 구성한다.
-  - [ ] provider/API가 지원하는 경우 prompt cache key 또는 동등한 routing hint를 안정적으로 설정하고, 지원하지 않는 provider path에서는 cache hint를 명시적으로 no-op 처리한다.
-  - [ ] prompt cache effectiveness를 확인할 수 있도록 provider response usage의 cached token metadata 또는 provider별 equivalent metric을 logging/status에 남길 수 있는 contract를 정의한다.
-  - [ ] prompt payload unit test가 field-level guidance text, delimiters, incompatible-input instruction, structured-output schema request를 검증한다.
-  - [ ] `.ai/status/active/T015D-storyboard-prompt-hardening.md`에 참조한 공식 프롬프트 문서, prompt before/after, 검증 결과가 기록되어 있다.
-- Notes:
-  - 2026-06-03 user direction: prompt quality enhancing work should happen after all MVP functionality works correctly.
-  - 2026-06-03 user direction: 프롬프트 구조뿐 아니라 각 JSON output field가 어떤 품질 기준으로 작성되어야 하는지 명시한다.
-  - 2026-06-03 user direction: prompt 품질 기준은 초기 슬라이드별 프롬프트 생성 호출에만 한정하지 않고, 이후 페이지 수정, 슬라이드 순서 수정, 슬라이드 삭제/추가/병합, 내용 재생성, 이미지 생성 프롬프트에도 적용한다.
-  - OpenAI Prompt Engineering guidance to account for during implementation: use message roles/instructions for higher-priority developer rules, use Markdown/XML delimiters for prompt boundaries, include relevant context, and keep GPT-style models explicit about desired output.
-  - OpenAI Structured Outputs guidance to account for during implementation: keep schema adherence via structured output, explicitly handle user-generated input that cannot produce a valid response, and avoid schema/type divergence.
-  - OpenAI Prompt Caching guidance to account for during implementation: put static/repeated instructions and examples before variable storyline/context, preserve exact shared prefixes where practical, use provider-supported cache keys consistently, and observe cached token metrics when available.
-  - 현재 OpenRouter Chat Completions route는 `system`/`user` messages와 `response_format.json_schema.strict=true`를 유지하되, prompt body와 field-level guidance를 output quality 기준에 맞춰 보강한다.
-  - OpenRouter 경유 OpenAI model의 prompt caching 지원/usage metadata 노출 여부는 구현 시점에 OpenRouter와 OpenAI 공식 문서 기준으로 확인한다.
+  - 프롬프트 구조/내용 품질 보강은 Post-MVP prompt quality/cache epic의 T015D에서 별도로 처리하며, T015C 구현을 막지 않는다.
 
 ### Feature F07. Storyboard Review UI
 
@@ -688,24 +651,25 @@ MVP scope:
 
 #### Task T017B. Storyboard detail input floating panel UX 수정
 - Priority: Medium
-- Status: Ready
+- Status: Done
 - Issue: #8
-- PR: None
+- PR: #11
 - Depends on: T017A
 - Branch: `fix/T017B-floating-detail-panel`
 - Expected PR Unit: `PR-T017B`
 - Acceptance Criteria:
-  - [ ] desktop storyboard workspace에서 오른쪽 프롬프트/내용 입력 panel이 floating 또는 sticky 형태로 유지되어, 왼쪽 storyboard list를 아래로 스크롤해도 선택 slide의 입력란이 계속 보인다.
-  - [ ] Content tab과 Prompt tab의 주요 textarea, 저장/삭제 action, selected slide summary가 panel 내부에서 접근 가능하다.
-  - [ ] 긴 입력 내용이 있을 때 panel 내부 스크롤과 페이지 스크롤이 서로 충돌하지 않고, 저장 버튼이 화면 밖으로 사라지지 않는다.
-  - [ ] panel이 header, storyboard card, footer, mobile layout과 겹치지 않는다.
-  - [ ] mobile/narrow viewport에서는 floating 때문에 입력란이 좁아지지 않도록 drawer, below-list layout, 또는 non-floating fallback을 사용한다.
-  - [ ] dev sample preview(`/dev/storyboard-sample`)와 실제 project detail(`/projects/{projectId}`) 양쪽에서 동일한 layout behavior를 확인한다.
-  - [ ] 브라우저 또는 equivalent visual check로 긴 storyboard list 스크롤 중 오른쪽 입력 panel visibility를 확인했다.
-  - [ ] `.ai/status/active/T017B-floating-detail-panel.md`에 before/after 스크롤 재현과 검증 결과가 기록되어 있다.
+  - [x] desktop storyboard workspace에서 오른쪽 프롬프트/내용 입력 panel이 floating 또는 sticky 형태로 유지되어, 왼쪽 storyboard list를 아래로 스크롤해도 선택 slide의 입력란이 계속 보인다.
+  - [x] Content tab과 Prompt tab의 주요 textarea, 저장/삭제 action, selected slide summary가 panel 내부에서 접근 가능하다.
+  - [x] 긴 입력 내용이 있을 때 panel 내부 스크롤과 페이지 스크롤이 서로 충돌하지 않고, 저장 버튼이 화면 밖으로 사라지지 않는다.
+  - [x] panel이 header, storyboard card, footer, mobile layout과 겹치지 않는다.
+  - [x] mobile/narrow viewport에서는 floating 때문에 입력란이 좁아지지 않도록 drawer, below-list layout, 또는 non-floating fallback을 사용한다.
+  - [x] dev sample preview(`/dev/storyboard-sample`)와 실제 project detail(`/projects/{projectId}`) 양쪽에서 동일한 layout behavior를 확인한다.
+  - [x] 브라우저 또는 equivalent visual check로 긴 storyboard list 스크롤 중 오른쪽 입력 panel visibility를 확인했다.
+  - [x] `.ai/status/active/T017B-floating-detail-panel.md`에 before/after 스크롤 재현과 검증 결과가 기록되어 있다.
 - Notes:
   - 2026-06-03 user feedback: 현재 편집 화면은 오른쪽 프롬프트/내용 입력란이 고정 레이아웃이라, 아래쪽으로 스크롤하면 입력란들이 보이지 않는다.
   - 구현 시 `position: sticky`, panel max-height, internal overflow, tab state, selected slide state를 함께 점검한다.
+  - Done by merged PR #11, which closed Issue #8 and verified sticky editor behavior on desktop plus mobile fallback.
 
 ### Feature F09. Manual Slide Operations
 
@@ -746,6 +710,95 @@ MVP scope:
 - Notes:
   - undo/redo UI는 MVP 범위가 아니다.
 
+### Feature F09A. MVP AI-Assisted Slide Structure Editing
+
+이 feature는 AI 기반 구조 편집 작업을 같은 MVP 맥락에서 다룬다. T029/T030/T031은 직접 구조 편집 action이고, T032는 해당 구조 편집 이후 deck flow를 점검하고 선택적으로 정리하는 후속 consistency 작업이다.
+
+#### Task T029. AI merge for selected slides 구현
+- Priority: High
+- Status: Ready
+- Issue: #17
+- PR: None
+- Depends on: T019, T015B
+- Branch: `feature/T029-ai-merge-selected-slides`
+- Expected PR Unit: `PR-T029`
+- Acceptance Criteria:
+  - [ ] 사용자가 2개 이상의 slide를 선택해 하나의 slide로 merge할 수 있다.
+  - [ ] MVP 범위에서는 우선 인접한 selected slides 병합을 지원하고, 비인접 slides 병합 지원 여부는 구현 전 확정한다.
+  - [ ] merged slide는 title, core message, content points, visual direction, image prompt, slide role을 포함한다.
+  - [ ] source slides의 순서, 선택 범위, merged result의 before/after snapshot이 operation history에 저장된다.
+  - [ ] merge 적용 후 retained slide와 soft-deleted source slides의 ordering이 안정적으로 재계산된다.
+  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] MVP merge prompt는 T015B의 structured output/provider contract를 따르고, 상세 prompt 품질/캐싱 최적화는 Post-MVP prompt quality/cache epic에서 후속 보강한다.
+  - [ ] `.ai/status/active/T029-ai-merge-slides.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: 여러 slide를 하나로 합치는 병합 기능은 MVP 범위 안에서 E05로 이동한다.
+  - 2026-06-03 user feedback: 여러 slide를 하나로 합치는 병합 기능이 필요하다.
+  - Prompt hardening/cache work는 별도 Post-MVP prompt quality/cache epic으로 분리하며, T029의 MVP 구현을 막는 의존성으로 두지 않는다.
+
+#### Task T030. AI split slide 구현
+- Priority: High
+- Status: Ready
+- Issue: #18
+- PR: None
+- Depends on: T019, T015B
+- Branch: `feature/T030-ai-split-slide`
+- Expected PR Unit: `PR-T030`
+- Acceptance Criteria:
+  - [ ] 한 slide를 AI로 2개 이상 slide로 split할 수 있다.
+  - [ ] 생성된 각 slide가 모든 required slide field를 포함한다.
+  - [ ] source slide와 generated child slides의 before/after snapshot이 operation history에 저장된다.
+  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] MVP split prompt는 T015B의 structured output/provider contract를 따르고, 상세 prompt 품질/캐싱 최적화는 Post-MVP prompt quality/cache epic에서 후속 보강한다.
+  - [ ] `.ai/status/active/T030-ai-split-slide.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: AI merge/split/insert/reflow 계열 구조 편집 작업은 같은 MVP E05 맥락에서 계획한다.
+  - Prompt hardening/cache work는 별도 Post-MVP prompt quality/cache epic으로 분리하며, T030의 MVP 구현을 막는 의존성으로 두지 않는다.
+
+#### Task T031. AI insert slide from natural language 구현
+- Priority: High
+- Status: Ready
+- Issue: #19
+- PR: None
+- Depends on: T019, T015B
+- Branch: `feature/T031-ai-insert-slide`
+- Expected PR Unit: `PR-T031`
+- Acceptance Criteria:
+  - [ ] 사용자가 선택 위치에 natural language instruction으로 slide를 삽입할 수 있다.
+  - [ ] inserted slide가 모든 required slide field를 포함한다.
+  - [ ] operation history에 instruction, insertion position, generated slide snapshot이 저장된다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] MVP insert prompt는 T015B의 structured output/provider contract를 따르고, 상세 prompt 품질/캐싱 최적화는 Post-MVP prompt quality/cache epic에서 후속 보강한다.
+  - [ ] AI reflow suggestion과 preview/diff UI는 T032에서 처리한다.
+  - [ ] `.ai/status/active/T031-ai-insert-slide.md`에 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: AI merge/split/insert/reflow 계열 구조 편집 작업은 같은 MVP E05 맥락에서 계획한다.
+  - Prompt hardening/cache work는 별도 Post-MVP prompt quality/cache epic으로 분리하며, T031의 MVP 구현을 막는 의존성으로 두지 않는다.
+
+#### Task T032. AI deck flow reflow after structural slide edits 구현
+- Priority: High
+- Status: Backlog
+- Issue: #21
+- PR: None
+- Depends on: T029, T030, T031
+- Branch: `feature/T032-ai-deck-flow-reflow`
+- Expected PR Unit: `PR-T032`
+- Acceptance Criteria:
+  - [ ] 슬라이드 순서 변경, 삭제, 추가, 병합, 분할 이후 사용자가 deck flow reflow 또는 consistency check를 실행할 수 있다.
+  - [ ] MVP reflow prompt는 T015B의 structured output/provider contract를 따르고, deck narrative flow, section continuity, duplicated message, missing transition, weak slide role을 점검한다.
+  - [ ] reflow 결과는 기존 slides를 즉시 덮어쓰지 않고 preview/diff 형태로 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 변경 제안을 보여준다.
+  - [ ] userModified field는 기본적으로 보호되며, 변경 제안이 필요한 경우 이유와 함께 표시된다.
+  - [ ] 사용자가 선택적으로 적용한 변경만 저장되고, before/after snapshot이 operation history에 기록된다.
+  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
+  - [ ] `.ai/status/active/T032-ai-deck-flow-reflow.md`에 prompt 품질 검토, preview/diff 검증, 적용/취소 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 user direction: T029/T030/T031/T032는 같은 MVP E05 구조 편집 맥락에서 작업하도록 계획한다.
+  - 2026-06-03 user direction: 슬라이드 순서 수정, 삭제/추가/병합 등 구조 변경 이후에 들어갈 LLM prompt도 추후 prompt quality baseline을 따라야 한다.
+  - T032는 T029/T030/T031 구조 편집 action이 구현된 뒤 같은 UX/operation-history 맥락에서 deck flow consistency를 점검하는 후속 MVP task다.
+  - Prompt hardening/cache work는 별도 Post-MVP prompt quality/cache epic으로 분리하며, T032의 MVP 구현을 막는 의존성으로 두지 않는다.
+
 ---
 
 ## Epic E06. Image Generation
@@ -779,49 +832,51 @@ MVP scope:
 
 #### Task T021. GPT Image / OpenAI Images provider 구현
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #9
-- PR: None
-- Depends on: T020, T009C
+- PR: #12
+- Depends on: T020, T008, T009A
 - Branch: `feature/T021-openai-images-provider`
 - Expected PR Unit: `PR-T021`
 - Acceptance Criteria:
-  - [ ] `gpt-image-2`가 `openai` account-level user/provider API key를 사용한다.
-  - [ ] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
-  - [ ] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
-  - [ ] provider response의 bytes 또는 URL이 local storage로 저장된다.
-  - [ ] 실패 응답이 표준 error message로 정규화된다.
-  - [ ] `.ai/status/active/T021-openai-images-provider.md`에 검증 결과가 기록되어 있다.
+  - [x] `gpt-image-2`가 `openai` account-level user/provider API key를 사용한다.
+  - [x] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
+  - [x] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
+  - [x] provider response의 bytes 또는 URL이 local storage로 저장된다.
+  - [x] 실패 응답이 표준 error message로 정규화된다.
+  - [x] `.ai/status/active/T021-openai-images-provider.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
   - 별도 `openai_images` key가 아니라 OpenAI account key를 LLM과 이미지 생성에 함께 쓰는 방향으로 구현한다.
+  - Done by merged PR #12, which closed Issue #9, added OpenRouter-first image routing with direct OpenAI fallback, and verified a one-slide OpenRouter smoke.
 
 #### Task T022. Gemini/Nano Banana image provider 구현
 - Priority: High
-- Status: Ready
+- Status: Done
 - Issue: #10
-- PR: None
-- Depends on: T020, T009C
+- PR: #12
+- Depends on: T020, T008, T009A
 - Branch: `feature/T022-gemini-image-provider`
 - Expected PR Unit: `PR-T022`
 - Acceptance Criteria:
-  - [ ] Gemini image generation path가 `gemini` account-level user/provider API key를 사용한다.
-  - [ ] project default image model의 `nano-banana` 선택은 Gemini provider key로 해석된다.
-  - [ ] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
-  - [ ] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
-  - [ ] provider response의 bytes 또는 URL이 local storage로 저장된다.
-  - [ ] 실패 응답이 표준 error message로 정규화된다.
-  - [ ] `.ai/status/active/T022-nano-banana-provider.md`에 검증 결과가 기록되어 있다.
+  - [x] Gemini image generation path가 `gemini` account-level user/provider API key를 사용한다.
+  - [x] project default image model의 `nano-banana` 선택은 Gemini provider key로 해석된다.
+  - [x] user key가 없으면 provider-key error를 반환하고 server fallback을 사용하지 않는다.
+  - [x] `16:9`, `4:3` aspect ratio input을 provider request에 반영한다.
+  - [x] provider response의 bytes 또는 URL이 local storage로 저장된다.
+  - [x] 실패 응답이 표준 error message로 정규화된다.
+  - [x] `.ai/status/active/T022-nano-banana-provider.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - 실제 외부 API 테스트가 불가능하면 mocked provider test와 수동 검증 한계를 status에 기록한다.
   - 별도 `nano_banana` key가 아니라 Gemini account key를 LLM과 이미지 생성에 함께 쓰는 방향으로 구현한다.
+  - Done by merged PR #12, which closed Issue #10, added OpenRouter-first image routing with direct Gemini fallback, and documented that direct Gemini live smoke remains pending user-supplied keys.
 
 ### Feature F11. Individual and Batch Image Generation
 
 #### Task T023. Single slide image generation, regeneration, history 구현
 - Priority: High
-- Status: Backlog
-- Issue: None
+- Status: Ready
+- Issue: #15
 - PR: None
 - Depends on: T017, T021, T022
 - Branch: `feature/T023-single-image-generation`
@@ -836,35 +891,35 @@ MVP scope:
   - [ ] `.ai/status/active/T023-single-image-generation.md`에 검증 결과가 기록되어 있다.
 - Notes:
   - Batch generation은 T024에서 처리한다.
+  - PR #12 already added per-slide mockup generation triggers and latest mockup display; this task should finish regeneration history, selected image behavior, and Images tab history UX.
+  - T023 implementation PR should consider including T023B immediately after the core history/selection behavior is in place, so mockup review UX can be finished without a separate context switch.
 
-#### Task T023A. Image prompt cache readiness와 regeneration prompt assembly 정리
-- Priority: Low
+#### Task T023B. Slide mockup result review and final selection UX 구현
+- Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #20
 - PR: None
-- Depends on: T023, T015D
-- Branch: `feature/T023A-image-prompt-cache-readiness`
-- Expected PR Unit: `PR-T023A`
+- Depends on: T023
+- Branch: `feature/T023-single-image-generation`
+- Expected PR Unit: `PR-T023 + PR-T023B`
 - Acceptance Criteria:
-  - [ ] image generation prompt builder가 static common style/instruction prefix와 slide-specific variable content를 분리한다.
-  - [ ] image generation prompt builder가 T015D의 reusable prompt quality baseline을 따라 slide field guidance, image prompt guidance, cache-friendly structure를 반영한다.
-  - [ ] single generation, regeneration, batch generation이 동일한 static prompt prefix를 최대한 공유하고 slide title/core message/content points/visual direction/imagePrompt만 뒤쪽 variable block으로 배치한다.
-  - [ ] provider/API가 prompt caching 또는 prompt cache key를 지원하는 경우 stable cache key 또는 equivalent routing hint를 사용할 수 있는 provider input field를 정의한다.
-  - [ ] OpenAI Images, Gemini/Nano Banana provider별 prompt caching 지원 여부와 usage metadata 노출 여부를 구현 시점 공식 문서로 확인하고 status file에 기록한다.
-  - [ ] provider가 prompt caching을 지원하지 않는 경우에도 prompt snapshots는 동일한 조합 규칙을 유지하고 cache hint는 no-op으로 처리한다.
-  - [ ] image generation history에 prompt snapshot과 함께 provider usage/cached-token metadata 또는 unsupported reason을 저장할지 결정하고 status file에 기록한다.
-  - [ ] mocked provider tests가 common prefix reuse, slide-specific suffix placement, provider cache hint pass-through/no-op behavior를 검증한다.
-  - [ ] `.ai/status/active/T023A-image-prompt-cache-readiness.md`에 provider별 캐싱 지원 확인 결과와 검증 결과가 기록되어 있다.
+  - [ ] 생성된 slide mockup thumbnail 또는 preview를 클릭하면 큰 preview modal 또는 dedicated viewer가 열린다.
+  - [ ] 한 slide에 여러 mockup 후보가 있으면 carousel-style viewer로 후보를 순차 확인할 수 있다.
+  - [ ] viewer에서 provider, model, createdAt, generation status, error summary, prompt snapshot presence를 확인할 수 있다.
+  - [ ] 사용자는 한 slide의 최종 mockup을 선택할 수 있고, 선택 상태가 Images tab, export 대상, history record에 일관되게 반영된다.
+  - [ ] workflow상 여러 accepted variant가 필요하면 한 slide에 둘 이상의 final mockup을 선택할 수 있는 옵션을 제공한다.
+  - [ ] 선택 변경은 soft-deleted slide, failed image, 다른 사용자의 image record에 적용되지 않는다.
+  - [ ] 브라우저 또는 equivalent visual check로 large preview, carousel navigation, single/multiple final selection UX를 확인했다.
+  - [ ] `.ai/status/active/T023B-mockup-review-selection.md`에 preview/selection 정책과 검증 결과가 기록되어 있다.
 - Notes:
-  - 2026-06-03 user direction: prompt quality/cache readiness work should not block core MVP image generation and should happen after MVP functionality works correctly.
-  - 2026-06-03 user direction: 내용 재생성, 페이지수 변경 재생성, 이미지 생성 단계에서도 prompt caching 활용 여지를 고려한다.
-  - OpenAI Prompt Caching guidance to account for during implementation: exact shared prefixes improve cache hits, variable request-specific content should come later, and cached token metrics should be observed where available.
-  - 이 task는 provider support가 있는 경우의 cache-friendly prompt assembly와 observability contract를 정리한다. 실제 batch orchestration은 T024에서 처리한다.
+  - 2026-06-04 planning handoff from merged PR #12: generated mockups should open in a larger preview, multi-result review should use a carousel-style viewer, and final-selection UX should support one or more accepted mockups per slide.
+  - 2026-06-04 user direction: T023B는 Backlog 이슈로 올리되, T023 구현 직후 같은 PR에서 바로 처리할 수 있게 계획한다.
+  - T023B는 T023의 image generation history/selected image behavior 위에서 이어지는 UX 작업이므로 별도 선행 prompt quality/cache work에 의존하지 않는다.
 
 #### Task T024. Batch image generation과 concurrency/progress 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #22
 - PR: None
 - Depends on: T023
 - Branch: `feature/T024-batch-image-generation`
@@ -890,7 +945,7 @@ MVP scope:
 #### Task T025. Markdown export 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #23
 - PR: None
 - Depends on: T016, T019, T023
 - Branch: `feature/T025-markdown-export`
@@ -909,7 +964,7 @@ MVP scope:
 #### Task T026. Selected image ZIP export 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #24
 - PR: None
 - Depends on: T025
 - Branch: `feature/T026-selected-image-zip-export`
@@ -929,7 +984,7 @@ MVP scope:
 #### Task T027. 보안/소유권/삭제 데이터 hardening
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #25
 - PR: None
 - Depends on: T020, T026
 - Branch: `feature/T027-security-hardening`
@@ -947,7 +1002,7 @@ MVP scope:
 #### Task T027A. Provider call progress and loading visualization 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #26
 - PR: None
 - Depends on: T015B, T023, T024
 - Branch: `feature/T027A-provider-call-progress-ui`
@@ -969,7 +1024,7 @@ MVP scope:
 #### Task T027B. Actual provider usage ledger and admin cost dashboard 구현
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #27
 - PR: None
 - Depends on: T009B, T015B, T021, T022, T024
 - Branch: `feature/T027B-provider-usage-ledger`
@@ -999,7 +1054,7 @@ MVP scope:
 #### Task T028. MVP end-to-end smoke와 Docker persistence 검증
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #28
 - PR: None
 - Depends on: T002, T009C, T024, T026, T027, T027A, T027B
 - Branch: `feature/T028-mvp-e2e-smoke`
@@ -1023,7 +1078,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T035. OpenRouter, OpenAI, Claude, Gemini LLM provider adapters 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #29
 - PR: None
 - Depends on: T015B, T009C
 - Branch: `feature/T035-multi-llm-providers`
@@ -1045,7 +1100,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T036. User-selectable LLM model selection 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #30
 - PR: None
 - Depends on: T035
 - Branch: `feature/T036-llm-model-selection`
@@ -1076,7 +1131,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T037. Unified provider key migration cleanup 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #31
 - PR: None
 - Depends on: T009C, T035, T036
 - Branch: `chore/T037-unified-provider-key-cleanup`
@@ -1103,7 +1158,7 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
 #### Task T038. Post-MVP provider error and recovery UX 구현
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #32
 - PR: None
 - Depends on: T027A, T035, T036, T037
 - Branch: `feature/T038-provider-error-recovery-ux`
@@ -1123,91 +1178,101 @@ This epic is explicitly after MVP. MVP should keep the primary storyboard genera
   - 2026-06-03 user direction: 에러 발생 시 사용자에게 보여줄 화면은 필요하지만 MVP 이후로 처리한다.
   - MVP 전에는 기존 generation failure text와 loading/progress state를 유지하고, 세분화된 recovery UX는 이 task에서 구현한다.
 
+#### Task T039. Admin-configurable provider routing and fallback policy 구현
+- Priority: Medium
+- Status: Backlog
+- Issue: #33
+- PR: None
+- Depends on: T035, T036, T037
+- Branch: `feature/T039-provider-routing-policy`
+- Expected PR Unit: `PR-T039`
+- Acceptance Criteria:
+  - [ ] LLM calls use the same routing principle as image generation: OpenRouter first when available, then direct provider fallback for the selected model when OpenRouter is unavailable or fails.
+  - [ ] Image generation keeps OpenRouter-first routing and direct OpenAI/Gemini fallback behavior for supported image models.
+  - [ ] 관리자는 admin settings surface에서 provider priority order를 설정할 수 있다.
+  - [ ] 관리자는 provider fallback 허용/차단 정책을 LLM과 image generation에 각각 또는 공통 정책으로 설정할 수 있다.
+  - [ ] routing policy는 account-level provider key assignment 상태와 model/image model catalog availability를 함께 고려한다.
+  - [ ] 선택한 provider route가 disabled, missing key, unsupported model, rate-limited, unavailable 상태이면 다음 route로 fallback하거나 사용자에게 명확한 error를 표시한다.
+  - [ ] fallback 발생 시 generation history 또는 provider usage ledger에 attempted route, final route, failure reason을 secret 없이 기록한다.
+  - [ ] mocked provider tests가 OpenRouter success, OpenRouter failure direct fallback, fallback disabled, missing key, unsupported model case를 검증한다.
+  - [ ] 브라우저 또는 equivalent visual check로 admin routing 설정과 generation-time routing 결과 표시를 확인했다.
+  - [ ] `.ai/status/active/T039-provider-routing-policy.md`에 routing policy, fallback matrix, 검증 결과가 기록되어 있다.
+- Notes:
+  - 2026-06-04 planning handoff from merged PR #12: LLM calls should follow the image generation provider priority policy, and admins should be able to configure priority/fallback behavior for both LLM and image generation.
+
 ---
 
-## Epic E08. High-Priority Follow-up AI Slide Editing
+## Epic E08. Post-MVP Prompt Quality and Prompt Caching Improvements
 
-### Feature F14. AI-Assisted Slide Editing
+This epic is explicitly after MVP. Prompt hardening and prompt caching should improve quality, cost, and observability after the core storyboard, structural editing, image generation, export, and MVP smoke flows work. These tasks must not block MVP feature delivery such as T023B or the E05 AI-assisted structure editing tasks.
 
-#### Task T029. AI merge for selected slides 구현
+### Feature F14. Reusable Prompt Quality and Cache Readiness
+
+#### Task T015D. Reusable LLM prompt quality baseline and prompt-engineer review
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #34
 - PR: None
-- Depends on: T019, T015D
-- Branch: `feature/T029-ai-merge-selected-slides`
-- Expected PR Unit: `PR-T029`
+- Depends on: T028
+- Branch: `feature/T015D-storyboard-prompt-hardening`
+- Expected PR Unit: `PR-T015D`
 - Acceptance Criteria:
-  - [ ] 사용자가 2개 이상의 slide를 선택해 하나의 slide로 merge할 수 있다.
-  - [ ] MVP 후속 범위에서는 우선 인접한 selected slides 병합을 지원하고, 비인접 slides 병합 지원 여부는 구현 전 확정한다.
-  - [ ] merged slide는 title, core message, content points, visual direction, image prompt, slide role을 포함한다.
-  - [ ] source slides의 순서, 선택 범위, merged result의 before/after snapshot이 operation history에 저장된다.
-  - [ ] merge 적용 후 retained slide와 soft-deleted source slides의 ordering이 안정적으로 재계산된다.
-  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] merge prompt는 T015D의 reusable prompt quality baseline을 따르고, merged slide의 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 작성 품질을 검증한다.
-  - [ ] `.ai/status/active/T029-ai-merge-slides.md`에 검증 결과가 기록되어 있다.
+  - [ ] Storyboard generation, slide count regeneration, slide content regeneration, AI merge/split/insert/reflow, and image prompt generation에서 재사용할 prompt quality baseline을 정의한다.
+  - [ ] 이 task 구현 시 prompt-engineering focused subagent 또는 prompt-engineer review pass를 사용해 prompt wording, field guidance, examples, cache-friendly structure를 검토한다.
+  - [ ] 프롬프트는 static developer/system instruction과 variable user input을 분리하고, Markdown section headings 또는 XML-style delimiters로 storyline, count policy, previous structure JSON의 경계를 명확히 구분한다.
+  - [ ] 반복되는 static instruction과 examples는 prompt 앞쪽에 두고, 사용자 storyline 같은 request-specific content는 뒤쪽에 둔다.
+  - [ ] Structured Outputs schema와 app-side Zod type이 divergence되지 않도록 prompt/schema 관련 테스트 또는 review guard를 둔다.
+  - [ ] 사용자 입력이 storyboard task에 부적합하거나 너무 모호한 경우 hallucinated slides를 억지로 만들지 않고, sections/improvement suggestions/rationale/error로 처리하는 지침이 prompt에 포함된다.
+  - [ ] slide `title` 작성 지침이 포함된다: 4-10단어 내외, executive deck headline처럼 구체적이고 action-oriented이며, 서로 중복되지 않고 해당 slide의 핵심 메시지를 예고해야 한다.
+  - [ ] slide `coreMessage` 작성 지침이 포함된다: 한 문장으로 consultant-style takeaway를 제시하고, 단순 주제명이나 제목 반복이 아니라 의사결정자가 기억해야 할 결론을 담아야 한다.
+  - [ ] slide `contentPoints` 작성 지침이 포함된다: 3-5개 bullet을 기본으로 하고, 각 bullet은 evidence, implication, action 중 하나를 담당하며, storyline에 없는 수치/사실은 지어내지 않는다.
+  - [ ] slide `visualDirection` 작성 지침이 포함된다: chart/table/diagram/timeline/process map/comparison matrix 등 구체적 시각 형식, 주요 구성요소, 강조해야 할 관계를 설명하고, "clean modern slide" 같은 일반 표현만 쓰지 않는다.
+  - [ ] slide `imagePrompt` 작성 지침이 포함된다: 이미지 생성용 visual prompt로 쓰일 수 있게 layout, composition, subject, style, color/contrast, aspect ratio intent를 포함하되, 작은 본문 텍스트나 읽기 어려운 세부 라벨 생성을 요구하지 않는다.
+  - [ ] slide `slideRole` 작성 지침이 포함된다: `Context`, `Problem`, `Insight`, `Evidence`, `Recommendation`, `Roadmap`, `Risk`, `Appendix` 같은 consultant workflow role을 일관되게 사용하거나 동등한 controlled vocabulary를 정의한다.
+  - [ ] section field 작성 지침이 포함된다: `sectionTitle`은 deck chapter label, `sectionId`는 stable machine id, `sourceSummary`는 storyline 근거 요약, `suggestedSlideCount`는 해당 section의 권장 분량으로 작성한다.
+  - [ ] slide 수정/재생성 prompt 지침이 포함된다: 기존 userModified field를 보호하고, 변경 instruction이 요구한 field만 바꾸며, 바뀐 field와 유지된 field를 구분할 수 있어야 한다.
+  - [ ] 구조 변경 prompt 지침이 포함된다: reorder/delete/add/merge/split 이후 deck flow, section continuity, duplicated message 제거, transition slide 필요 여부를 점검하도록 한다.
+  - [ ] image generation prompt 지침이 포함된다: storyboard field를 이미지 prompt로 변환할 때 text-heavy slide rendering을 피하고, reference image가 아닌 consultant slide visual composition을 우선한다.
+  - [ ] prompt examples 또는 fixture 설명이 최소 1개 이상 포함되어, 좋은 slide object와 나쁜 generic slide object의 차이를 검증할 수 있다.
+  - [ ] story_structure, slide_breakdown, regenerate-with-instruction, slide-count-change regeneration 요청이 static prompt prefix를 최대한 공유하도록 prompt builder를 구성한다.
+  - [ ] provider/API가 지원하는 경우 prompt cache key 또는 동등한 routing hint를 안정적으로 설정하고, 지원하지 않는 provider path에서는 cache hint를 명시적으로 no-op 처리한다.
+  - [ ] prompt cache effectiveness를 확인할 수 있도록 provider response usage의 cached token metadata 또는 provider별 equivalent metric을 logging/status에 남길 수 있는 contract를 정의한다.
+  - [ ] prompt payload unit test가 field-level guidance text, delimiters, incompatible-input instruction, structured-output schema request를 검증한다.
+  - [ ] `.ai/status/active/T015D-storyboard-prompt-hardening.md`에 참조한 공식 프롬프트 문서, prompt before/after, 검증 결과가 기록되어 있다.
 - Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-  - 2026-06-03 user feedback: 여러 slide를 하나로 합치는 병합 기능이 필요하다.
+  - 2026-06-03 user direction: prompt quality enhancing work should happen after all MVP functionality works correctly.
+  - 2026-06-03 user direction: 프롬프트 구조뿐 아니라 각 JSON output field가 어떤 품질 기준으로 작성되어야 하는지 명시한다.
+  - 2026-06-03 user direction: prompt 품질 기준은 초기 슬라이드별 프롬프트 생성 호출에만 한정하지 않고, 이후 페이지 수정, 슬라이드 순서 수정, 슬라이드 삭제/추가/병합, 내용 재생성, 이미지 생성 프롬프트에도 적용한다.
+  - OpenAI Prompt Engineering guidance to account for during implementation: use message roles/instructions for higher-priority developer rules, use Markdown/XML delimiters for prompt boundaries, include relevant context, and keep GPT-style models explicit about desired output.
+  - OpenAI Structured Outputs guidance to account for during implementation: keep schema adherence via structured output, explicitly handle user-generated input that cannot produce a valid response, and avoid schema/type divergence.
+  - OpenAI Prompt Caching guidance to account for during implementation: put static/repeated instructions and examples before variable storyline/context, preserve exact shared prefixes where practical, use provider-supported cache keys consistently, and observe cached token metrics when available.
+  - 현재 OpenRouter Chat Completions route는 `system`/`user` messages와 `response_format.json_schema.strict=true`를 유지하되, prompt body와 field-level guidance를 output quality 기준에 맞춰 보강한다.
+  - OpenRouter 경유 OpenAI model의 prompt caching 지원/usage metadata 노출 여부는 구현 시점에 OpenRouter와 OpenAI 공식 문서 기준으로 확인한다.
 
-#### Task T030. AI split slide 구현
-- Priority: Medium
+#### Task T023A. Image prompt cache readiness와 regeneration prompt assembly 정리
+- Priority: Low
 - Status: Backlog
-- Issue: None
+- Issue: #35
 - PR: None
-- Depends on: T019, T015D
-- Branch: `feature/T030-ai-split-slide`
-- Expected PR Unit: `PR-T030`
+- Depends on: T023, T015D
+- Branch: `feature/T023A-image-prompt-cache-readiness`
+- Expected PR Unit: `PR-T023A`
 - Acceptance Criteria:
-  - [ ] 한 slide를 AI로 2개 이상 slide로 split할 수 있다.
-  - [ ] 생성된 각 slide가 모든 required slide field를 포함한다.
-  - [ ] source slide와 generated child slides의 before/after snapshot이 operation history에 저장된다.
-  - [ ] retained slide의 user-modified field는 overwrite되지 않는다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] split prompt는 T015D의 reusable prompt quality baseline을 따르고, child slide별 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 작성 품질을 검증한다.
-  - [ ] `.ai/status/active/T030-ai-split-slide.md`에 검증 결과가 기록되어 있다.
+  - [ ] image generation prompt builder가 static common style/instruction prefix와 slide-specific variable content를 분리한다.
+  - [ ] image generation prompt builder가 T015D의 reusable prompt quality baseline을 따라 slide field guidance, image prompt guidance, cache-friendly structure를 반영한다.
+  - [ ] single generation, regeneration, batch generation이 동일한 static prompt prefix를 최대한 공유하고 slide title/core message/content points/visual direction/imagePrompt만 뒤쪽 variable block으로 배치한다.
+  - [ ] provider/API가 prompt caching 또는 prompt cache key를 지원하는 경우 stable cache key 또는 equivalent routing hint를 사용할 수 있는 provider input field를 정의한다.
+  - [ ] OpenAI Images, Gemini/Nano Banana provider별 prompt caching 지원 여부와 usage metadata 노출 여부를 구현 시점 공식 문서로 확인하고 status file에 기록한다.
+  - [ ] provider가 prompt caching을 지원하지 않는 경우에도 prompt snapshots는 동일한 조합 규칙을 유지하고 cache hint는 no-op으로 처리한다.
+  - [ ] image generation history에 prompt snapshot과 함께 provider usage/cached-token metadata 또는 unsupported reason을 저장할지 결정하고 status file에 기록한다.
+  - [ ] mocked provider tests가 common prefix reuse, slide-specific suffix placement, provider cache hint pass-through/no-op behavior를 검증한다.
+  - [ ] `.ai/status/active/T023A-image-prompt-cache-readiness.md`에 provider별 캐싱 지원 확인 결과와 검증 결과가 기록되어 있다.
 - Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-
-#### Task T031. AI insert slide from natural language 구현
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T019, T015D
-- Branch: `feature/T031-ai-insert-slide`
-- Expected PR Unit: `PR-T031`
-- Acceptance Criteria:
-  - [ ] 사용자가 선택 위치에 natural language instruction으로 slide를 삽입할 수 있다.
-  - [ ] inserted slide가 모든 required slide field를 포함한다.
-  - [ ] operation history에 instruction, insertion position, generated slide snapshot이 저장된다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] insert prompt는 T015D의 reusable prompt quality baseline을 따르고, inserted slide의 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 작성 품질을 검증한다.
-  - [ ] AI reflow suggestion과 preview/diff UI는 구현하지 않는다.
-  - [ ] `.ai/status/active/T031-ai-insert-slide.md`에 검증 결과가 기록되어 있다.
-- Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-
-#### Task T032. AI deck flow reflow after structural slide edits 구현
-- Priority: Medium
-- Status: Backlog
-- Issue: None
-- PR: None
-- Depends on: T019, T029, T030, T031, T015D
-- Branch: `feature/T032-ai-deck-flow-reflow`
-- Expected PR Unit: `PR-T032`
-- Acceptance Criteria:
-  - [ ] 슬라이드 순서 변경, 삭제, 추가, 병합, 분할 이후 사용자가 deck flow reflow 또는 consistency check를 실행할 수 있다.
-  - [ ] reflow prompt는 T015D의 reusable prompt quality baseline을 따르고, deck narrative flow, section continuity, duplicated message, missing transition, weak slide role을 점검한다.
-  - [ ] reflow 결과는 기존 slides를 즉시 덮어쓰지 않고 preview/diff 형태로 title/core message/contentPoints/visualDirection/imagePrompt/slideRole 변경 제안을 보여준다.
-  - [ ] userModified field는 기본적으로 보호되며, 변경 제안이 필요한 경우 이유와 함께 표시된다.
-  - [ ] 사용자가 선택적으로 적용한 변경만 저장되고, before/after snapshot이 operation history에 기록된다.
-  - [ ] invalid AI output은 저장되지 않고 surfaced 된다.
-  - [ ] `.ai/status/active/T032-ai-deck-flow-reflow.md`에 prompt 품질 검토, preview/diff 검증, 적용/취소 검증 결과가 기록되어 있다.
-- Notes:
-  - 초기 MVP 범위가 아니며 Phase 5 고우선 후속이다.
-  - 2026-06-03 user direction: 슬라이드 순서 수정, 삭제/추가/병합 등 구조 변경 이후에 들어갈 LLM prompt도 T015D의 prompt quality baseline을 따라야 한다.
+  - 2026-06-03 user direction: prompt quality/cache readiness work should not block core MVP image generation and should happen after MVP functionality works correctly.
+  - 2026-06-03 user direction: 내용 재생성, 페이지수 변경 재생성, 이미지 생성 단계에서도 prompt caching 활용 여지를 고려한다.
+  - 2026-06-04 user direction: prompt caching/quality work should be grouped after MVP so it does not push down feature work such as T023B.
+  - OpenAI Prompt Caching guidance to account for during implementation: exact shared prefixes improve cache hits, variable request-specific content should come later, and cached token metrics should be observed where available.
+  - 이 task는 provider support가 있는 경우의 cache-friendly prompt assembly와 observability contract를 정리한다. 실제 batch orchestration은 T024에서 처리한다.
 
 ---
 
@@ -1220,7 +1285,7 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 #### Task D001. IMPLEMENTATION_PLAN.md 상태 갱신
 - Priority: High
 - Status: Backlog
-- Issue: None
+- Issue: #36
 - PR: None
 - Depends on: Merged PR evidence
 - Branch: `docs/update-implementation-plan`
@@ -1236,7 +1301,7 @@ These tasks should be handled in dedicated planning/docs sessions, not ordinary 
 #### Task D002. 프로젝트 backlog/status/roadmap 문서 정리
 - Priority: Medium
 - Status: Backlog
-- Issue: None
+- Issue: #37
 - PR: None
 - Depends on: Merged PR evidence or user instruction
 - Branch: `docs/update-project-status`

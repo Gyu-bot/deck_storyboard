@@ -35,6 +35,7 @@ export function ensureUser(db: Db, userId: string, email = `${userId}@example.co
     passwordHash: "test-password-hash",
     createdAt: timestamp,
     updatedAt: timestamp,
+    disabledAt: null,
     deletedAt: null,
   };
   db.insert(users).values(row).run();
@@ -119,6 +120,19 @@ export function createProjectForUser(
 }
 
 export function listProjectsForUser(db: Db, userId: string) {
+  const activeUser = db
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      and(
+        eq(users.id, userId),
+        isNull(users.disabledAt),
+        isNull(users.deletedAt),
+      ),
+    )
+    .get();
+  if (!activeUser) return [];
+
   return db
     .select()
     .from(projects)
@@ -128,6 +142,19 @@ export function listProjectsForUser(db: Db, userId: string) {
 }
 
 export function getProjectForUser(db: Db, projectId: string, userId: string) {
+  const activeUser = db
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      and(
+        eq(users.id, userId),
+        isNull(users.disabledAt),
+        isNull(users.deletedAt),
+      ),
+    )
+    .get();
+  if (!activeUser) return null;
+
   return (
     db
       .select()

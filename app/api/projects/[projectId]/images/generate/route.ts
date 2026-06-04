@@ -16,7 +16,7 @@ function imageGenerationErrorMessage(error: unknown) {
         : providerError.provider === "gemini"
           ? "Gemini"
           : "OpenAI";
-    return `${providerName} API key가 없습니다. 관리자 화면에서 test 계정에 provider key를 할당한 뒤 다시 시도하세요.`;
+    return `${providerName} API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.`;
   }
   return error instanceof Error ? error.message : "목업 생성에 실패했습니다.";
 }

@@ -15,6 +15,22 @@ function now() {
   return new Date().toISOString();
 }
 
+function activeUserCondition(userId?: string) {
+  return userId
+    ? and(
+        eq(users.id, userId),
+        isNull(users.disabledAt),
+        isNull(users.deletedAt),
+      )
+    : and(isNull(users.disabledAt), isNull(users.deletedAt));
+}
+
+function visibleUserCondition(userId?: string) {
+  return userId
+    ? and(eq(users.id, userId), isNull(users.deletedAt))
+    : isNull(users.deletedAt);
+}
+
 export function normalizeLoginIdentifier(identifier: string) {
   const value = identifier.trim().toLowerCase();
   if (value === "test") return "test@example.local";
@@ -41,6 +57,7 @@ export async function createUser(
     role: input.role ?? "member",
     createdAt: timestamp,
     updatedAt: timestamp,
+    disabledAt: null,
     deletedAt: null,
   };
   db.insert(users).values(row).run();
@@ -52,21 +69,73 @@ export function getUserById(db: Db, userId: string) {
     db
       .select()
       .from(users)
-      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .where(activeUserCondition(userId))
       .get() ?? null
   );
 }
 
-export function listUsers(db: Db, options: { query?: string } = {}) {
+export function getUserByIdIncludingInactive(db: Db, userId: string) {
+  return (
+    db.select().from(users).where(visibleUserCondition(userId)).get() ?? null
+  );
+}
+
+function getUserByIdIncludingDeleted(db: Db, userId: string) {
+  return db.select().from(users).where(eq(users.id, userId)).get() ?? null;
+}
+
+export function listUsers(
+  db: Db,
+  options: { query?: string; includeInactive?: boolean } = {},
+) {
   const query = options.query?.trim().toLowerCase() ?? "";
   const rows = db
     .select()
     .from(users)
-    .where(isNull(users.deletedAt))
+    .where(
+      options.includeInactive ? visibleUserCondition() : activeUserCondition(),
+    )
     .all()
-    .sort((a, b) => a.email.localeCompare(b.email));
+    .sort(
+      (a, b) =>
+        Number(Boolean(a.disabledAt)) - Number(Boolean(b.disabledAt)) ||
+        a.email.localeCompare(b.email),
+    );
   if (!query) return rows;
   return rows.filter((user) => user.email.toLowerCase().includes(query));
+}
+
+export function deactivateUser(db: Db, userId: string) {
+  const user = getUserById(db, userId);
+  if (!user) return null;
+  const timestamp = now();
+  db.update(users)
+    .set({ disabledAt: timestamp, updatedAt: timestamp })
+    .where(eq(users.id, userId))
+    .run();
+  return getUserByIdIncludingInactive(db, userId);
+}
+
+export function grantAdminRole(db: Db, userId: string) {
+  const user = getUserById(db, userId);
+  if (!user) return null;
+  const timestamp = now();
+  db.update(users)
+    .set({ role: "admin", updatedAt: timestamp })
+    .where(eq(users.id, userId))
+    .run();
+  return getUserById(db, userId);
+}
+
+export function deleteUser(db: Db, userId: string) {
+  const user = getUserByIdIncludingInactive(db, userId);
+  if (!user) return null;
+  const timestamp = now();
+  db.update(users)
+    .set({ deletedAt: timestamp, updatedAt: timestamp })
+    .where(eq(users.id, userId))
+    .run();
+  return getUserByIdIncludingDeleted(db, userId);
 }
 
 export async function verifyUserPassword(
@@ -78,7 +147,13 @@ export async function verifyUserPassword(
   const user = db
     .select()
     .from(users)
-    .where(and(eq(users.email, normalizedEmail), isNull(users.deletedAt)))
+    .where(
+      and(
+        eq(users.email, normalizedEmail),
+        isNull(users.disabledAt),
+        isNull(users.deletedAt),
+      ),
+    )
     .get();
   if (!user) return null;
   const valid = await bcrypt.compare(password, user.passwordHash);
@@ -114,6 +189,7 @@ export function seedDevelopmentUsers(db: Db) {
       role: input.role,
       createdAt: timestamp,
       updatedAt: timestamp,
+      disabledAt: null,
       deletedAt: null,
     };
     db.insert(users).values(row).run();

@@ -323,6 +323,32 @@ describe("T017B storyboard improvement suggestions", () => {
   });
 });
 
+describe("storyboard generation errors", () => {
+  it("shows an actionable alert instead of raw API JSON", () => {
+    const project = {
+      id: "project-1",
+      name: "Sample",
+      status: "storyboard_generation_failed" as const,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+      generationError:
+        "OpenRouter API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.",
+    };
+
+    render(<StoryboardWorkspace project={project} initialSlides={[]} />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent("스토리보드 생성 실패");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "OpenRouter API key가 없습니다.",
+    );
+    expect(screen.getByRole("link", { name: "프로젝트 목록" })).toHaveAttribute(
+      "href",
+      "/projects",
+    );
+    expect(screen.queryByText(/\"error\"/)).not.toBeInTheDocument();
+  });
+});
+
 describe("T015B storyboard test mode toggle", () => {
   it("switches between sample fixture mode and live OpenRouter mode", () => {
     const { rerender } = render(<StoryboardTestModeToggle enabled={false} />);
@@ -373,6 +399,7 @@ describe("T009B admin settings navigation", () => {
         role: "member" as const,
         createdAt: "2026-06-03T00:00:00.000Z",
         updatedAt: "2026-06-03T00:00:00.000Z",
+        disabledAt: null,
         deletedAt: null,
       },
       {
@@ -381,6 +408,16 @@ describe("T009B admin settings navigation", () => {
         role: "member" as const,
         createdAt: "2026-06-03T00:00:00.000Z",
         updatedAt: "2026-06-03T00:00:00.000Z",
+        disabledAt: null,
+        deletedAt: null,
+      },
+      {
+        id: "member-3",
+        email: "inactive@example.local",
+        role: "member" as const,
+        createdAt: "2026-06-03T00:00:00.000Z",
+        updatedAt: "2026-06-04T00:00:00.000Z",
+        disabledAt: "2026-06-04T00:00:00.000Z",
         deletedAt: null,
       },
     ];
@@ -395,10 +432,22 @@ describe("T009B admin settings navigation", () => {
     );
 
     expect(screen.getByRole("heading", { name: "회원 리스트" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "test@example.local" })).toHaveAttribute(
-      "href",
-      "/settings?userId=member-1",
+    expect(screen.getByRole("textbox", { name: "신규 회원 이메일" })).toHaveAttribute(
+      "name",
+      "email",
     );
+    expect(screen.getByLabelText("신규 회원 비밀번호")).toHaveAttribute(
+      "name",
+      "password",
+    );
+    expect(screen.getByRole("button", { name: "회원 추가" })).toBeInTheDocument();
+    const testMemberLink = screen.getByRole("link", { name: "test@example.local" });
+    expect(testMemberLink).toHaveAttribute("href", "/settings?userId=member-1");
+    expect(testMemberLink).toHaveClass("block");
+    expect(testMemberLink).toHaveClass("w-full");
+    expect(testMemberLink).toHaveClass("max-w-full");
+    expect(testMemberLink).toHaveClass("box-border");
+    expect(screen.getByText("비활성")).toBeInTheDocument();
     expect(screen.queryByPlaceholderText("key 추가 또는 교체")).not.toBeInTheDocument();
     expect(screen.getByText("회원을 선택하면 provider key를 관리할 수 있습니다.")).toBeInTheDocument();
 
@@ -423,5 +472,40 @@ describe("T009B admin settings navigation", () => {
     for (const returnTo of screen.getAllByDisplayValue("/settings?userId=member-1")) {
       expect(returnTo).toHaveAttribute("name", "returnTo");
     }
+    expect(screen.getByRole("button", { name: "계정 비활성화" })).toHaveAttribute(
+      "formAction",
+      "/api/admin/users/member-1",
+    );
+    expect(screen.getByRole("button", { name: "관리자 권한 부여" })).toHaveAttribute(
+      "formAction",
+      "/api/admin/users/member-1",
+    );
+    expect(screen.getByRole("button", { name: "계정 삭제" })).toHaveAttribute(
+      "formAction",
+      "/api/admin/users/member-1",
+    );
+    expect(screen.getByDisplayValue("grant_admin")).toHaveAttribute("name", "intent");
+    expect(screen.getByDisplayValue("delete")).toHaveAttribute("name", "intent");
+
+    fireEvent.change(screen.getByLabelText("OpenAI key"), {
+      target: { value: "sk-openai-full-secret" },
+    });
+    rerender(
+      <AdminMemberKeySettings
+        users={users}
+        selectedUser={users[0]!}
+        selectedPresence={{
+          openrouter: "sk-o...1234",
+          openai: "sk-o...cret",
+          anthropic: null,
+          gemini: null,
+        }}
+        query=""
+      />,
+    );
+
+    expect(screen.getByLabelText("OpenAI key")).toHaveValue("");
+    expect(screen.getByText("할당됨: sk-o...cret")).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("sk-openai-full-secret")).not.toBeInTheDocument();
   });
 });

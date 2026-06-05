@@ -89,6 +89,10 @@ export type OpenRouterSlideCountPolicy = Omit<SlideCountPolicyInput, "mode"> & {
 };
 
 export type OpenRouterProvider = {
+  debugMetadata?: {
+    provider: "openrouter";
+    model: string;
+  };
   generateStoryboard(input: {
     task: OpenRouterTask;
     storyline: string;
@@ -114,7 +118,7 @@ type FetchImpl = (url: string, init?: RequestInit) => Promise<Response>;
 
 const OPENROUTER_CHAT_COMPLETIONS_URL =
   "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_OPENROUTER_STORYBOARD_MODEL = "openai/gpt-4o";
+export const DEFAULT_OPENROUTER_STORYBOARD_MODEL = "openai/gpt-4o";
 
 const storySectionJsonSchema = {
   type: "object",
@@ -385,9 +389,12 @@ export function createOpenRouterChatCompletionFetcher({
 export function createOpenRouterProvider({
   apiKey,
   fetcher = createOpenRouterChatCompletionFetcher(),
+  model = process.env.OPENROUTER_STORYBOARD_MODEL ??
+    DEFAULT_OPENROUTER_STORYBOARD_MODEL,
 }: {
   apiKey?: string | null;
   fetcher?: Fetcher;
+  model?: string;
 }): OpenRouterProvider {
   async function request(input: Parameters<OpenRouterProvider["generateStoryboard"]>[0]) {
     if (!apiKey) {
@@ -405,6 +412,10 @@ export function createOpenRouterProvider({
   }
 
   return {
+    debugMetadata: {
+      provider: "openrouter",
+      model,
+    },
     async generateStoryboard(input) {
       let lastError: unknown;
       for (let attempt = 0; attempt < 2; attempt += 1) {

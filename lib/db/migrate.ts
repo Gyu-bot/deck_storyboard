@@ -107,6 +107,32 @@ export function migrateDatabase(sqlite: Database.Database) {
       deleted_at TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS provider_call_debug_logs (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id),
+      slide_id TEXT REFERENCES slides(id),
+      user_id TEXT NOT NULL REFERENCES users(id),
+      operation_type TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      model TEXT NOT NULL,
+      aspect_ratio TEXT,
+      attempt_number INTEGER NOT NULL DEFAULT 1,
+      fallback_order INTEGER,
+      started_at TEXT NOT NULL,
+      completed_at TEXT NOT NULL,
+      duration_ms INTEGER NOT NULL,
+      status TEXT NOT NULL,
+      http_status INTEGER,
+      request_id TEXT,
+      normalized_error TEXT,
+      request_snapshot TEXT,
+      response_snapshot TEXT,
+      storage_summary TEXT,
+      redaction_metadata TEXT,
+      created_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS slide_edit_operations (
       id TEXT PRIMARY KEY,
       project_id TEXT NOT NULL REFERENCES projects(id),

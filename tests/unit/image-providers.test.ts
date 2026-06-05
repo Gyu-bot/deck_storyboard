@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { eq } from "drizzle-orm";
 
-import { slideImageGenerations } from "@/lib/db/schema";
+import { providerCallDebugLogs, slideImageGenerations } from "@/lib/db/schema";
 import { createTestDatabase } from "@/lib/db/test-utils";
 import {
   createProjectForUser,
@@ -312,6 +312,30 @@ describe("T021-T022 slide image generation orchestration", () => {
     expect(records[0]?.commonPromptSnapshot).toBe("Use the corporate blue visual system.");
     expect(records[0]?.slidePromptSnapshot).toBe("Generate a clean slide mockup");
     expect(records[0]?.updatedAt).toBeTruthy();
+    const debugLogs = db.select().from(providerCallDebugLogs).all();
+    expect(debugLogs).toHaveLength(1);
+    expect(debugLogs[0]).toMatchObject({
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      operationType: "single_image_generation",
+      provider: "openrouter",
+      model: "nano-banana",
+      aspectRatio: "4:3",
+      attemptNumber: 1,
+      fallbackOrder: 1,
+      status: "succeeded",
+      storageSummary: {
+        storageKey: `projects/${project.id}/images/slide-1.png`,
+        contentType: "image/png",
+      },
+    });
+    expect(JSON.stringify(debugLogs[0]?.requestSnapshot)).not.toContain(
+      "openrouter-user-key",
+    );
+    expect(JSON.stringify(debugLogs[0]?.responseSnapshot)).not.toContain(
+      "openrouter-png",
+    );
   });
 
   it("keeps the existing selected image when a slide is regenerated and appends a new history record", async () => {
@@ -556,5 +580,80 @@ describe("T021-T022 slide image generation orchestration", () => {
       }),
     );
     expect(result.provider).toBe("openai");
+    expect(
+      db
+        .select()
+        .from(providerCallDebugLogs)
+        .orderBy(providerCallDebugLogs.fallbackOrder)
+        .all()
+        .map((log) => ({
+          provider: log.provider,
+          status: log.status,
+          error: log.normalizedError,
+        })),
+    ).toEqual([
+      {
+        provider: "openrouter",
+        status: "failed",
+        error: "openrouter image generation failed: OpenRouter is unavailable",
+      },
+      {
+        provider: "openai",
+        status: "succeeded",
+        error: null,
+      },
+    ]);
+  });
+
+  it("records storage save failures as storage diagnostics before fallback", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi.fn().mockRejectedValue(new Error("disk full")),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openrouter-png"),
+        contentType: "image/png",
+      }),
+    };
+
+    await expect(
+      generateSlideImageForProject(db, {
+        projectId: project.id,
+        slideId: slide.id,
+        userId: "user-a",
+        encryptionSecret,
+        storageProvider: storage,
+        providers: { openrouter: openRouterProvider },
+      }),
+    ).rejects.toMatchObject({
+      provider: "openrouter",
+    });
+
+    const logs = db.select().from(providerCallDebugLogs).all();
+    expect(logs[0]).toMatchObject({
+      provider: "openrouter",
+      status: "failed",
+      responseSnapshot: {
+        contentType: "image/png",
+        hasBytes: true,
+      },
+      storageSummary: {
+        status: "failed",
+        error: "disk full",
+      },
+    });
   });
 });

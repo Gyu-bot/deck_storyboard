@@ -35,12 +35,27 @@ export const imageGenerationStatusValues = [
 
 export const editStateValues = ["aiGenerated", "userModified"] as const;
 
+export const providerCallOperationValues = [
+  "story_structure",
+  "slide_breakdown",
+  "single_image_generation",
+] as const;
+
+export const providerCallStatusValues = [
+  "succeeded",
+  "failed",
+  "skipped",
+] as const;
+
 export type ProjectStatus = (typeof projectStatusValues)[number];
 export type ProviderKey = (typeof providerKeyValues)[number];
 export type UserRole = (typeof userRoleValues)[number];
 export type ImageGenerationStatus =
   (typeof imageGenerationStatusValues)[number];
 export type FieldEditState = (typeof editStateValues)[number];
+export type ProviderCallOperation =
+  (typeof providerCallOperationValues)[number];
+export type ProviderCallStatus = (typeof providerCallStatusValues)[number];
 
 export type SlideFieldEditState = {
   title: FieldEditState;
@@ -210,6 +225,40 @@ export const imageGenerationBatches = sqliteTable("image_generation_batches", {
   deletedAt: text("deleted_at"),
 });
 
+export const providerCallDebugLogs = sqliteTable("provider_call_debug_logs", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id),
+  slideId: text("slide_id").references(() => slides.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  operationType: text("operation_type")
+    .$type<ProviderCallOperation>()
+    .notNull(),
+  provider: text("provider").notNull(),
+  model: text("model").notNull(),
+  aspectRatio: text("aspect_ratio").$type<"16:9" | "4:3">(),
+  attemptNumber: integer("attempt_number").notNull().default(1),
+  fallbackOrder: integer("fallback_order"),
+  startedAt: text("started_at").notNull(),
+  completedAt: text("completed_at").notNull(),
+  durationMs: integer("duration_ms").notNull(),
+  status: text("status").$type<ProviderCallStatus>().notNull(),
+  httpStatus: integer("http_status"),
+  requestId: text("request_id"),
+  normalizedError: text("normalized_error"),
+  requestSnapshot: text("request_snapshot", { mode: "json" }).$type<unknown>(),
+  responseSnapshot: text("response_snapshot", { mode: "json" }).$type<unknown>(),
+  storageSummary: text("storage_summary", { mode: "json" }).$type<unknown>(),
+  redactionMetadata: text("redaction_metadata", {
+    mode: "json",
+  }).$type<Record<string, unknown>>(),
+  createdAt: text("created_at").notNull(),
+  deletedAt: text("deleted_at"),
+});
+
 export const slideEditOperations = sqliteTable("slide_edit_operations", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
@@ -235,5 +284,6 @@ export const schema = {
   slides,
   slideImageGenerations,
   imageGenerationBatches,
+  providerCallDebugLogs,
   slideEditOperations,
 };

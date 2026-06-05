@@ -48,6 +48,24 @@ export function missingImageProviderKey(provider: ImageGenerationProviderKey) {
   );
 }
 
+const providerLabels: Record<ImageGenerationProviderKey, string> = {
+  openrouter: "OpenRouter",
+  openai: "OpenAI",
+  gemini: "Gemini",
+};
+
+export function missingImageProviderKeys(providers: ImageGenerationProviderKey[]) {
+  const uniqueProviders = [...new Set(providers)];
+  const providerList = uniqueProviders
+    .map((provider) => providerLabels[provider])
+    .join(" 또는 ");
+  return new ImageProviderError(
+    `${providerList} API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.`,
+    "provider_key_missing",
+    uniqueProviders[0] ?? "openrouter",
+  );
+}
+
 export function resolveProviderForImageModel(
   model: string,
 ): Exclude<ImageGenerationProviderKey, "openrouter"> {

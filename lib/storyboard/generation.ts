@@ -1,5 +1,5 @@
 import type { createTestDatabase } from "@/lib/db/test-utils";
-import type { OpenRouterProvider, StoryboardResponse } from "@/lib/ai/openrouter";
+import type { StoryboardProvider, StoryboardResponse } from "@/lib/ai/openrouter";
 import {
   createSlideForProject,
   getProjectForUser,
@@ -59,7 +59,7 @@ function elapsedMs(startedAt: string, completedAt: string) {
   return new Date(completedAt).getTime() - new Date(startedAt).getTime();
 }
 
-function providerDebugMetadata(provider: OpenRouterProvider) {
+function providerDebugMetadata(provider: StoryboardProvider) {
   return {
     provider: provider.debugMetadata?.provider ?? "openrouter",
     model:
@@ -90,7 +90,7 @@ function recordStoryboardDebugLog(
     projectId: string;
     userId: string;
     operationType: "story_structure" | "slide_breakdown";
-    provider: OpenRouterProvider;
+    provider: StoryboardProvider;
     startedAt: string;
     completedAt: string;
     status: "succeeded" | "failed";
@@ -132,7 +132,7 @@ export async function analyzeStoryStructure(
   db: Db,
   projectId: string,
   userId: string,
-  provider: OpenRouterProvider,
+  provider: StoryboardProvider,
 ) {
   const project = getProjectForUser(db, projectId, userId);
   if (!project) throw new Error("project not found");
@@ -208,7 +208,7 @@ export async function createSlideBreakdown(
   db: Db,
   projectId: string,
   userId: string,
-  provider: OpenRouterProvider,
+  provider: StoryboardProvider,
   structure: StoryboardResponse,
 ) {
   const project = getProjectForUser(db, projectId, userId);

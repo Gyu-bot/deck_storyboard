@@ -10,7 +10,7 @@ type FetchImpl = typeof fetch;
 const OPENROUTER_IMAGE_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 
 const OPENROUTER_IMAGE_MODEL_ALIASES: Record<string, string> = {
-  "gpt-image-2": "openai/gpt-5-image",
+  "gpt-image-2": "openai/gpt-5.4-image-2",
   "nano-banana": "google/gemini-2.5-flash-image",
 };
 

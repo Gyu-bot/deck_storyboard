@@ -15,6 +15,7 @@ import { createOpenRouterImageProvider } from "@/lib/images/openrouter";
 import {
   ImageProviderError,
   missingImageProviderKey,
+  missingImageProviderKeys,
   normalizeImageProviderError,
   resolveProviderForImageModel,
   type ImageGenerationProvider,
@@ -88,6 +89,58 @@ function composePrompt(input: {
 
 function extensionForContentType(contentType: string) {
   return contentType === "image/jpeg" ? "jpg" : "png";
+}
+
+function readImageDimensions(bytes: Buffer, contentType: string) {
+  if (
+    contentType === "image/png" &&
+    bytes.length >= 24 &&
+    bytes.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex")) &&
+    bytes.subarray(12, 16).toString("ascii") === "IHDR"
+  ) {
+    return {
+      width: bytes.readUInt32BE(16),
+      height: bytes.readUInt32BE(20),
+    };
+  }
+
+  if (contentType !== "image/jpeg" || bytes.length < 4) return null;
+  let offset = 2;
+  while (offset + 9 < bytes.length) {
+    if (bytes[offset] !== 0xff) return null;
+    const marker = bytes[offset + 1];
+    const length = bytes.readUInt16BE(offset + 2);
+    if (length < 2) return null;
+    if (marker && marker >= 0xc0 && marker <= 0xc3) {
+      return {
+        height: bytes.readUInt16BE(offset + 5),
+        width: bytes.readUInt16BE(offset + 7),
+      };
+    }
+    offset += 2 + length;
+  }
+  return null;
+}
+
+function aspectRatioValue(aspectRatio: "16:9" | "4:3") {
+  return aspectRatio === "16:9" ? 16 / 9 : 4 / 3;
+}
+
+function validateGeneratedAspectRatio(input: {
+  provider: ImageGenerationProviderKey;
+  requestedAspectRatio: "16:9" | "4:3";
+  dimensions: { width: number; height: number } | null;
+}) {
+  if (input.provider !== "openrouter") return null;
+  if (!input.dimensions || input.dimensions.height === 0) return null;
+  const actual = input.dimensions.width / input.dimensions.height;
+  const expected = aspectRatioValue(input.requestedAspectRatio);
+  const tolerance = 0.03;
+  if (Math.abs(actual - expected) / expected <= tolerance) return null;
+  return normalizeImageProviderError(
+    input.provider,
+    `Provider returned ${input.dimensions.width}x${input.dimensions.height}, which does not match requested ${input.requestedAspectRatio}.`,
+  );
 }
 
 function insertImageGenerationRecord(
@@ -186,74 +239,198 @@ export async function generateSlideImageForProject(
     .run();
 
   let lastError: ImageProviderError | null = null;
-  let firstError: ImageProviderError | null = null;
   let attemptedProviderCall = false;
   let attemptedProvider: ImageGenerationProviderKey = "openrouter";
 
   let attemptNumber = 0;
-  for (const provider of imageProviderOrder(project.defaultImageModel)) {
-    attemptNumber += 1;
-    attemptedProvider = provider;
-    const startedAt = now();
-    const apiKey = getDecryptedUserApiKey(
-      db,
-      input.userId,
-      provider as ProviderKey,
-      { encryptionSecret: input.encryptionSecret },
-    );
-    if (!apiKey) {
-      const missingKeyError = missingImageProviderKey(provider);
-      if (!attemptedProviderCall) {
-        lastError = missingKeyError;
-      }
-      firstError ??= missingKeyError;
-      const completedAt = now();
-      recordImageDebugLog(db, {
-        projectId: project.id,
-        slideId: slide.id,
-        userId: input.userId,
-        provider,
-        model: project.defaultImageModel,
-        aspectRatio: project.aspectRatio,
-        attemptNumber,
-        fallbackOrder: attemptNumber,
-        startedAt,
-        completedAt,
-        status: "failed",
-        prompt,
-        error: missingKeyError,
-        responseSnapshot: { keyAvailable: false },
-      });
-      continue;
-    }
+  const providerOrder = imageProviderOrder(project.defaultImageModel);
+  let activeAttemptStartedAt = now();
 
-    try {
-      attemptedProviderCall = true;
-      const generated = await providers[provider].generateImage({
-        apiKey,
-        model: project.defaultImageModel,
-        aspectRatio: project.aspectRatio,
-        prompt,
-      });
-      const recordId = randomUUID();
-      const timestamp = now();
-      const selected = !hasSuccessfulImage(db, project.id, slide.id);
-      const fileName = `${slide.id}-${recordId}.${extensionForContentType(generated.contentType)}`;
-      let stored;
-      try {
-        stored = await storage.saveProjectImage({
-          projectId: project.id,
-          ownerUserId: input.userId,
-          fileName,
-          contentType: generated.contentType,
-          bytes: generated.bytes,
-        });
-      } catch (storageError) {
+  try {
+    for (const provider of providerOrder) {
+      attemptNumber += 1;
+      attemptedProvider = provider;
+      const startedAt = now();
+      activeAttemptStartedAt = startedAt;
+      const apiKey = getDecryptedUserApiKey(
+        db,
+        input.userId,
+        provider as ProviderKey,
+        { encryptionSecret: input.encryptionSecret },
+      );
+      if (!apiKey) {
+        const missingKeyError = missingImageProviderKey(provider);
+        if (!attemptedProviderCall) {
+          lastError = missingKeyError;
+        }
         const completedAt = now();
-        const normalizedStorageError =
-          storageError instanceof Error ? storageError.message : String(storageError);
-        lastError = normalizeImageProviderError(provider, normalizedStorageError);
-        firstError ??= lastError;
+        recordImageDebugLog(db, {
+          projectId: project.id,
+          slideId: slide.id,
+          userId: input.userId,
+          provider,
+          model: project.defaultImageModel,
+          aspectRatio: project.aspectRatio,
+          attemptNumber,
+          fallbackOrder: attemptNumber,
+          startedAt,
+          completedAt,
+          status: "failed",
+          prompt,
+          error: missingKeyError,
+          responseSnapshot: { keyAvailable: false },
+        });
+        continue;
+      }
+
+      try {
+        attemptedProviderCall = true;
+        const generated = await providers[provider].generateImage({
+          apiKey,
+          model: project.defaultImageModel,
+          aspectRatio: project.aspectRatio,
+          prompt,
+        });
+        const imageDimensions = readImageDimensions(generated.bytes, generated.contentType);
+        const aspectRatioError = validateGeneratedAspectRatio({
+          provider,
+          requestedAspectRatio: project.aspectRatio,
+          dimensions: imageDimensions,
+        });
+        if (aspectRatioError) {
+          lastError = aspectRatioError;
+          const completedAt = now();
+          recordImageDebugLog(db, {
+            projectId: project.id,
+            slideId: slide.id,
+            userId: input.userId,
+            provider,
+            model: project.defaultImageModel,
+            aspectRatio: project.aspectRatio,
+            attemptNumber,
+            fallbackOrder: attemptNumber,
+            startedAt,
+            completedAt,
+            status: "failed",
+            prompt,
+            error: lastError,
+            responseSnapshot: {
+              contentType: generated.contentType,
+              width: imageDimensions?.width ?? null,
+              height: imageDimensions?.height ?? null,
+              hasBytes: generated.bytes.length > 0,
+              byteLength: generated.bytes.length,
+              providerErrorCode: lastError.code,
+            },
+          });
+          continue;
+        }
+        const recordId = randomUUID();
+        const timestamp = now();
+        const selected = !hasSuccessfulImage(db, project.id, slide.id);
+        const fileName = `${slide.id}-${recordId}.${extensionForContentType(generated.contentType)}`;
+        let stored;
+        try {
+          stored = await storage.saveProjectImage({
+            projectId: project.id,
+            ownerUserId: input.userId,
+            fileName,
+            contentType: generated.contentType,
+            bytes: generated.bytes,
+          });
+        } catch (storageError) {
+          const completedAt = now();
+          const normalizedStorageError =
+            storageError instanceof Error ? storageError.message : String(storageError);
+          lastError = normalizeImageProviderError(provider, normalizedStorageError);
+          recordImageDebugLog(db, {
+            projectId: project.id,
+            slideId: slide.id,
+            userId: input.userId,
+            provider,
+            model: project.defaultImageModel,
+            aspectRatio: project.aspectRatio,
+            attemptNumber,
+            fallbackOrder: attemptNumber,
+            startedAt,
+            completedAt,
+            status: "failed",
+            prompt,
+            error: lastError,
+            responseSnapshot: {
+              contentType: generated.contentType,
+              width: imageDimensions?.width ?? null,
+              height: imageDimensions?.height ?? null,
+              hasBytes: generated.bytes.length > 0,
+              byteLength: generated.bytes.length,
+            },
+            storageSummary: {
+              status: "failed",
+              error: normalizedStorageError,
+            },
+          });
+          continue;
+        }
+        const completedAt = now();
+        const record = insertImageGenerationRecord(db, {
+          id: recordId,
+          projectId: project.id,
+          slideId: slide.id,
+          provider,
+          model: project.defaultImageModel,
+          promptSnapshot: prompt,
+          commonPromptSnapshot: project.resolvedCommonPrompt,
+          slidePromptSnapshot: slide.imagePrompt,
+          aspectRatio: project.aspectRatio,
+          storageKey: stored.storageKey,
+          imageUrl: stored.url,
+          status: "succeeded",
+          errorMessage: null,
+          selected,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          deletedAt: null,
+        });
+        db.update(slides)
+          .set({ imageGenerationStatus: "generated", updatedAt: now() })
+          .where(eq(slides.id, slide.id))
+          .run();
+        recordImageDebugLog(db, {
+          projectId: project.id,
+          slideId: slide.id,
+          userId: input.userId,
+          provider,
+          model: project.defaultImageModel,
+          aspectRatio: project.aspectRatio,
+          attemptNumber,
+          fallbackOrder: attemptNumber,
+          startedAt,
+          completedAt,
+          status: "succeeded",
+          prompt,
+          responseSnapshot: {
+            contentType: generated.contentType,
+            width: imageDimensions?.width ?? null,
+            height: imageDimensions?.height ?? null,
+            hasBytes: generated.bytes.length > 0,
+            byteLength: generated.bytes.length,
+          },
+          storageSummary: {
+            storageKey: stored.storageKey,
+            imageUrl: stored.url,
+            contentType: stored.contentType,
+          },
+        });
+        return record;
+      } catch (error) {
+        lastError =
+          error instanceof Error && "code" in error
+            ? (error as ImageProviderError)
+            : normalizeImageProviderError(
+                provider,
+                error instanceof Error ? error.message : "Image generation failed.",
+              );
+        const completedAt = now();
         recordImageDebugLog(db, {
           projectId: project.id,
           slideId: slide.id,
@@ -269,101 +446,46 @@ export async function generateSlideImageForProject(
           prompt,
           error: lastError,
           responseSnapshot: {
-            contentType: generated.contentType,
-            hasBytes: generated.bytes.length > 0,
-            byteLength: generated.bytes.length,
-          },
-          storageSummary: {
-            status: "failed",
-            error: normalizedStorageError,
+            providerErrorCode: lastError.code,
           },
         });
-        continue;
       }
-      const completedAt = now();
-      const record = insertImageGenerationRecord(db, {
-        id: recordId,
-        projectId: project.id,
-        slideId: slide.id,
-        provider,
-        model: project.defaultImageModel,
-        promptSnapshot: prompt,
-        commonPromptSnapshot: project.resolvedCommonPrompt,
-        slidePromptSnapshot: slide.imagePrompt,
-        aspectRatio: project.aspectRatio,
-        storageKey: stored.storageKey,
-        imageUrl: stored.url,
-        status: "succeeded",
-        errorMessage: null,
-        selected,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null,
-      });
-      db.update(slides)
-        .set({ imageGenerationStatus: "generated", updatedAt: now() })
-        .where(eq(slides.id, slide.id))
-        .run();
-      recordImageDebugLog(db, {
-        projectId: project.id,
-        slideId: slide.id,
-        userId: input.userId,
-        provider,
-        model: project.defaultImageModel,
-        aspectRatio: project.aspectRatio,
-        attemptNumber,
-        fallbackOrder: attemptNumber,
-        startedAt,
-        completedAt,
-        status: "succeeded",
-        prompt,
-        responseSnapshot: {
-          contentType: generated.contentType,
-          hasBytes: generated.bytes.length > 0,
-          byteLength: generated.bytes.length,
-        },
-        storageSummary: {
-          storageKey: stored.storageKey,
-          imageUrl: stored.url,
-          contentType: stored.contentType,
-        },
-      });
-      return record;
-    } catch (error) {
-      lastError =
-        error instanceof Error && "code" in error
-          ? (error as ImageProviderError)
-          : normalizeImageProviderError(
-              provider,
-              error instanceof Error ? error.message : "Image generation failed.",
-            );
-      firstError ??= lastError;
-      const completedAt = now();
-      recordImageDebugLog(db, {
-        projectId: project.id,
-        slideId: slide.id,
-        userId: input.userId,
-        provider,
-        model: project.defaultImageModel,
-        aspectRatio: project.aspectRatio,
-        attemptNumber,
-        fallbackOrder: attemptNumber,
-        startedAt,
-        completedAt,
-        status: "failed",
-        prompt,
-        error: lastError,
-        responseSnapshot: {
-          providerErrorCode: lastError.code,
-        },
-      });
     }
+  } catch (error) {
+    lastError =
+      error instanceof Error && "code" in error
+        ? (error as ImageProviderError)
+        : normalizeImageProviderError(
+            attemptedProvider,
+            error instanceof Error ? error.message : "Image generation failed.",
+          );
+    const completedAt = now();
+    recordImageDebugLog(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: input.userId,
+      provider: attemptedProvider,
+      model: project.defaultImageModel,
+      aspectRatio: project.aspectRatio,
+      attemptNumber: Math.max(attemptNumber, 1),
+      fallbackOrder: Math.max(attemptNumber, 1),
+      startedAt: activeAttemptStartedAt,
+      completedAt,
+      status: "failed",
+      prompt,
+      error: lastError,
+      responseSnapshot: {
+        providerErrorCode: lastError.code,
+        keyLookup: "failed",
+      },
+    });
   }
 
-  const normalized =
-    attemptedProviderCall
-      ? (lastError ?? missingImageProviderKey(attemptedProvider))
-      : (firstError ?? lastError ?? missingImageProviderKey(attemptedProvider));
+  const normalized = attemptedProviderCall
+    ? (lastError ?? missingImageProviderKey(attemptedProvider))
+    : lastError?.code === "provider_error"
+      ? lastError
+      : missingImageProviderKeys(providerOrder);
   insertImageGenerationRecord(db, {
     id: randomUUID(),
     projectId: project.id,

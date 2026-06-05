@@ -281,3 +281,13 @@ Development mode seeds two local accounts when the app opens the database:
 | Admin placeholder | `admin` | `admin` |
 
 The current auth schema is still email-based internally, so these short IDs map to `test@example.local` and `admin@example.local`. Full admin roles and the admin management screen are tracked separately in `IMPLEMENTATION_PLAN.md`.
+
+### Local API key encryption secret
+
+When reusing a local development database, keep `API_KEY_ENCRYPTION_SECRET` fixed. The default local value is:
+
+```bash
+API_KEY_ENCRYPTION_SECRET=development-only-api-key-secret
+```
+
+Provider keys are stored encrypted in the database. If the server is restarted with a different `API_KEY_ENCRYPTION_SECRET` while keeping the same local DB file, existing provider keys cannot be decrypted and image/storyboard generation will fail before the provider call. If you intentionally change the secret, delete and re-enter the provider keys from the admin screen or create a fresh local DB.

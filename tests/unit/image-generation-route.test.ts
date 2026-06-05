@@ -151,6 +151,28 @@ describe("T021-T022 project image generation route", () => {
       failed: 1,
     });
   });
+
+  it("preserves multi-provider missing-key messages from the image orchestrator", async () => {
+    routeMocks.getSlidesForProject.mockReturnValue([{ id: "slide-a" }]);
+    routeMocks.generateSlideImageForProject.mockRejectedValue({
+      code: "provider_key_missing",
+      provider: "openrouter",
+      message:
+        "OpenRouter 또는 OpenAI API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.",
+    });
+
+    const response = await POST(new Request("http://localhost/api"), {
+      params: Promise.resolve({ projectId: "project-1" }),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error:
+        "OpenRouter 또는 OpenAI API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.",
+      generated: 0,
+      failed: 1,
+    });
+  });
 });
 
 describe("T023 selected image route", () => {

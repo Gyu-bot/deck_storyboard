@@ -39,6 +39,9 @@ export default async function SettingsPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
+            <Link href="/settings/provider-debug-logs">Provider 로그</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href="/projects">프로젝트</Link>
           </Button>
           <LogoutButton />

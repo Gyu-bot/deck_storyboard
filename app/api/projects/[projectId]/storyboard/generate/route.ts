@@ -5,6 +5,7 @@ import { requireCurrentUserId } from "@/lib/auth/session";
 import { getDecryptedUserApiKey } from "@/lib/repositories/user-api-keys";
 import { getProjectForUser, updateProjectForUser } from "@/lib/repositories/projects";
 import { createOpenRouterProvider } from "@/lib/ai/openrouter";
+import { createOpenAIStoryboardProvider } from "@/lib/ai/openai";
 import {
   STORYBOARD_TEST_MODE_COOKIE,
   isStoryboardTestModeEnabled,
@@ -19,7 +20,9 @@ import { appUrl } from "@/lib/http/redirects";
 export const runtime = "nodejs";
 
 const missingOpenRouterKeyMessage =
-  "OpenRouter API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.";
+  "OpenRouter 또는 OpenAI API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.";
+
+const storyboardProviderOrder = ["openrouter", "openai"] as const;
 
 function projectUrl(request: Request, projectId: string) {
   return appUrl(`/projects/${projectId}`, request);
@@ -39,20 +42,30 @@ export async function POST(
     cookieValue: cookieStore.get(STORYBOARD_TEST_MODE_COOKIE)?.value,
   });
   const sampleStoryboard = loadStoryboardSampleFixture({ testModeEnabled });
-  const apiKey = sampleStoryboard
-    ? "dummy-openrouter-key"
-    : getDecryptedUserApiKey(db, userId, "openrouter");
-  if (!apiKey) {
+  const provider = sampleStoryboard
+    ? createOpenRouterProvider({
+        apiKey: "dummy-openrouter-key",
+        fetcher: async () => sampleStoryboard,
+      })
+    : (() => {
+        for (const providerName of storyboardProviderOrder) {
+          const apiKey = getDecryptedUserApiKey(db, userId, providerName);
+          if (!apiKey) continue;
+          return providerName === "openrouter"
+            ? createOpenRouterProvider({ apiKey })
+            : createOpenAIStoryboardProvider({ apiKey });
+        }
+        return null;
+      })();
+
+  if (!provider) {
     updateProjectForUser(db, projectId, userId, {
       status: "storyboard_generation_failed",
       generationError: missingOpenRouterKeyMessage,
     });
     return NextResponse.redirect(projectUrl(request, projectId), 303);
   }
-  const provider = createOpenRouterProvider({
-    apiKey,
-    fetcher: sampleStoryboard ? async () => sampleStoryboard : undefined,
-  });
+
   try {
     const structure = await analyzeStoryStructure(db, projectId, userId, provider);
     await createSlideBreakdown(db, projectId, userId, provider, structure);

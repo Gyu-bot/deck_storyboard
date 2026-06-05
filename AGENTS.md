@@ -1,3 +1,7 @@
+## Local development environment
+
+- When reusing an existing local development DB, keep `API_KEY_ENCRYPTION_SECRET=development-only-api-key-secret`. Existing provider keys are encrypted with the active secret; changing the secret while keeping the same DB causes repeated provider key decryption failures before OpenAI/OpenRouter calls. If the secret must change, re-enter provider keys through the admin screen or use a fresh local DB.
+
 ## Planning and backlog policy
 
 The repository may contain global planning documents:

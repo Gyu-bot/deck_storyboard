@@ -21,6 +21,16 @@ import { generateSlideImageForProject } from "@/lib/images/generation";
 
 const encryptionSecret = "0123456789abcdef0123456789abcdef";
 
+function pngBytesWithDimensions(width: number, height: number) {
+  const bytes = Buffer.alloc(24);
+  Buffer.from("89504e470d0a1a0a", "hex").copy(bytes, 0);
+  bytes.writeUInt32BE(13, 8);
+  bytes.write("IHDR", 12, "ascii");
+  bytes.writeUInt32BE(width, 16);
+  bytes.writeUInt32BE(height, 20);
+  return bytes;
+}
+
 describe("OpenRouter image provider", () => {
   it("uses the openrouter account-level key, requests image output, and decodes returned data URLs", async () => {
     const requests: Array<{ url: string; init: RequestInit }> = [];
@@ -68,7 +78,7 @@ describe("OpenRouter image provider", () => {
       modalities: string[];
       image_config: { aspect_ratio: string };
     };
-    expect(body.model).toBe("openai/gpt-5-image");
+    expect(body.model).toBe("openai/gpt-5.4-image-2");
     expect(body.modalities).toEqual(["image", "text"]);
     expect(body.image_config.aspect_ratio).toBe("16:9");
     expect(body.messages[0]?.content).toContain("Executive slide mockup");
@@ -218,7 +228,319 @@ describe("T021-T022 slide image generation orchestration", () => {
     ).rejects.toMatchObject({
       code: "provider_key_missing",
       provider: "openrouter",
+      message:
+        "OpenRouter 또는 OpenAI API key가 없습니다. 관리자 화면에서 해당 회원에게 provider key를 할당한 뒤 다시 시도하세요.",
     });
+  });
+
+  it("keeps the OpenRouter provider failure when the direct fallback key is missing", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    const openRouterProvider = {
+      generateImage: vi.fn().mockRejectedValue(new Error("OpenRouter is unavailable")),
+    };
+
+    await expect(
+      generateSlideImageForProject(db, {
+        projectId: project.id,
+        slideId: slide.id,
+        userId: "user-a",
+        encryptionSecret,
+        providers: { openrouter: openRouterProvider },
+      }),
+    ).rejects.toMatchObject({
+      code: "provider_error",
+      provider: "openrouter",
+      message: "openrouter image generation failed: OpenRouter is unavailable",
+    });
+
+    const records = db.select().from(slideImageGenerations).all();
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      provider: "openrouter",
+      status: "failed",
+      errorMessage: "openrouter image generation failed: OpenRouter is unavailable",
+    });
+  });
+
+  it("marks the slide failed when provider key decryption fails after entering generation", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+
+    await expect(
+      generateSlideImageForProject(db, {
+        projectId: project.id,
+        slideId: slide.id,
+        userId: "user-a",
+        encryptionSecret: "development-only-api-key-secret",
+      }),
+    ).rejects.toMatchObject({
+      code: "provider_error",
+      provider: "openrouter",
+    });
+
+    expect(getSlidesForProject(db, project.id, "user-a")[0]?.imageGenerationStatus).toBe(
+      "failed",
+    );
+    const records = db.select().from(slideImageGenerations).all();
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      provider: "openrouter",
+      status: "failed",
+    });
+  });
+
+  it("uses OpenRouter successfully without requiring the direct OpenAI image key", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi.fn().mockResolvedValue({
+        storageKey: `projects/${project.id}/images/slide-1.png`,
+        filePath: `/app/data/storage/projects/${project.id}/images/slide-1.png`,
+        url: `/api/projects/${project.id}/images/slide-1.png`,
+        contentType: "image/png",
+      }),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openrouter-png"),
+        contentType: "image/png",
+      }),
+    };
+    const openaiProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openai-png"),
+        contentType: "image/png",
+      }),
+    };
+
+    const result = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider, openai: openaiProvider },
+    });
+
+    expect(result.provider).toBe("openrouter");
+    expect(openRouterProvider.generateImage).toHaveBeenCalledWith(
+      expect.objectContaining({ apiKey: "openrouter-user-key" }),
+    );
+    expect(openaiProvider.generateImage).not.toHaveBeenCalled();
+  });
+
+  it("uses the direct OpenAI image provider when OpenRouter key is missing", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openai", "openai-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi.fn().mockResolvedValue({
+        storageKey: `projects/${project.id}/images/slide-1.png`,
+        filePath: `/app/data/storage/projects/${project.id}/images/slide-1.png`,
+        url: `/api/projects/${project.id}/images/slide-1.png`,
+        contentType: "image/png",
+      }),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openrouter-png"),
+        contentType: "image/png",
+      }),
+    };
+    const openaiProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: Buffer.from("openai-png"),
+        contentType: "image/png",
+      }),
+    };
+
+    const result = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider, openai: openaiProvider },
+    });
+
+    expect(openRouterProvider.generateImage).not.toHaveBeenCalled();
+    expect(openaiProvider.generateImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiKey: "openai-user-key",
+        model: "gpt-image-2",
+      }),
+    );
+    expect(result.provider).toBe("openai");
+  });
+
+  it("accepts the direct OpenAI landscape output size without OpenRouter aspect-ratio enforcement", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openai", "openai-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi.fn().mockResolvedValue({
+        storageKey: `projects/${project.id}/images/slide-1.png`,
+        filePath: `/app/data/storage/projects/${project.id}/images/slide-1.png`,
+        url: `/api/projects/${project.id}/images/slide-1.png`,
+        contentType: "image/png",
+      }),
+    };
+    const openaiProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: pngBytesWithDimensions(1536, 1024),
+        contentType: "image/png",
+      }),
+    };
+
+    const result = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openai: openaiProvider },
+    });
+
+    expect(result.provider).toBe("openai");
+    expect(storage.saveProjectImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bytes: pngBytesWithDimensions(1536, 1024),
+      }),
+    );
+  });
+
+  it("rejects a mismatched OpenRouter image aspect ratio before storing and falls back", async () => {
+    const db = createTestDatabase();
+    const project = createProjectForUser(db, "user-a", {
+      name: "Deck",
+      storyline: "story",
+      defaultImageModel: "gpt-image-2",
+    });
+    const slide = createSlideForProject(db, project.id, "user-a", {
+      title: "Slide 1",
+      imagePrompt: "Generate a clean slide mockup",
+    });
+    saveUserApiKey(db, "user-a", "openrouter", "openrouter-user-key", {
+      encryptionSecret,
+    });
+    saveUserApiKey(db, "user-a", "openai", "openai-user-key", {
+      encryptionSecret,
+    });
+    const storage = {
+      saveProjectImage: vi.fn().mockResolvedValue({
+        storageKey: `projects/${project.id}/images/slide-1.png`,
+        filePath: `/app/data/storage/projects/${project.id}/images/slide-1.png`,
+        url: `/api/projects/${project.id}/images/slide-1.png`,
+        contentType: "image/png",
+      }),
+    };
+    const openRouterProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: pngBytesWithDimensions(1024, 1024),
+        contentType: "image/png",
+      }),
+    };
+    const openaiProvider = {
+      generateImage: vi.fn().mockResolvedValue({
+        bytes: pngBytesWithDimensions(1536, 864),
+        contentType: "image/png",
+      }),
+    };
+
+    const result = await generateSlideImageForProject(db, {
+      projectId: project.id,
+      slideId: slide.id,
+      userId: "user-a",
+      encryptionSecret,
+      storageProvider: storage,
+      providers: { openrouter: openRouterProvider, openai: openaiProvider },
+    });
+
+    expect(result.provider).toBe("openai");
+    expect(storage.saveProjectImage).toHaveBeenCalledTimes(1);
+    expect(storage.saveProjectImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bytes: pngBytesWithDimensions(1536, 864),
+      }),
+    );
+    expect(
+      db
+        .select()
+        .from(providerCallDebugLogs)
+        .orderBy(providerCallDebugLogs.fallbackOrder)
+        .all()
+        .map((log) => ({
+          provider: log.provider,
+          status: log.status,
+          error: log.normalizedError,
+        })),
+    ).toEqual([
+      {
+        provider: "openrouter",
+        status: "failed",
+        error:
+          "openrouter image generation failed: Provider returned 1024x1024, which does not match requested 16:9.",
+      },
+      {
+        provider: "openai",
+        status: "succeeded",
+        error: null,
+      },
+    ]);
   });
 
   it("generates one slide image through OpenRouter by default, stores bytes locally, records provider metadata, and updates slide status", async () => {

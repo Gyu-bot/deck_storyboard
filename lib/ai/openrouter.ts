@@ -88,9 +88,11 @@ export type OpenRouterSlideCountPolicy = Omit<SlideCountPolicyInput, "mode"> & {
   mode: Exclude<SlideCountMode, "custom"> | "custom_range";
 };
 
-export type OpenRouterProvider = {
+export type StoryboardProviderKey = "openrouter" | "openai";
+
+export type StoryboardProvider = {
   debugMetadata?: {
-    provider: "openrouter";
+    provider: StoryboardProviderKey;
     model: string;
   };
   generateStoryboard(input: {
@@ -100,6 +102,13 @@ export type OpenRouterProvider = {
     includeSuggestions: boolean;
     previousStructure?: StoryboardResponse;
   }): Promise<StoryboardResponse>;
+};
+
+export type OpenRouterProvider = StoryboardProvider & {
+  debugMetadata?: {
+    provider: "openrouter";
+    model: string;
+  };
 };
 
 export type OpenRouterFetcherInput = {

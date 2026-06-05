@@ -32,6 +32,10 @@ import {
   createOpenRouterProvider,
   storyboardResponseSchema,
 } from "@/lib/ai/openrouter";
+import {
+  createOpenAIResponsesFetcher,
+  createOpenAIStoryboardProvider,
+} from "@/lib/ai/openai";
 import { analyzeStoryStructure, createSlideBreakdown } from "@/lib/storyboard/generation";
 import { LocalImageStorageProvider } from "@/lib/images/local-storage";
 
@@ -230,6 +234,132 @@ describe("T013-T015 storyboard generation contracts", () => {
     expect(body.messages[1]?.content).toContain('"minSlideCount": 9');
     expect(body.messages[1]?.content).toContain('"maxSlideCount": 14');
     expect(body.messages[1]?.content).toContain('"preferredSlideCount": 12');
+  });
+
+  it("builds structured OpenAI Responses requests and parses output_text JSON", async () => {
+    const storyboard = {
+      documentPurpose: "제안서",
+      overallThesis: "엔터프라이즈 팀을 우선 공략한다.",
+      sections: [
+        {
+          id: "s1",
+          title: "전략",
+          role: "Recommendation",
+          coreMessage: "출시 초점을 좁힌다.",
+          sourceSummary: "사용자 스토리라인",
+          suggestedSlideCount: 1,
+        },
+      ],
+      slides: null,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+    };
+    const requests: Array<{ url: string; init: RequestInit }> = [];
+    const fetcher = createOpenAIResponsesFetcher({
+      model: "gpt-4.1",
+      fetchImpl: async (url, init) => {
+        requests.push({ url: String(url), init: init ?? {} });
+        return new Response(
+          JSON.stringify({
+            output_text: JSON.stringify(storyboard),
+          }),
+          { status: 200 },
+        );
+      },
+    });
+
+    await expect(
+      fetcher({
+        provider: "openai",
+        apiKey: "sk-openai-user-secret",
+        task: "story_structure",
+        storyline: "엔터프라이즈 팀을 위한 출시 전략 덱이 필요하다.",
+        slideCountPolicy: {
+          mode: "standard",
+          minSlideCount: 9,
+          maxSlideCount: 14,
+          preferredSlideCount: 12,
+          storylineSlideMarkerCount: null,
+          storylineSlideMarkerConfidence: "none",
+          targetSlideCountRationale: null,
+        },
+        includeSuggestions: false,
+      }),
+    ).resolves.toEqual(storyboard);
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.url).toBe("https://api.openai.com/v1/responses");
+    expect(requests[0]?.init.method).toBe("POST");
+    expect(requests[0]?.init.headers).toMatchObject({
+      Authorization: "Bearer sk-openai-user-secret",
+      "Content-Type": "application/json",
+    });
+    const body = JSON.parse(String(requests[0]?.init.body)) as {
+      model: string;
+      input: Array<{ role: string; content: string }>;
+      text: {
+        format: { type: string; name: string; strict: boolean; schema: unknown };
+      };
+    };
+    expect(body.model).toBe("gpt-4.1");
+    expect(body.input.map((message) => message.role)).toEqual(["system", "user"]);
+    expect(body.input[1]?.content).toContain('"mode": "standard"');
+    expect(body.text.format).toMatchObject({
+      type: "json_schema",
+      name: "deck_storyboard_response",
+      strict: true,
+    });
+  });
+
+  it("validates direct OpenAI storyboard output with the shared storyboard schema before accepting it", async () => {
+    const validStoryboard = {
+      documentPurpose: "제안서",
+      overallThesis: "엔터프라이즈 팀을 우선 공략한다.",
+      sections: [
+        {
+          id: "s1",
+          title: "전략",
+          role: "Recommendation",
+          coreMessage: "출시 초점을 좁힌다.",
+          sourceSummary: "사용자 스토리라인",
+          suggestedSlideCount: 1,
+        },
+      ],
+      slides: null,
+      improvementSuggestions: null,
+      targetSlideCountRationale: null,
+    };
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce({ documentPurpose: "missing required fields" })
+      .mockResolvedValueOnce(validStoryboard);
+    const provider = createOpenAIStoryboardProvider({
+      apiKey: "sk-openai-user-secret",
+      fetcher,
+    });
+
+    await expect(
+      provider.generateStoryboard({
+        task: "story_structure",
+        storyline: "엔터프라이즈 팀을 위한 출시 전략 덱이 필요하다.",
+        slideCountPolicy: {
+          mode: "standard",
+          minSlideCount: 9,
+          maxSlideCount: 14,
+          preferredSlideCount: 12,
+          storylineSlideMarkerCount: null,
+          storylineSlideMarkerConfidence: "none",
+          targetSlideCountRationale: null,
+        },
+        includeSuggestions: false,
+      }),
+    ).resolves.toEqual({
+      documentPurpose: "제안서",
+      overallThesis: "엔터프라이즈 팀을 우선 공략한다.",
+      sections: validStoryboard.sections,
+      improvementSuggestions: undefined,
+    });
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
   it("sends the full slide count range policy and marker context to OpenRouter", async () => {

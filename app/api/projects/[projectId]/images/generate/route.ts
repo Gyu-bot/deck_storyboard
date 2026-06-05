@@ -10,6 +10,9 @@ export const runtime = "nodejs";
 function imageGenerationErrorMessage(error: unknown) {
   const providerError = error as Partial<ImageProviderError>;
   if (providerError.code === "provider_key_missing") {
+    if (typeof providerError.message === "string" && providerError.message.trim()) {
+      return providerError.message;
+    }
     const providerName =
       providerError.provider === "openrouter"
         ? "OpenRouter"
